@@ -1,0 +1,31 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+          <!-- Add Controls for Previewer Here -->
+            <Button Classes="close-btn" Padding="20"></Button>
+        </Border>
+    </Design.PreviewWith>
+    
+    <!-- Styles doesn't work in a Resource Dictionary unlike in WPF -->   
+    <!-- Style files must be included in App.axaml to access styles globally -->   
+	<Style Selector="Button.titlebar-btn">
+		<Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+    <Style Selector="Button.close-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        
+    </Style>  
+    <Style Selector="Button.minimize-btn">
+        <Setter Property="Content" Value="_"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style> 
+    <Style Selector="Button.close-btn">
+        <Setter Property="Content" Value="X"/>
+        <Setter Property="Foreground" Value="PaleVioletRed"/>
+    </Style> 
+</Styles>

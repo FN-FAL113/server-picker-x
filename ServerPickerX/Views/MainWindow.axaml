@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ServerPickerX.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ServerPickerX.Converters"
+        mc:Ignorable="d" 
+        d:DesignWidth="800" d:DesignHeight="450"
+        Width="850"
+        MinWidth="850"
+        MaxWidth="1280"
+        Height="600"
+        MinHeight="500"
+        MaxHeight="960"
+        x:Class="ServerPickerX.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ServerPickerX"
+        SystemDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Loaded="Window_Loaded">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Resources>
+        <local:ImageConverter x:Key="ImageConverter" />
+    </Window.Resources>
+
+    <Border
+        Background="#373B78"
+        BorderBrush="#12FFFFFF"
+        BorderThickness="0.10">
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <!-- Title Bar -->
+                <RowDefinition Height="30" />
+                <!-- Main Content -->
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar -->
+            <Grid Grid.Row="0" Background="#373B78" PointerPressed="Window_PointerPressed">
+                <StackPanel
+                        Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                    <Button
+                            Name="MinimizeBtn"
+                            Classes="titlebar-btn minimize-btn"
+                            Width="32"
+                            Height="32"
+                            BorderThickness="0"
+                            Click="MinimizeBtn_Click" />
+                    <Button
+                            Name="CloseBtn"
+                            Classes="titlebar-btn close-btn"
+                            Width="32"
+                            Height="32"
+                            Click="CloseBtn_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1">
+				<Grid.RowDefinitions>
+                    <!-- Top Buttons -->
+					<RowDefinition Height="44"></RowDefinition>
+                    <!-- Server DataGrid -->
+					<RowDefinition></RowDefinition>
+                    <!-- Main Buttons -->
+                    <RowDefinition Height="44"></RowDefinition>
+                    <!-- Footer -->
+					<RowDefinition Height="32"></RowDefinition>
+                </Grid.RowDefinitions>
+
+
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+						<Button 
+                            Command="{Binding PingServers}" 
+                            VerticalAlignment="Center"
+                            Foreground="White">
+                            Refresh
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <DataGrid
+                           x:Name="serverList"
+                           ItemsSource="{Binding ServerModels}"
+                           SelectedItem="{Binding SelectedDataGridItem}"
+                           IsReadOnly="True"
+                           CanUserReorderColumns="False"
+                           CanUserResizeColumns="False"
+                           CanUserSortColumns="True"
+                           GridLinesVisibility="All"
+                           Foreground="White"
+                           Background="Transparent"
+                           DoubleTapped="DataGrid_DoubleTapped">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Flag">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}" 
+                                               Width="50" Height="50" 
+                                               Stretch="Uniform"
+                                               VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+							<DataGridTextColumn Width="105" Header="Server ID" Binding="{Binding Name}" />
+							<DataGridTextColumn Width="*" Header="Server Name" Binding="{Binding Description}" />
+							<DataGridTextColumn Width="128" Header="Ping" Binding="{Binding Ping}" HeaderPointerPressed="DataGridTextColumn_HeaderPointerPressed" />
+							<DataGridTextColumn Width="100" Header="Status" Binding="{Binding Status}" />
+                        </DataGrid.Columns>
+						<DataGrid.Styles>
+                            <Style Selector="DataGridColumnHeader">
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Style>
+                        </DataGrid.Styles>
+                    </DataGrid>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="12" Margin="16,0,0,0">
+						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Block All</Button>
+						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Block Selected</Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12" Margin="0,0,16,0">
+						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Unblock All</Button>
+						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Unblock Selected</Button>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="3" Background="LightBlue">
+
+                </Grid>
+            </Grid>
+                
+        </Grid>
+    </Border>
+
+
+</Window>
