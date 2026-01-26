@@ -149,6 +149,10 @@ namespace ServerPickerX.ViewModels
                 // offload to another thread, process.waitForExit is blocking the UI thread
                 await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: true, ServerModels));
             }
+            else if (OperatingSystem.IsLinux())
+            {
+                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: true, ServerModels));
+            }
 
             PendingOperation = false;
 
@@ -181,6 +185,10 @@ namespace ServerPickerX.ViewModels
                 // offload to another thread, process.waitForExit is blocking the UI thread
                 await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: true, serverModels));
             }
+            else if (OperatingSystem.IsLinux())
+            {
+                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: true, serverModels));
+            }
 
             PendingOperation = false;
 
@@ -209,6 +217,9 @@ namespace ServerPickerX.ViewModels
             {
                 // offload to another thread, process.waitForExit is blocking the UI thread
                 await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: false, ServerModels));
+            } else if(OperatingSystem.IsLinux())
+            {
+                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: false, ServerModels));
             }
 
             PendingOperation = false;
@@ -242,6 +253,10 @@ namespace ServerPickerX.ViewModels
             {
                 // offload to another thread, process.waitForExit is blocking the UI thread
                 await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: false, serverModels));
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: false, serverModels));
             }
 
             PendingOperation = false;

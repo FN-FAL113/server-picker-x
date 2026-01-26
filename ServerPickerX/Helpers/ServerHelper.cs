@@ -64,6 +64,51 @@ namespace ServerPickerX.Helpers
             process.Dispose();
         }
 
-       
+        public static async Task BlockUnblockServersLinux(bool shouldBlock, ObservableCollection<ServerModel> serverModels)
+        {
+            Process process = ProcessHelper.createProcess("sudo");
+
+            foreach (ServerModel serverModel in serverModels)
+            {
+                string ipAddresses = String.Join(",", serverModel.RelayModels.Select(s => s.IPv4).ToList());
+
+                try
+                {
+                    // append or delete rules in the iptables input chain
+                    process.StartInfo.Arguments = "iptables " +
+                            (shouldBlock ? "-A" : "-D") + " INPUT -s " + ipAddresses + " -j DROP";
+
+                    process.Start();
+                    process.WaitForExit();
+
+                    if (process.ExitCode == 1 || process.ExitCode < 0)
+                    {
+                        throw new Exception("StdOut: " + process.StandardOutput.ReadToEnd() + Environment.NewLine
+                            + "StdErr: " + process.StandardError.ReadToEnd());
+                    }
+
+                    await PingHelper.PingServer(serverModel);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.LogErrorToFile(
+                        ex.Message,
+                        "An error has occured while" + (shouldBlock ? "blocking" : "unblocking") + " servers."
+                    );
+
+                    await MessageBoxHelper.ShowMessageBox(
+                        "Error",
+                        "An error has occured while" + (shouldBlock ? "blocking" : "unblocking") + " servers." +
+                        Environment.NewLine +
+                        "Please upload the generated error file on github issue tracker.",
+                        ButtonEnum.Ok
+                    );
+                }
+            }
+
+            process.Dispose();
+        }
+
+
     }
 }
