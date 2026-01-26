@@ -46,6 +46,11 @@
 
             <!-- Title Bar -->
             <Grid Grid.Row="0" Background="#373B78" PointerPressed="Window_PointerPressed">
+                <ProgressBar 
+                    Margin="0,-24,0,0" 
+                    Height="4"
+                    IsIndeterminate="True"
+                    IsVisible="{Binding ShowProgressBar, Mode=TwoWay}"/>
                 <StackPanel
                         Grid.Row="0"
                         HorizontalAlignment="Right"
@@ -95,6 +100,7 @@
                            x:Name="serverList"
                            ItemsSource="{Binding ServerModels}"
                            SelectedItem="{Binding SelectedDataGridItem}"
+                           SelectionMode="Extended"
                            IsReadOnly="True"
                            CanUserReorderColumns="False"
                            CanUserResizeColumns="False"
@@ -131,16 +137,37 @@
 
                 <Grid Grid.Row="2">
                      <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="12" Margin="16,0,0,0">
-						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Block All</Button>
-						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Block Selected</Button>
+						<Button x:Name="BlockAllBtn"
+                            Classes="main-btn"
+                            Command="{Binding BlockAll}"
+                            VerticalAlignment="Center"
+                            Content="Block All"/>
+						<Button 
+                            x:Name="BlockSelectedBtn" 
+                            Classes="main-btn" 
+                            Command="{Binding BlockSelected}"
+                            CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
+                            VerticalAlignment="Center" 
+                            Content="Block Selected"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12" Margin="0,0,16,0">
-						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Unblock All</Button>
-						<Button Classes="main-btn" Command="{Binding PingServers}" VerticalAlignment="Center">Unblock Selected</Button>
+						<Button 
+                            x:Name="UnlockAllBtn" 
+                            Classes="main-btn" 
+                            Command="{Binding UnblockAll}" 
+                            VerticalAlignment="Center"
+                            Content="Unblock All"/>
+						<Button 
+                            x:Name="UnblockSelectedBtn" 
+                            Classes="main-btn" 
+                            Command="{Binding UnblockSelected}" 
+                            CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
+                            VerticalAlignment="Center" 
+                            Content="Unblock Selected"/>
                     </StackPanel>
                 </Grid>
 
-                <Grid Grid.Row="3" Background="LightBlue">
+                <Grid Grid.Row="3">
 
                 </Grid>
             </Grid>

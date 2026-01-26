@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace ServerPickerX.Models
 {
-    // ObservableObject base class requries a partial class to  
+    // ObservableObject base class requires a partial class type to  
     // generate boiler plate code for common MVVM implementations
     public partial class ServerModel: ObservableObject
     {

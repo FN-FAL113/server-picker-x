@@ -52,13 +52,14 @@ namespace ServerPickerX.Views
             // a cell is double clicked, ping the selected server
             if (e.Source is Border || e.Source is TextBlock || e.Source is Image)
             {
-                await ((MainWindowViewModel)DataContext).PingServer();
+                await ((MainWindowViewModel)DataContext).PingSelectedServer();
             }
         }
 
         private void DataGridTextColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
             pingSortDirection = pingSortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+
             serverList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
         }
     }
