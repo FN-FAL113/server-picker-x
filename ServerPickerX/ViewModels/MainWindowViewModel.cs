@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia.Enums;
 using ServerPickerX.Helpers;
 using ServerPickerX.Models;
 using System;
@@ -128,65 +129,21 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            if (PendingOperation)
-            {
-                await MessageBoxHelper.ShowMessageBox("Info", "Pending block operation. Please wait...");
-                return;
-            }
-
-            PendingOperation = true;
-
-            ShowProgressBar = true;
-
-            if (OperatingSystem.IsWindows())
-            {
-                // offload to another thread, process.waitForExit is blocking the UI thread
-                await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: true, ServerModels));
-            }
-            else if (OperatingSystem.IsLinux())
-            {
-                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: true, ServerModels));
-            }
-
-            PendingOperation = false;
-
-            ShowProgressBar = false;
+            await performOperation(true, ServerModels);
         }
 
         [RelayCommand]
         public async Task BlockSelected(IList selectedServers)
         {
-            if (PendingOperation)
-            {
-                await MessageBoxHelper.ShowMessageBox("Info", "Pending block operation. Please wait...");
-                return;
-            }
-
             if (selectedServers.Count == 0)
             {
-                await MessageBoxHelper.ShowMessageBox("Info", "Please select servers to unblock");
+                await MessageBoxHelper.ShowMessageBox("Info", "Please select any server to block");
                 return;
             }
 
             var serverModels = new ObservableCollection<ServerModel>(selectedServers.Cast<ServerModel>());
 
-            PendingOperation = true;
-
-            ShowProgressBar = true;
-
-            if (OperatingSystem.IsWindows())
-            {
-                // offload to another thread, process.waitForExit is blocking the UI thread
-                await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: true, serverModels));
-            }
-            else if (OperatingSystem.IsLinux())
-            {
-                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: true, serverModels));
-            }
-
-            PendingOperation = false;
-
-            ShowProgressBar = false;
+            await performOperation(true, serverModels);
         }
 
         [RelayCommand]
@@ -197,60 +154,58 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            if (PendingOperation)
-            {
-                await MessageBoxHelper.ShowMessageBox("Info", "Pending unblock operation. Please wait...");
-                return;
-            }
-
-            PendingOperation = true;
-
-            ShowProgressBar = true;
-
-            if (OperatingSystem.IsWindows())
-            {
-                // offload to another thread, process.waitForExit is blocking the UI thread
-                await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: false, ServerModels));
-            } else if(OperatingSystem.IsLinux())
-            {
-                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: false, ServerModels));
-            }
-
-            PendingOperation = false;
-
-            ShowProgressBar = false;
+            await performOperation(false, ServerModels);
         }
 
 
         [RelayCommand]
         public async Task UnblockSelected(IList selectedServers)
         {
-            if (PendingOperation)
-            {
-                await MessageBoxHelper.ShowMessageBox("Info", "Pending unblock operation. Please wait...");
-                return;
-            }
-
             if (selectedServers.Count == 0)
             {
-                await MessageBoxHelper.ShowMessageBox("Info", "Please select servers to unblock");
+                await MessageBoxHelper.ShowMessageBox("Info", "Please select any server to unblock");
                 return;
             }
 
             var serverModels = new ObservableCollection<ServerModel>(selectedServers.Cast<ServerModel>());
 
+            await performOperation(false, serverModels);
+
+        }
+
+        public async Task performOperation(bool shouldBlock, ObservableCollection<ServerModel> serverModels)
+        {
+            if (PendingOperation)
+            {
+                await MessageBoxHelper.ShowMessageBox("Info", "Pending operation. Please wait...");
+                return;
+            }
+
             PendingOperation = true;
 
             ShowProgressBar = true;
 
-            if (OperatingSystem.IsWindows())
+            try
             {
-                // offload to another thread, process.waitForExit is blocking the UI thread
-                await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock: false, serverModels));
+                if (OperatingSystem.IsWindows())
+                {
+                    // offload to background thread, process.waitForExit blocks the UI thread
+                    await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock, serverModels));
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock, serverModels));
+                }
             }
-            else if (OperatingSystem.IsLinux())
+            catch (Exception ex)
             {
-                await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock: false, serverModels));
+                await MessageBoxHelper.ShowMessageBox(
+                        "Error",
+                        "An error has occured! Please upload generated error file to github.",
+                        ButtonEnum.Ok
+                    );
+
+                await LogHelper.LogErrorToFile(ex.Message, "An error has occured while blocking or unblocking servers.");
             }
 
             PendingOperation = false;
