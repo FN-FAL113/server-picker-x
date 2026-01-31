@@ -1,6 +1,7 @@
 ﻿using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using ServerPickerX.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,11 +25,12 @@ namespace ServerPickerX.Helpers
                 ShowInCenter = true,
                 CanResize = false,
                 Icon = title == "Error" ? Icon.Error : icon,
+                Topmost = true,
             };
 
             var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-            await box.ShowAsync();
+            await box.ShowWindowDialogAsync(MainWindow.Instance);
         }
 
         public static async Task ShowMessageBoxWithLink(string title, string text, string url, Icon icon = Icon.Info)
@@ -45,11 +47,12 @@ namespace ServerPickerX.Helpers
                 ShowInCenter = true,
                 CanResize = false,
                 Icon = title == "Error" ? Icon.Error : icon,
+                Topmost = true,
             };
 
             var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-            var result = await box.ShowAsync();
+            var result = await box.ShowWindowDialogAsync(MainWindow.Instance);
 
             if (result != "Ok")
             {

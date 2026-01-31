@@ -10,6 +10,9 @@ namespace ServerPickerX.Views
 {
     public partial class MainWindow : Window
     {
+        // initialize a static singleton object for accessing main window instance
+        public static MainWindow Instance { get; private set; }
+
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
 
         // initialize a static singleton object for handling json settings
@@ -18,6 +21,8 @@ namespace ServerPickerX.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            Instance = this;
         }
 
         private async void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -51,14 +56,6 @@ namespace ServerPickerX.Views
             await VersionHelper.CheckVersion();
         }
 
-        private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            // prevent other mouse event listeners from being triggered
-            e.Handled = true;
-
-            BeginMoveDrag(e);
-        }
-
         private async void DataGrid_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             var source = e.Source;
@@ -68,6 +65,16 @@ namespace ServerPickerX.Views
             {
                 await ((MainWindowViewModel)DataContext).PingSelectedServer();
             }
+        }
+
+        private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            // prevent other mouse event listeners from being triggered
+            e.Handled = true;
+
+            var parentWindow = TopLevel.GetTopLevel(this) as Window;
+
+            parentWindow.BeginMoveDrag(e);
         }
 
         private void DataGridTextColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)

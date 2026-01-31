@@ -6,8 +6,7 @@
         xmlns:local="clr-namespace:ServerPickerX.Converters"
         xmlns:userControls="using:ServerPickerX"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
-        mc:Ignorable="d" 
-        d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Width="850"
@@ -22,6 +21,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
+        WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
     <Design.DataContext>
@@ -47,7 +47,7 @@
             </Grid.RowDefinitions>
 
             <!-- Title Bar -->
-            <Grid Grid.Row="0" x:Name="TitleBar" Background="#373B78" PointerPressed="TitleBar_PointerPressed">
+            <Grid Grid.Row="0" x:Name="TitleBar" Background="#373B78" PointerPressed="TitleBar_PointerPressed" >
                 <ProgressBar 
                     Margin="0,-24,0,0" 
                     Height="4"

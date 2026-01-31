@@ -3,7 +3,12 @@
     <Design.PreviewWith>
         <Border Padding="20" Background="Gray">
             <!-- Add Controls for Previewer Here -->
-            <Button Classes="main-btn" Padding="20">Block All</Button>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+				<Button Classes="main-btn" Padding="20">Block All</Button>
+                <Button Classes="main-btn" Padding="20">Block Selected</Button>
+                <Button Classes="main-btn" Padding="20">Unblock All</Button>
+                <Button Classes="main-btn" Padding="20">Unblock Selected</Button>
+            </StackPanel>
         </Border>
     </Design.PreviewWith>
 

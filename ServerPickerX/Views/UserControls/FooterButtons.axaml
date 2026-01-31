@@ -10,8 +10,21 @@
         HorizontalAlignment="Right"
         Orientation="Horizontal"
         Spacing="6">
-        <Button Foreground="White" i:Attached.Icon="fa-paypal" FontSize="20" />
-        <Button Foreground="White" i:Attached.Icon="fa-github" FontSize="20" />
-        <Button Foreground="White" i:Attached.Icon="fa-gear" FontSize="20" Margin="0,0,10,0" />
+        <Button x:Name="PaypalBtn"
+                Foreground="White" 
+                i:Attached.Icon="fa-paypal" 
+                FontSize="20"
+                Click="PaypalBtn_Click" />
+        <Button x:Name="GithubBtn"
+                Foreground="White"
+                i:Attached.Icon="fa-github" 
+                FontSize="20" 
+                Click="GithubBtn_Click" />
+        <Button x:Name="SettingsBtn"
+                Foreground="White"
+                i:Attached.Icon="fa-gear" 
+                FontSize="20"
+                Margin="0,0,10,0" 
+                Click="SettingsBtn_Click" />
     </StackPanel>
 </UserControl>
