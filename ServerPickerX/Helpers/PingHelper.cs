@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using ServerPickerX.Models;
+﻿using ServerPickerX.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
@@ -12,11 +11,14 @@ namespace ServerPickerX.Helpers
     {
         public static async Task PingServer(ServerModel server)
         {
-            if (server == null) return;
+            if (server == null)
+            {
+                return;
+            }
 
             ServerModel serverModel = server;
 
-            Ping ping = new Ping();
+            Ping ping = new();
 
             foreach (RelayModel relay in serverModel.RelayModels)
             {
@@ -24,7 +26,7 @@ namespace ServerPickerX.Helpers
 
                 try
                 {
-                    var res = await ping.SendPingAsync(relay.IPv4, timeout: 1000);
+                    var res = await ping.SendPingAsync(relay.IPv4, timeout: 500);
 
 
                     if (res.RoundtripTime > 0)
@@ -39,7 +41,7 @@ namespace ServerPickerX.Helpers
                 }
             }
 
-            // Update server status by checking if pingable or not
+            // if pinging status remains after pinging all server relay addresses then its blocked or unreachable
             if (serverModel.Ping == "Pinging server")
             {
                 serverModel.Status = "❌";

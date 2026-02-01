@@ -33,6 +33,30 @@ namespace ServerPickerX.Helpers
             await box.ShowWindowDialogAsync(MainWindow.Instance);
         }
 
+        public static async Task<bool> ShowMessageBoxConfirmation(string title, string text, Icon icon = Icon.Info)
+        {
+            var customMbsParams = new MessageBoxCustomParams
+            {
+                ContentTitle = title,
+                ContentMessage = text,
+                ButtonDefinitions = [
+                        new() { Name = "Ok", },
+                        new() { Name = "Cancel", },
+                    ],
+                WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                ShowInCenter = true,
+                CanResize = false,
+                Icon = title == "Error" ? Icon.Error : icon,
+                Topmost = true,
+            };
+
+            var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
+
+            var result = await box.ShowWindowDialogAsync(MainWindow.Instance);
+
+            return result == "Ok";
+        }
+
         public static async Task ShowMessageBoxWithLink(string title, string text, string url, Icon icon = Icon.Info)
         {
             var customMbsParams = new MessageBoxCustomParams
@@ -59,7 +83,7 @@ namespace ServerPickerX.Helpers
                 return;
             }
 
-            ProcessHelper.createProcessFromUrl(url);
+            ProcessHelper.CreateProcessFromUrl(url);
         }
     }
 }

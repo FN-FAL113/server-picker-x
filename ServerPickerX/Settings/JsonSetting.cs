@@ -12,15 +12,14 @@ namespace ServerPickerX.ConfigSections
 {
     public class JsonSetting : Setting
     {
+        public string warning { get; private set; } = "Do not modify server revision! It will unblock your servers on launch";
+
         public string server_revision { get; set; } = "-1";
 
         public bool version_check_on_startup { get; set; } = true;
 
         [JsonIgnore]
         public readonly string jsonFilePath = "./settings.json";
-
-        [JsonIgnore]
-        private readonly JsonSerializerOptions serializerOptions = new(){ WriteIndented = true };
 
         public override async Task<Setting> LoadSettings()
         {
@@ -35,7 +34,7 @@ namespace ServerPickerX.ConfigSections
                 {
                     using FileStream newSettingsFile = File.Create(jsonFilePath);
 
-                    await JsonSerializer.SerializeAsync(newSettingsFile, this, serializerOptions);
+                    await JsonSerializer.SerializeAsync(newSettingsFile, this);
 
                     return this;
                 }
@@ -63,7 +62,7 @@ namespace ServerPickerX.ConfigSections
                 // open existing local json settings and deserialize it back to its complex form
                 using FileStream file = File.OpenWrite(jsonFilePath);
 
-                await JsonSerializer.SerializeAsync(file, this, serializerOptions);
+                await JsonSerializer.SerializeAsync(file, this);
 
                 return true;
             }

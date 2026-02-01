@@ -25,7 +25,7 @@ namespace ServerPickerX.Helpers
 
             try
             {
-                Stream res = await httpClient.GetStreamAsync("https://api.github.com/repositories/649341649/releases");
+                Stream res = await httpClient.GetStreamAsync("https://api.github.com/repositories/1141835010/releases");
 
                 if (res == null) {
                     throw new Exception(

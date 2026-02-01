@@ -6,7 +6,7 @@ namespace ServerPickerX.Helpers
 {
     public class ProcessHelper
     {
-        public static Process createProcess(string filename)
+        public static Process CreateProcess(string filename = "")
         {
             Process process = new();
 
@@ -19,7 +19,7 @@ namespace ServerPickerX.Helpers
             return process;
         }
 
-        public static void createProcessFromUrl(string url)
+        public static void CreateProcessFromUrl(string url)
         {
             if (OperatingSystem.IsWindows())
             {

@@ -91,7 +91,7 @@ namespace ServerPickerX.Helpers
 
         public static async Task BlockUnblockServersWindows(bool shouldBlock, ObservableCollection<ServerModel> serverModels)
         {
-            Process process = ProcessHelper.createProcess("cmd.exe");
+            Process process = ProcessHelper.CreateProcess("cmd.exe");
 
             foreach (ServerModel serverModel in serverModels)
             {
@@ -124,7 +124,7 @@ namespace ServerPickerX.Helpers
 
         public static async Task BlockUnblockServersLinux(bool shouldBlock, ObservableCollection<ServerModel> serverModels)
         {
-            Process process = ProcessHelper.createProcess("sudo");
+            Process process = ProcessHelper.CreateProcess("sudo");
 
             foreach (ServerModel serverModel in serverModels)
             {

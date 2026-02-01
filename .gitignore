@@ -55,3 +55,4 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 settings.json
+ServerPickerX/ServerPickerX.csproj.Backup.tmp
