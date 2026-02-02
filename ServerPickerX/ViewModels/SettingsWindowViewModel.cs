@@ -70,6 +70,12 @@ namespace ServerPickerX.ViewModels
                     throw new Exception("StdOut: " + process.StandardOutput.ReadToEnd() + 
                         Environment.NewLine + "StdErr: " + process.StandardError.ReadToEnd());
                 }
+
+                await MessageBoxHelper.ShowMessageBox(
+                        "Info",
+                        "Successfully reset firewall!",
+                        MsBox.Avalonia.Enums.Icon.Success
+                    );
             }
             catch (Exception ex) {
                 await MessageBoxHelper.ShowMessageBox(

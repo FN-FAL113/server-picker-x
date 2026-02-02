@@ -15,8 +15,24 @@
         WindowStartupLocation="CenterOwner"
         CanResize="False"
         CanMaximize="False"
+        Background="Transparent"
         x:DataType="viewmodels:SettingsWindowViewModel">
-  <Border Background="#373B78"
+  <Window.Styles>
+	  <Style Selector="Border.wBorder">
+		  <Style.Animations>
+			  <Animation Duration="0:0:0.3" Easing="QuadraticEaseIn">
+				  <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+              </Animation>
+          </Style.Animations>
+      </Style>
+  </Window.Styles>
+
+  <Border Classes="wBorder" Background="#373B78"
         BorderBrush="#12FFFFFF"
         BorderThickness="0.10">
         <Grid Grid.Column="1">
@@ -60,7 +76,8 @@
                         <Button 
                             Classes="main-btn" 
                             HorizontalAlignment="Center"
-                            Content="Reset Firewall" />
+                            Content="Reset Firewall"
+                            Command="{Binding ResetFirewallCommand}"/>
                     </Grid>
                 </Grid>
             </Grid>
