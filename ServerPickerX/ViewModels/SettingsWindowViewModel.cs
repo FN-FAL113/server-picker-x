@@ -1,14 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using ServerPickerX.ConfigSections;
-using ServerPickerX.Helpers;
-using ServerPickerX.Models;
-using ServerPickerX.Views;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Text;
+using Microsoft.Extensions.DependencyInjection;
+using ServerPickerX.Services.SystemFirewalls;
+using ServerPickerX.Settings;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.ViewModels
@@ -17,74 +10,30 @@ namespace ServerPickerX.ViewModels
     {
         public bool VersionCheckOnStartup { get; set; }
 
-        public SettingsWindowViewModel() { 
-            VersionCheckOnStartup = MainWindow.jsonSettings.version_check_on_startup;
-        }
+        private readonly JsonSetting _jsonSetting;
+        private readonly ISystemFirewallService _systemFirewallService;
 
-        [RelayCommand]
-        public async Task VersionCheckerCommand()
+        // Parameterless constructors for windows and viewmodels, access services instead through the container
+        // DI through constructors doesn't work with design previewer since it has no clue on providing parameters
+        public SettingsWindowViewModel()
         {
-            JsonSetting jsonSetting = MainWindow.jsonSettings;
+            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
+            _systemFirewallService = App.ServiceProvider.GetRequiredService<ISystemFirewallService>();
 
-            jsonSetting.version_check_on_startup = VersionCheckOnStartup;
-
-            await jsonSetting.SaveSettings();
+            VersionCheckOnStartup = _jsonSetting.version_check_on_startup;
         }
 
         [RelayCommand]
+        public async Task VersionCheckerToggleCommand()
+        {
+            _jsonSetting.version_check_on_startup = VersionCheckOnStartup;
+
+            await _jsonSetting.SaveSettingsAsync();
+        }
+
         public async Task ResetFirewallCommand()
         {
-            var result = await MessageBoxHelper.ShowMessageBoxConfirmation(
-                    "Warning",
-                    "This will attempt to reset firewall to its default state. Confirm action?",
-                    MsBox.Avalonia.Enums.Icon.Warning
-                );
-
-            if (!result)
-            {
-                return;
-            }
-
-            using Process process = ProcessHelper.CreateProcess();
-
-            try
-            {
-                if (OperatingSystem.IsWindows())
-                {
-                    process.StartInfo.FileName = "cmd.exe";
-
-                    process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} advfirewall reset";
-                }
-                else if (OperatingSystem.IsLinux())
-                {
-                    process.StartInfo.FileName = "sudo";
-
-                    process.StartInfo.Arguments = $"iptables -F";
-                }
-
-                process.Start();
-                process.WaitForExit();
-
-                if (process.ExitCode == 1 || process.ExitCode < 0)
-                {
-                    throw new Exception("StdOut: " + process.StandardOutput.ReadToEnd() + 
-                        Environment.NewLine + "StdErr: " + process.StandardError.ReadToEnd());
-                }
-
-                await MessageBoxHelper.ShowMessageBox(
-                        "Info",
-                        "Successfully reset firewall!",
-                        MsBox.Avalonia.Enums.Icon.Success
-                    );
-            }
-            catch (Exception ex) {
-                await MessageBoxHelper.ShowMessageBox(
-                        "Error",
-                        "An error has occured while resetting firewall! Please upload generated error file to github."
-                    );
-
-                await FileHelper.LogErrorToFile(ex.Message, "An error has occured while resetting firewall.");
-            }
+            await _systemFirewallService.ResetFirewallAsync();
         }
     }
 }

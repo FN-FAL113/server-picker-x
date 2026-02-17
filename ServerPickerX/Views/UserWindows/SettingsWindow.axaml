@@ -16,7 +16,8 @@
         CanResize="False"
         CanMaximize="False"
         Background="Transparent"
-        x:DataType="viewmodels:SettingsWindowViewModel">
+        x:DataType="viewmodels:SettingsWindowViewModel"
+        Loaded="Window_Loaded">
   <Window.Styles>
 	  <Style Selector="Border.wBorder">
 		  <Style.Animations>
@@ -69,7 +70,7 @@
 						<CheckBox x:Name="VersionCheckerSetting"
                                 Foreground="White"
                                 IsChecked="{Binding VersionCheckOnStartup}"
-                                Command="{Binding VersionCheckerCommand}">
+                                Command="{Binding VersionCheckerToggleCommand}">
                             Check for new version on startup
                         </CheckBox>
                     </StackPanel>

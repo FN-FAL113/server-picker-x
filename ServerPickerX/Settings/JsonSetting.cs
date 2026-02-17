@@ -1,5 +1,7 @@
 ﻿
 using ServerPickerX.Helpers;
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Settings;
 using System;
 using System.IO;
@@ -8,7 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace ServerPickerX.ConfigSections
+namespace ServerPickerX.Settings
 {
     // publishing an app with trimmed assemblies or using Ahead-of-Time compilation for 
     // reduced build size can limit the functionality of serialization since it requires reflection 
@@ -19,9 +21,13 @@ namespace ServerPickerX.ConfigSections
 
     public class JsonSetting : Setting
     {
-        public string warning { get; private set; } = "Do not modify server_revision or is_clustered!";
+        public string warning { get; private set; } = "Do not modify settings here! only do it from the app!";
 
-        public string server_revision { get; set; } = "-1";
+        public string game_mode { set; get; } = "Counter Strike 2";
+
+        public string deadlock_server_revision { get; set; } = "-1";
+
+        public string cs2_server_revision { get; set; } = "-1";
 
         public bool is_clustered { get; set; } = false;
 
@@ -31,13 +37,30 @@ namespace ServerPickerX.ConfigSections
         public readonly string jsonFilePath = "./settings.json";
 
         [JsonIgnore]
-        public readonly JsonSerializerOptions serializerOptions = new JsonSerializerOptions()
+        public readonly JsonSerializerOptions serializerOptions = new()
         {
             TypeInfoResolver = SourceGenerationContext.Default,
-            WriteIndented = true,        
+            WriteIndented = true,
+            IncludeFields = true,
         };
 
-        public override async Task<Setting> LoadSettings()
+        [JsonIgnore]
+        private IMessageBoxService _messageBoxService { get; set; }
+        [JsonIgnore]
+        private ILoggerService _logger { get; set; }
+
+        public JsonSetting() { }
+
+        public JsonSetting(
+            IMessageBoxService messageBoxService,
+            ILoggerService logger
+            ) 
+        {
+            _messageBoxService = messageBoxService;
+            _logger = logger;
+        }
+
+        public override async Task<Setting> LoadSettingsAsync()
         {
             try
             {
@@ -55,20 +78,22 @@ namespace ServerPickerX.ConfigSections
 
                 JsonSetting localSettings = await JsonSerializer.DeserializeAsync<JsonSetting>(settingsFile, serializerOptions) ?? this;
 
-                server_revision = localSettings.server_revision;
+                game_mode = localSettings.game_mode;
+                cs2_server_revision = localSettings.cs2_server_revision;
+                deadlock_server_revision = localSettings.deadlock_server_revision;
                 is_clustered = localSettings.is_clustered;
                 version_check_on_startup = localSettings.version_check_on_startup;
             }
             catch (Exception ex) {
-                await MessageBoxHelper.ShowMessageBox("Error", "An error has occured while loading json settings");
+                _logger.LogError("An error has occured while loading json settings", ex.Message);
 
-                await FileHelper.LogErrorToFile(ex.Message, "An error has occured while loading json settings");
+                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
             }
 
             return this;
         }
 
-        public override async Task<bool> SaveSettings()
+        public override async Task<bool> SaveSettingsAsync()
         {
             try
             {
@@ -84,9 +109,9 @@ namespace ServerPickerX.ConfigSections
                 return true;
             }
             catch (Exception ex) {
-                await MessageBoxHelper.ShowMessageBox("Error", "An error has occured while saving json settings");
+                _logger.LogError("An error has occured while saving json settings", ex.Message);
 
-                await FileHelper.LogErrorToFile(ex.Message, "An error has occured while saving json settings");
+                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
 
                 return false;
             }

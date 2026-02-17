@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using ServerPickerX.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using ServerPickerX.Services.Processes;
 using ServerPickerX.Views;
 
 namespace ServerPickerX;
@@ -14,12 +15,16 @@ public partial class FooterButtons : UserControl
 
     private async void PaypalBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        await ProcessHelper.OpenUrl("https://www.paypal.com/paypalme/fnfal113");
+        await App.ServiceProvider
+            .GetRequiredService<IProcessService>()
+            .OpenUrl("https://www.paypal.com/paypalme/fnfal113");
     }
 
     private async void GithubBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        await ProcessHelper.OpenUrl("https://github.com/FN-FAL113/server-picker-x");
+        await App.ServiceProvider
+            .GetRequiredService<IProcessService>()
+            .OpenUrl("https://github.com/FN-FAL113/server-picker-x");
     }
 
     private void SettingsBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

@@ -1,15 +1,14 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using ServerPickerX.Views;
 using System;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace ServerPickerX.Helpers
+namespace ServerPickerX.Services.Processes
 {
-    public class ProcessHelper
+    public class ProcessService : IProcessService
     {
-        public static Process CreateProcess(string filename = "")
+        public Process CreateProcess(string filename = "")
         {
             Process process = new();
 
@@ -22,7 +21,7 @@ namespace ServerPickerX.Helpers
             return process;
         }
 
-        public async static Task OpenUrl(string url)
+        public async Task OpenUrl(string url)
         {
             var topLevel = TopLevel.GetTopLevel(MainWindow.Instance);
 

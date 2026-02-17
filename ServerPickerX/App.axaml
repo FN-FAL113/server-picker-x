@@ -15,6 +15,7 @@
         <StyleInclude Source="/Styles/TitleBarButtonStyle.axaml" />
         <StyleInclude Source="/Styles/MainButtonStyle.axaml" />
         <StyleInclude Source="/Styles/TextBoxStyle.axaml" />
+        <StyleInclude Source="/Styles/ComboBoxStyle.axaml" />
     </Application.Styles>
 
    

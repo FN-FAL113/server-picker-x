@@ -1,27 +1,45 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using MsBox.Avalonia.Enums;
-using ServerPickerX.ConfigSections;
 using ServerPickerX.Extensions;
-using ServerPickerX.Helpers;
 using ServerPickerX.Models;
-using ServerPickerX.Views;
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
+using ServerPickerX.Services.Servers;
+using ServerPickerX.Services.SystemFirewalls;
+using ServerPickerX.Settings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        private readonly ILoggerService _loggerServiceService;
+        private readonly IMessageBoxService _messageBoxService;
+        private readonly IServerDataService _serverDataService;
+        private readonly ISystemFirewallService _systemFirewallService;
+        private readonly JsonSetting _jsonSetting;
+
+        // Parameterless constructors for windows and viewmodels, access services instead through the container
+        // DI through constructors doesn't work with design previewer since it has no clue on providing parameters
+        public MainWindowViewModel() 
+        {
+            _loggerServiceService = App.ServiceProvider.GetRequiredService<ILoggerService>();
+            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>(); 
+            _serverDataService = App.ServiceProvider.GetRequiredService<IServerDataService>(); 
+            _systemFirewallService = App.ServiceProvider.GetRequiredService<ISystemFirewallService>();
+            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
+        }
+
         public ObservableCollectionExtended<ServerModel> ServerModels { get; set; } = [];
 
+        // Property resolve through expression body that react to changes from another observable property
         public ObservableCollectionExtended<ServerModel> FilteredServerModels =>
              string.IsNullOrWhiteSpace(SearchText)
                 ? ServerModels
@@ -46,14 +64,14 @@ namespace ServerPickerX.ViewModels
 
         partial void OnSearchTextChanged(string value)
         {
-            // An observable collection only reacts to changes made inside the collection (Add/Remove)
-            // Have to dispatch event for property changed to signal the UI that binding got updated
+            // An observable collection only reacts to changes through add and remove
+            // Dispatch prop changed event manually to signal the UI for data binding changes
             OnPropertyChanged(nameof(FilteredServerModels));
         }
 
         public async Task LoadServers()
         {
-            await ServerHelper.LoadServers();
+            await _serverDataService.LoadServersAsync();
 
             await ClusterUnclusterServers();
 
@@ -63,26 +81,24 @@ namespace ServerPickerX.ViewModels
         [RelayCommand]
         public async Task ClusterUnclusterServers()
         {
-            JsonSetting jsonSetting = MainWindow.jsonSettings;
-
             // do not update json settings nor unblock servers on first app load
             if (ServersInitialized)
             {
-                jsonSetting.is_clustered = !jsonSetting.is_clustered;
+                _jsonSetting.is_clustered = !_jsonSetting.is_clustered;
 
-                await jsonSetting.SaveSettings();
+                await _jsonSetting.SaveSettingsAsync();
 
                 await UnblockAll();
             }
 
-            List<ServerModel> serverModels = jsonSetting.is_clustered ?
-                ServerHelper.CLUSTERED_SERVERS : ServerHelper.UNCLUSTERED_SERVERS;
+            ServerData serverData = _serverDataService.GetServerData();
+
+            List<ServerModel> serverModels = _jsonSetting.is_clustered ?
+                serverData.ClusteredServers : serverData.UnclusteredServers;
 
             ServerModels.Clear();
 
             ServerModels.AddRange(serverModels);
-
-            //FilteredServerModels.AddRange(serverModels);
 
             PingServers(serverModels);
         }
@@ -132,7 +148,8 @@ namespace ServerPickerX.ViewModels
         {
             if (selectedServers.Count == 0)
             {
-                await MessageBoxHelper.ShowMessageBox("Info", "Hey! Please select at least one server to block");
+                await _messageBoxService.ShowMessageBoxAsync("Info", "Hey! Please select at least one server to block");
+
                 return;
             }
 
@@ -158,7 +175,8 @@ namespace ServerPickerX.ViewModels
         {
             if (selectedServers.Count == 0)
             {
-                await MessageBoxHelper.ShowMessageBox("Info", "Hey! Please select at least one server to unblock");
+                await _messageBoxService.ShowMessageBoxAsync("Info", "Hey! Please select at least one server to unblock");
+
                 return;
             }
 
@@ -171,7 +189,12 @@ namespace ServerPickerX.ViewModels
         {
             if (PendingOperation)
             {
-                await MessageBoxHelper.ShowMessageBox("Info", "Whoa! There's already a pending operation. Please wait...", Icon.Setting);
+                await _messageBoxService.ShowMessageBoxAsync(
+                    "Info", 
+                    "Whoa! There's already a pending operation. Please wait...", 
+                    Icon.Setting
+                    );
+
                 return;
             }
 
@@ -180,14 +203,17 @@ namespace ServerPickerX.ViewModels
 
             try
             {
-                if (OperatingSystem.IsWindows())
+                if (shouldBlock)
                 {
                     // offload to background thread, process.waitForExit blocks the UI thread
-                    await Task.Run(() => ServerHelper.BlockUnblockServersWindows(shouldBlock, serverModels));
-                }
-                else if (OperatingSystem.IsLinux())
+                    await Task.Run(() => _systemFirewallService.BlockServersAsync(serverModels));
+
+                    _loggerServiceService.LogInfo("Servers blocked successfully");
+                } else
                 {
-                    await Task.Run(() => ServerHelper.BlockUnblockServersLinux(shouldBlock, serverModels));
+                    await Task.Run(() => _systemFirewallService.UnblockServersAsync(serverModels));
+
+                    _loggerServiceService.LogInfo("Servers unblocked successfully");
                 }
 
                 // Ping servers in the background (parallel operation)
@@ -195,16 +221,21 @@ namespace ServerPickerX.ViewModels
             }
             catch (Exception ex)
             {
-                await MessageBoxHelper.ShowMessageBox(
-                        "Error",
-                        "Oops! Something went wrong. Please upload the error log file to GitHub."
-                    );
+                _loggerServiceService.LogError("An error has occurred while blocking or unblocking servers.", ex.Message);
 
-                await FileHelper.LogErrorToFile(ex.Message, "An error has occurred while blocking or unblocking servers.");
+                await _messageBoxService.ShowMessageBoxAsync(
+                    "Error",
+                    "Oops! Something went wrong. Please upload the log file to GitHub."
+                    );
             }
 
             PendingOperation = false;
             ShowProgressBar = false;
+        }
+
+        public IServerDataService GetServerDataService()
+        { 
+            return _serverDataService; 
         }
 
     }

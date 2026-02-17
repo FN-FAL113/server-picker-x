@@ -1,0 +1,40 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20" Background="Gray">
+            <!-- Add Controls for Previewer Here -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
+				<ComboBox Classes="game-combobox" SelectedIndex="0">
+					<ComboBoxItem>Counter Strike 2</ComboBoxItem>
+					<ComboBoxItem>Deadlock</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- Add Styles Here -->
+    <Style Selector="ComboBox.game-combobox">
+        <Style.Resources>
+			<SolidColorBrush x:Key="ComboBoxDropDownGlyphForeground">White</SolidColorBrush>
+        </Style.Resources>
+        <Setter Property="BorderBrush" Value="#575cd4"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background">
+            <Setter.Value>
+				<SolidColorBrush Color="#4a4e8a" Opacity="0.5" />
+            </Setter.Value>
+        </Setter> 
+        <Setter Property="FontSize" Value="14"/>
+
+        <!-- set style when hovered or focused -->
+        <Style Selector="^:focus /template/ Border#PART_BorderElement">
+	        <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
+            <Setter Property="Background" Value="{TemplateBinding Background}"/>
+        </Style>
+
+        <Style Selector="^:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
+            <Setter Property="Background" Value="{TemplateBinding Background}"/>
+        </Style>
+    </Style>
+</Styles>

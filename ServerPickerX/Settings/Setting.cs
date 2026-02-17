@@ -5,8 +5,8 @@ namespace ServerPickerX.Settings
     public abstract class Setting
     {
         // Override this method on derived or implementing classes 
-        public abstract Task<Setting> LoadSettings();
+        public abstract Task<Setting> LoadSettingsAsync();
 
-        public abstract Task<bool> SaveSettings();
+        public abstract Task<bool> SaveSettingsAsync();
     }
 }

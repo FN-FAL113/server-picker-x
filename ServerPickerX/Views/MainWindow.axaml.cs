@@ -1,58 +1,104 @@
 using Avalonia.Controls;
+using Avalonia.Logging;
+using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Comparers;
-using ServerPickerX.ConfigSections;
 using ServerPickerX.Helpers;
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
+using ServerPickerX.Services.Processes;
+using ServerPickerX.Services.Servers;
+using ServerPickerX.Services.SystemFirewalls;
+using ServerPickerX.Services.Versions;
+using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
 using System.ComponentModel;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ServerPickerX.Views
 {
     public partial class MainWindow : Window
     {
-        // initialize a static singleton object for accessing main window instance
+        // Initialize a static singleton object for accessing main window instance
         public static MainWindow? Instance { get; private set; }
-
-        private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
-
-        // initialize a static singleton object for handling json settings
-        public static JsonSetting jsonSettings = new();
 
         public static bool IsDebugBuild
         {
             get
             {
                 #if DEBUG
-                     return true;
+                    return true;
                 #else
-                     return false;
+                    return false;
                 #endif
             }
         }
 
+        private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
+
+        private readonly IMessageBoxService _messageBoxService;
+        private readonly IVersionService _versionService;
+        private readonly JsonSetting _jsonSetting;
+
+        // Parameterless constructors for windows and viewmodels, access services instead through the container
+        // DI through constructors doesn't work with design previewer since it has no clue on providing parameters
         public MainWindow()
         {
             InitializeComponent();
 
             Instance = this;
+
+            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
+            _versionService = App.ServiceProvider.GetRequiredService<VersionService>();
+            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
         }
 
         private async void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            await jsonSettings.LoadSettings();
+            await InitializeApp();
+        }
 
-            clusterUnclusterBtn.Content = jsonSettings.is_clustered ? "Uncluster Servers" : "Cluster Servers";
+        private async void gameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            // User changed game mode, re-initialize app with updated services and settings
+            MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
 
-            var viewModel = new MainWindowViewModel();
+            if (viewModel == null) return;
 
+            // Unblock servers first to prevent conflicting firewall entries between both games
+            await viewModel.UnblockAll();
+
+            // Update json setting gameMode prop and serialize locally
+            _jsonSetting.game_mode = ((ComboBoxItem)gameComboBox.SelectedItem).Content.ToString();
+
+            await _jsonSetting.SaveSettingsAsync();
+
+            await InitializeApp();
+        }
+
+        public async Task InitializeApp()
+        {
+            await _jsonSetting.LoadSettingsAsync();
+
+            bool isGameModeCS2 = _jsonSetting.game_mode == "Counter Strike 2";
+
+            // Set UI control content values based on jsonSetting values
+            gameComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
+            clusterUnclusterBtn.Content = _jsonSetting.is_clustered ? "Uncluster Servers" : "Cluster Servers";
+
+            // Load servers and attach view model to window data context
+            var viewModel = App.ServiceProvider.GetRequiredService<MainWindowViewModel>(); 
             await viewModel.LoadServers();
 
             DataContext = viewModel;
 
-            // unblock all server to sync new data if steam sdr api has been updated
-            if (jsonSettings.server_revision != ServerHelper.CURRENT_SERVER_REVISION)
+            // Unblock all server to sync new data if Steam SDR API has been updated
+            var serverRevision = isGameModeCS2 ? _jsonSetting.cs2_server_revision : _jsonSetting.deadlock_server_revision;
+            if (serverRevision != viewModel.GetServerDataService().GetServerData().Revision)
             {
-                await MessageBoxHelper.ShowMessageBox(
+                await _messageBoxService.ShowMessageBoxAsync(
                     "Please Standby",
                     "Server data just got updated by Valve! All blocked servers " + Environment.NewLine +
                     "will be unblocked in order to synchronize new server data",
@@ -61,19 +107,26 @@ namespace ServerPickerX.Views
 
                 await viewModel.UnblockAll();
 
-                jsonSettings.server_revision = ServerHelper.CURRENT_SERVER_REVISION;
+                if (isGameModeCS2)
+                {
+                    _jsonSetting.cs2_server_revision = viewModel.GetServerDataService().GetServerData().Revision;
+                } else
+                {
+                    _jsonSetting.deadlock_server_revision = viewModel.GetServerDataService().GetServerData().Revision;
+                }
 
-                await jsonSettings.SaveSettings();
+                await _jsonSetting.SaveSettingsAsync();
             }
 
-            await VersionHelper.CheckVersion();
+            // Check for latest version through github releases API
+            await _versionService.CheckVersionAsync();
         }
 
         private async void DataGrid_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             var source = e.Source;
 
-            // a cell is double clicked, ping the selected server
+            // A cell is double clicked, ping the selected server
             if (source is Border || source is TextBlock || source is Image)
             {
                 (DataContext as MainWindowViewModel)?.PingSelectedServer();
@@ -82,7 +135,7 @@ namespace ServerPickerX.Views
 
         private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
-            // prevent other mouse event listeners from being triggered
+            // Prevent other mouse event listeners from being triggered
             e.Handled = true;
 
             var parentWindow = TopLevel.GetTopLevel(this) as Window;
@@ -92,7 +145,7 @@ namespace ServerPickerX.Views
 
         private void DataGridTextColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
-            // custom sort comparer for ping column due to having a suffix "ms"
+            // Custom sort comparer for ping column due to having a suffix "ms"
             pingSortDirection = pingSortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
 
             serverList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
@@ -100,10 +153,12 @@ namespace ServerPickerX.Views
 
         private void clusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            if (!(DataContext as MainWindowViewModel)?.ServersInitialized ?? true) {
+            if (!(DataContext as MainWindowViewModel)?.ServersInitialized ?? true)
+            {
                 return;
             }
 
+            // Update UI content by inverse value
             clusterUnclusterBtn.Content = clusterUnclusterBtn?.Content?.ToString() == "Cluster Servers" ? "Uncluster Servers" : "Cluster Servers";
         }
     }
