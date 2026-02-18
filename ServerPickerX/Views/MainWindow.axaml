@@ -3,8 +3,9 @@
         xmlns:vm="using:ServerPickerX.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ServerPickerX.Converters"
+        xmlns:converters="clr-namespace:ServerPickerX.Converters"
         xmlns:userControls="using:ServerPickerX"
+        xmlns:settings="clr-namespace:ServerPickerX.Settings"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
@@ -24,6 +25,7 @@
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
+
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -31,7 +33,7 @@
     </Design.DataContext>
 
     <Window.Resources>
-        <local:ImageConverter x:Key="ImageConverter" />
+        <converters:ImageConverter x:Key="ImageConverter" />
     </Window.Resources>
 
     <Border
@@ -83,18 +85,17 @@
                             Width="144"
                             Margin="8,0,0,0"
                             BorderThickness="1"/>
-                        <ComboBox 
-                            x:Name="gameComboBox" 
-                            Classes="game-combobox"
-                            SelectionChanged="gameComboBox_SelectionChanged"
-                            SelectedIndex="0"
-                            VerticalAlignment="Center"
-                            Width="144"
-                            Margin="8,0,0,0"
-                            BorderThickness="1"> 
-                            <ComboBoxItem>Counter Strike 2</ComboBoxItem>
-                            <ComboBoxItem>Deadlock</ComboBoxItem>
-                        </ComboBox>
+<ComboBox 
+                             x:Name="gameComboBox" 
+                             Classes="game-combobox"
+                             SelectionChanged="gameComboBox_SelectionChanged"
+                             ItemsSource="{Binding Source={x:Static settings:GameModes.All}}"
+                             SelectedIndex="0"
+                             VerticalAlignment="Center"
+                             Width="144"
+                             Margin="8,0,0,0"
+                             BorderThickness="1">
+                         </ComboBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button 

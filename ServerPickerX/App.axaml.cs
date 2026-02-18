@@ -14,6 +14,8 @@ using ServerPickerX.Services.Servers;
 using ServerPickerX.Services.SystemFirewalls;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
+using ServerPickerX.Settings;
+using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using ServerPickerX.Views;
 
@@ -21,7 +23,7 @@ namespace ServerPickerX
 {
     public partial class App : Application
     {
-        // Singleton service container, access services across the app
+        // Singleton service container, access services across the app on execution lifetime
         public static IServiceProvider ServiceProvider { get; private set; }
 
         public override void Initialize()
@@ -46,11 +48,11 @@ namespace ServerPickerX
             {
                 JsonSetting jsonSetting = serviceProvider.GetRequiredService<JsonSetting>();
 
-                if (jsonSetting.game_mode == "Counter Strike 2")
+                if (jsonSetting.game_mode == GameModes.CounterStrike2)
                 {
                     return serviceProvider.GetRequiredService<CS2ServerDataService>();
                 }
-                else if (jsonSetting.game_mode == "Deadlock")
+                else if (jsonSetting.game_mode == GameModes.Deadlock)
                 {
                     return serviceProvider.GetRequiredService<DeadLockServerDataService>();
                 }

@@ -8,10 +8,15 @@ namespace ServerPickerX;
 
 public partial class FooterButtons : UserControl
 {
-    public FooterButtons()
-    {
-        InitializeComponent();
-    }
+public FooterButtons()
+        {
+            InitializeComponent();
+
+            // Attach tooltips to the footer buttons
+            ToolTip.SetTip(PaypalBtn, "Donate via PayPal");
+            ToolTip.SetTip(GithubBtn, "Go to GitHub repository");
+            ToolTip.SetTip(SettingsBtn, "Open settings");
+        }
 
     private async void PaypalBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {

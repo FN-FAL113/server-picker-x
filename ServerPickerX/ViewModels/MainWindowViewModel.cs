@@ -81,7 +81,7 @@ namespace ServerPickerX.ViewModels
         [RelayCommand]
         public async Task ClusterUnclusterServers()
         {
-            // do not update json settings nor unblock servers on first app load
+            // Update json settings and unblock all servers only when servers are initialized on first load
             if (ServersInitialized)
             {
                 _jsonSetting.is_clustered = !_jsonSetting.is_clustered;
