@@ -101,5 +101,4 @@ dotnet test --filter "FullyQualifiedName=ServerPickerX.Models.ServerModelTests.P
 ## Other Instructions
 - If you are unsure how to do something, use `gh_grep` tools to search code examples from GitHub or use `context7` tools to search for project/code documentations
 - To prevent reasoning loops, follow these strict rules:
-    1. If you are stuck, state 'I am unable to progress with the current toolset' and stop.
-    2. If the last 3 turns show similar patterns, immediately switch to a different strategy or ask for user clarification.
+    1. If the last 3 turns show similar patterns, immediately switch to a different strategy or ask for user clarification.
