@@ -11,7 +11,7 @@ a single file `<PublishSingleFile>true</PublishSingleFile>` and it can run indep
 The code follows the MVVM pattern with ViewModels exposed through `Microsoft.Extensions.DependencyInjection` specifically a 
 static singleton service container is instantiated in `App.axaml.cs`.
 
-## Build / Publish
+## Build / Publish Guidelines
 ```bash
 # Clean and build (debug)
 dotnet clean
@@ -27,7 +27,7 @@ dotnet publish -c Release -r linux-x64
 ```
 The output binary is located under `ServerPickerX/bin/Release/net10.0/<win-x64|linux-x64>/publish`.
 
-## Linting & Formatting
+## Linting & Formatting Guidelines
 ```bash
 # Check formatting without making changes
 # Requires dotnet-format to be installed (dotnet tool install -g dotnet-format)
@@ -38,7 +38,7 @@ dotnet format --verify-no-changes
 dotnet format
 ```
 
-## Testing
+## Testing Guidelines
 > **Note**: The repository currently contains no automated tests. When adding
 > tests, follow these guidelines:
 >
@@ -92,7 +92,6 @@ dotnet test --filter "FullyQualifiedName=ServerPickerX.Models.ServerModelTests.P
 ## Error Handling Patterns
 1. **User Feedback** – Use `MessageBoxService` for critical errors that require user attention.
 2. **Persistent Logging** – Use `FileLoggerService` for logging errors to a file.
-3. **Cancellation Support** – Pass `CancellationToken` to long‑running operations when possible.
 
 ## Build & CI Checklist
 - [ ] All tests pass (`dotnet test`).
