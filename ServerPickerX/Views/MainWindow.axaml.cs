@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Comparers;
+using ServerPickerX.Constants;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
@@ -24,7 +25,7 @@ namespace ServerPickerX.Views
 #if DEBUG
                 return true;
 #else
-                    return false;
+                return false;
 #endif
             }
         }
@@ -65,8 +66,8 @@ namespace ServerPickerX.Views
         {
             await InitializeApp();
 
-            ToolTip.SetTip(refreshBtn, "Refresh ping");
-            ToolTip.SetTip(gameComboBox, "Select the game mode");
+            ToolTip.SetTip(gameComboBox, "Select game mode");
+            ToolTip.SetTip(refreshBtn, "Refresh all server ping");
         }
 
         private async void gameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -113,7 +114,7 @@ namespace ServerPickerX.Views
             ConfigureControls();
 
             var vm = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            await vm.LoadServers();
+            await vm.LoadServersAsync();
             DataContext = vm;
 
             await SyncServersAsync(vm);
@@ -159,7 +160,7 @@ namespace ServerPickerX.Views
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
-            await vm.UnblockAll();
+            await vm.UnblockAllAsync();
 
             if (_jsonSetting.game_mode == GameModes.CounterStrike2)
                 _jsonSetting.cs2_server_revision = vm.GetServerDataService().GetServerData().Revision;
@@ -173,8 +174,10 @@ namespace ServerPickerX.Views
         {
             if (DataContext is not MainWindowViewModel vm) return;
 
-            await vm.UnblockAll();
+            // Unblock all servers first before changing game mode
+            await vm.UnblockAllAsync();
 
+            // Update json setting game mode and serialize it
             _jsonSetting.game_mode = (string)gameComboBox.SelectedItem!;
             await _jsonSetting.SaveSettingsAsync();
 

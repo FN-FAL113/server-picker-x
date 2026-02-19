@@ -76,7 +76,6 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string serverDescription = server.Value["desc"].ToString();
-                string clusterName = GetClusterKeywords().FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
 
                 var serverModel = new ServerModel
                 {
@@ -95,12 +94,14 @@ namespace ServerPickerX.Services.Servers
 
                 unclusteredServers.Add(serverModel);
 
+                string clusterName = GetClusterKeywords().FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
                 if (!string.IsNullOrEmpty(clusterName))
                 {
                     var clusteredServer = clusteredServers.FirstOrDefault(s => s.Description == clusterName, new ServerModel());
 
                     clusteredServer.RelayModels.AddRange(serverModel.RelayModels);
 
+                    // Initialize a server cluster where relay addresses will be appended
                     if (string.IsNullOrEmpty(clusteredServer.Description))
                     {
                         clusteredServer.Flag = serverModel.Flag;

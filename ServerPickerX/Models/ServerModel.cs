@@ -26,11 +26,6 @@ namespace ServerPickerX.Models
 
         public async void PingServer()
         {
-            if (RelayModels.Count == 0)
-            {
-                return;
-            }
-
             using Ping ping = new();
 
             Ping = "Pinging server";
@@ -41,7 +36,7 @@ namespace ServerPickerX.Models
                 {
                     var res = await ping.SendPingAsync(relay.IPv4, timeout: 750);
 
-                    if (res.Status == IPStatus.Success && res.RoundtripTime > 0)
+                    if (res.Status == IPStatus.Success && res.RoundtripTime >= 0)
                     {
                         Ping = res.RoundtripTime + "ms";
                         Status = "✅";

@@ -20,19 +20,20 @@ namespace ServerPickerX.Settings
     [JsonSerializable(typeof(JsonSetting))]
     internal partial class SourceGenerationContext : JsonSerializerContext { }
 
-    public class JsonSetting : Setting
+    public class JsonSetting : ISetting
     {
-        public string warning { get; private set; } = "Do not modify settings here! only do it from the app!";
+        // Properties are virtual for unit test mocking 
+        public virtual string warning { get; private set; } = "Do not modify settings here! only do it from the app!";
 
-        public string game_mode { set; get; } = "Counter Strike 2";
+        public virtual string game_mode { set; get; } = "Counter Strike 2";
 
-        public string deadlock_server_revision { get; set; } = "-1";
+        public virtual string deadlock_server_revision { get; set; } = "-1";
 
-        public string cs2_server_revision { get; set; } = "-1";
+        public virtual string cs2_server_revision { get; set; } = "-1";
 
-        public bool is_clustered { get; set; } = false;
+        public virtual bool is_clustered { get; set; } = false;
 
-        public bool version_check_on_startup { get; set; } = true;
+        public virtual bool version_check_on_startup { get; set; } = true;
 
         [JsonIgnore]
         public readonly string jsonFilePath = "./settings.json";
@@ -63,7 +64,7 @@ namespace ServerPickerX.Settings
 
 #pragma warning disable IL2026
         // Reflection is partially used here and might not be trim-compatible unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
-        public override async Task<Setting> LoadSettingsAsync()
+        public async Task LoadSettingsAsync()
         {
             try
             {
@@ -74,7 +75,7 @@ namespace ServerPickerX.Settings
 
                     await JsonSerializer.SerializeAsync(newSettingsFile, this);
 
-                    return this;
+                    return;
                 }
 
                 using FileStream settingsFile = File.OpenRead(jsonFilePath);
@@ -93,12 +94,10 @@ namespace ServerPickerX.Settings
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
             }
-
-            return this;
         }
 
         // Reflection is partially used here and might not be trim-compatible unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
-        public override async Task<bool> SaveSettingsAsync()
+        public async Task<bool> SaveSettingsAsync()
         {
             try
             {

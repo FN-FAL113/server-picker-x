@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:ServerPickerX.Converters"
         xmlns:userControls="using:ServerPickerX"
-        xmlns:settings="clr-namespace:ServerPickerX.Settings"
+        xmlns:constants="clr-namespace:ServerPickerX.Constants"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
@@ -88,7 +88,7 @@
                              x:Name="gameComboBox" 
                              Classes="game-combobox"
                              SelectionChanged="gameComboBox_SelectionChanged"
-                             ItemsSource="{Binding Source={x:Static settings:GameModes.All}}"
+                             ItemsSource="{Binding Source={x:Static constants:GameModes.All}}"
                              SelectedIndex="0"
                              VerticalAlignment="Center"
                              Width="144"
@@ -100,7 +100,7 @@
                         <Button 
                             x:Name="clusterUnclusterBtn"
                             Classes="main-btn"
-                            Command="{Binding ClusterUnclusterServers}" 
+                            Command="{Binding ClusterUnclusterServersAsync}" 
                             Click="clusterUnclusterBtn_Click"
                             VerticalAlignment="Center"
                             Foreground="White"
@@ -169,7 +169,7 @@
                         Margin="8,0,0,0">
 						<Button x:Name="BlockAllBtn"
                             Classes="main-btn"
-                            Command="{Binding BlockAll}"
+                            Command="{Binding BlockAllAsync}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
@@ -179,7 +179,7 @@
 						<Button 
                             x:Name="BlockSelectedBtn" 
                             Classes="main-btn" 
-                            Command="{Binding BlockSelected}"
+                            Command="{Binding BlockSelectedAsync}"
                             CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
@@ -197,7 +197,7 @@
 						<Button 
                             x:Name="UnlockAllBtn" 
                             Classes="main-btn" 
-                            Command="{Binding UnblockAll}" 
+                            Command="{Binding UnblockAllAsync}" 
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
@@ -207,7 +207,7 @@
 						<Button 
                             x:Name="UnblockSelectedBtn" 
                             Classes="main-btn" 
-                            Command="{Binding UnblockSelected}" 
+                            Command="{Binding UnblockSelectedAsync}" 
                             CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">

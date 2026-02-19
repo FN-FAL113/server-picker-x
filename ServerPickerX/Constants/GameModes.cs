@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ServerPickerX.Settings
+namespace ServerPickerX.Constants
 {
     public static class GameModes
     {
