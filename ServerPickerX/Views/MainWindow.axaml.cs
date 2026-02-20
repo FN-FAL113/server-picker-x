@@ -10,6 +10,7 @@ using ServerPickerX.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ServerPickerX.Views
 {
@@ -67,6 +68,7 @@ namespace ServerPickerX.Views
             await InitializeApp();
 
             ToolTip.SetTip(gameComboBox, "Select game mode");
+            ToolTip.SetTip(clusterUnclusterBtn, $"Group or ungroup servers");
             ToolTip.SetTip(refreshBtn, "Refresh all server ping");
         }
 
@@ -133,11 +135,6 @@ namespace ServerPickerX.Views
             clusterUnclusterBtn.Content = _jsonSetting.is_clustered
                 ? "Uncluster Servers"
                 : "Cluster Servers";
-
-            // Set tooltip info for (un)cluster button
-            var action = _jsonSetting.is_clustered ? "Uncluster" : "Cluster";
-
-            ToolTip.SetTip(clusterUnclusterBtn, $"Click to {action.ToLower()} servers");
         }
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
@@ -173,6 +170,22 @@ namespace ServerPickerX.Views
         private async Task HandleGameModeChangeAsync()
         {
             if (DataContext is not MainWindowViewModel vm) return;
+
+            bool result = await _messageBoxService.ShowMessageBoxConfirmationAsync(
+                    "Info",
+                    "This action will unblock all servers first to prevent firewall conflicts.",
+                    MsBox.Avalonia.Enums.Icon.Setting
+                    );
+
+            if (!result || vm.PendingOperation)
+            {
+                // Revert back selection without triggering the handler
+                gameComboBox.SelectionChanged -= gameComboBox_SelectionChanged;
+                gameComboBox.SelectedItem = _jsonSetting.game_mode;
+                gameComboBox.SelectionChanged += gameComboBox_SelectionChanged;
+
+                return;
+            }
 
             // Unblock all servers first before changing game mode
             await vm.UnblockAllAsync();
