@@ -31,7 +31,7 @@ namespace ServerPickerX.ViewModels
                     s.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
                 ));
 
-        public ServerModel? SelectedDataGridItem { get; set; }
+        public ServerModel? SelectedDataGridServerModel { get; set; }
 
         // Mvvm tool kit will auto generate source code to make this property observable
         // When updating this property, reference it by its auto property name (PascalCase)
@@ -41,9 +41,19 @@ namespace ServerPickerX.ViewModels
         [ObservableProperty]
         public string searchText = string.Empty;
 
-        public bool PendingOperation = false;
+        [ObservableProperty]
+        public bool serversLoaded = false;
 
-        public bool ServersInitialized = false;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
+        public bool serverModelsInitialized = false;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
+        public bool pendingOperation = false;
+
+        // Dependent/Computed prop for main UI buttons `IsEnabled` state
+        public bool IsOperationAllowed => !PendingOperation && ServerModelsInitialized;
 
         private readonly ILoggerService _loggerService;
         private readonly IMessageBoxService _messageBoxService;
@@ -86,18 +96,22 @@ namespace ServerPickerX.ViewModels
 
         public async Task LoadServersAsync()
         {
-            await _serverDataService.LoadServersAsync();
+            ServersLoaded = await _serverDataService.LoadServersAsync();
+
+            if (!ServersLoaded) return;
 
             await ClusterUnclusterServersAsync();
 
-            ServersInitialized = true;
+            ServerModelsInitialized = true;
         }
 
         [RelayCommand]
         public async Task ClusterUnclusterServersAsync()
         {
+            if (!ServersLoaded) return;
+
             // Update json settings and unblock all servers only after servers are initialized on first load
-            if (ServersInitialized)
+            if (ServerModelsInitialized)
             {
                 _jsonSetting.is_clustered = !_jsonSetting.is_clustered;
 
@@ -133,7 +147,7 @@ namespace ServerPickerX.ViewModels
                     serverModel.PingServer();
                 }
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 // when user suddenly tries to cluster or uncluster the servers while ServerModels is being iterated
             }
@@ -141,12 +155,12 @@ namespace ServerPickerX.ViewModels
 
         public void PingSelectedServer()
         {
-            if (SelectedDataGridItem == null)
+            if (SelectedDataGridServerModel == null)
             {
                 return;
             }
 
-            SelectedDataGridItem.PingServer();
+            SelectedDataGridServerModel.PingServer();
         }
 
         [RelayCommand]

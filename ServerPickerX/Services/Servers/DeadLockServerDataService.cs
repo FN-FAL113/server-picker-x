@@ -7,18 +7,20 @@ using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
     public class DeadLockServerDataService(
         ILoggerService _logger,
+        IMessageBoxService _messageBoxService,
         HttpClient _httpClient,
         JsonSetting _jsonSettings
         ) : IServerDataService
     {
         private ServerData _serverData = new();
 
-        public async Task LoadServersAsync()
+        public async Task<bool> LoadServersAsync()
         {
             try
             {
@@ -58,8 +60,13 @@ namespace ServerPickerX.Services.Servers
             catch (Exception ex)
             {
                 _logger.LogError("Failed to load deadlock servers", ex.Message);
-                throw;
+                
+                await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
+
+                return false;
             }
+
+            return true;
         }
 
         private void ProcessServers(JsonObject mainJson, ServerData serverData)
@@ -121,7 +128,7 @@ namespace ServerPickerX.Services.Servers
 
         public string GetCurrentRevision()
         {
-            return _jsonSettings.deadlock_server_revision;
+            return _serverData.Revision;
         }
 
         public ServerData GetServerData()

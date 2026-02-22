@@ -79,16 +79,18 @@
                         <TextBox 
                             Classes="search-textbox"
                             Text="{Binding SearchText}"
+                            IsEnabled="{Binding IsOperationAllowed}"
                             Watermark="Search servers..." 
                             VerticalAlignment="Center"
                             Width="144"
                             Margin="8,0,0,0"
                             BorderThickness="1"/>
                         <ComboBox 
-                             x:Name="gameComboBox" 
+                             x:Name="GameModeComboBox" 
                              Classes="game-combobox"
-                             SelectionChanged="gameComboBox_SelectionChanged"
+                             SelectionChanged="GameModeComboBox_SelectionChanged"
                              ItemsSource="{Binding Source={x:Static constants:GameModes.All}}"
+                             IsEnabled="{Binding IsOperationAllowed}"
                              SelectedIndex="0"
                              VerticalAlignment="Center"
                              Width="144"
@@ -98,20 +100,22 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button 
-                            x:Name="clusterUnclusterBtn"
+                            x:Name="ClusterUnclusterBtn"
                             Classes="main-btn"
-                            Command="{Binding ClusterUnclusterServersAsync}" 
-                            Click="clusterUnclusterBtn_Click"
+                            Command="{Binding ClusterUnclusterServersAsync}"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            Click="ClusterUnclusterBtn_Click"
                             VerticalAlignment="Center"
                             Foreground="White"
                             Margin="0,0,8,0">
                             Cluster Servers
                         </Button>
                         <Button 
-                            x:Name="refreshBtn"
+                            x:Name="RefreshBtn"
                             Classes="main-btn"
                             Command="{Binding PingServers}" 
                             CommandParameter="{Binding ServerModels}"
+                            IsEnabled="{Binding IsOperationAllowed}"
                             VerticalAlignment="Center"
                             Foreground="White"
                             Margin="0,0,8,0">
@@ -122,9 +126,9 @@
 
                 <Grid Grid.Row="1">
                      <DataGrid
-                           x:Name="serverList"
+                           x:Name="ServerList"
                            ItemsSource="{Binding FilteredServerModels}"
-                           SelectedItem="{Binding SelectedDataGridItem}"
+                           SelectedItem="{Binding SelectedDataGridServerModel}"
                            SelectionMode="Extended"
                            IsReadOnly="True"
                            CanUserReorderColumns="False"
@@ -170,6 +174,7 @@
 						<Button x:Name="BlockAllBtn"
                             Classes="main-btn"
                             Command="{Binding BlockAllAsync}"
+                            IsEnabled="{Binding IsOperationAllowed}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
@@ -180,7 +185,8 @@
                             x:Name="BlockSelectedBtn" 
                             Classes="main-btn" 
                             Command="{Binding BlockSelectedAsync}"
-                            CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
@@ -197,7 +203,8 @@
 						<Button 
                             x:Name="UnlockAllBtn" 
                             Classes="main-btn" 
-                            Command="{Binding UnblockAllAsync}" 
+                            Command="{Binding UnblockAllAsync}"
+                            IsEnabled="{Binding IsOperationAllowed}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
@@ -207,8 +214,9 @@
 						<Button 
                             x:Name="UnblockSelectedBtn" 
                             Classes="main-btn" 
-                            Command="{Binding UnblockSelectedAsync}" 
-                            CommandParameter="{Binding ElementName=serverList, Path=SelectedItems}"
+                            Command="{Binding UnblockSelectedAsync}"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 

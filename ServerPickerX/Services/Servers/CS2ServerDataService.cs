@@ -7,18 +7,20 @@ using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
     public class CS2ServerDataService(
         ILoggerService _logger,
+        IMessageBoxService _messageBoxService,
         HttpClient _httpClient,
         JsonSetting _jsonSettings
         ) : IServerDataService
     {
         private ServerData _serverData = new();
 
-        public async Task LoadServersAsync()
+        public async Task<bool> LoadServersAsync()
         {
             try
             {
@@ -59,8 +61,12 @@ namespace ServerPickerX.Services.Servers
             {
                 _logger.LogError("Failed to load cs2 servers", ex.Message);
 
-                throw;
+                await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
+
+                return false;
             }
+
+            return true;
         }
 
         private void ProcessServers(JsonObject mainJson, ServerData serverData)
@@ -123,7 +129,7 @@ namespace ServerPickerX.Services.Servers
 
         public string GetCurrentRevision()
         {
-            return _jsonSettings.cs2_server_revision;
+            return _serverData.Revision;
         }
 
         public ServerData GetServerData()

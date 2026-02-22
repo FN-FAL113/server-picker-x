@@ -50,7 +50,7 @@ namespace ServerPickerX.Tests.ViewModels
             };
 
             // mock methods with fake results
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act
@@ -58,7 +58,22 @@ namespace ServerPickerX.Tests.ViewModels
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
-            Assert.True(_vm.ServersInitialized);
+            Assert.True(_vm.ServerModelsInitialized);
+        }
+
+        [Fact]
+        public async Task Test_LoadServers_CollectionIsEmptyAndNotInitialized()
+        {
+            // Arrange
+            // mock methods with fake results
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(false));
+
+            // Act
+            await _vm.LoadServersAsync();
+
+            // Assert
+            Assert.Empty(_vm.ServerModels);
+            Assert.False(_vm.ServerModelsInitialized);
         }
 
         [Fact]
@@ -72,6 +87,8 @@ namespace ServerPickerX.Tests.ViewModels
                 ClusteredServers = ServerModelFactory.Create(3),
                 UnclusteredServers = ServerModelFactory.CreateWithCluster(3),
             };
+
+            _vm.ServersLoaded = true;
 
             // mock method with fake data
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
@@ -108,7 +125,7 @@ namespace ServerPickerX.Tests.ViewModels
             };
 
             // mock methods with fake results
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act
@@ -134,7 +151,7 @@ namespace ServerPickerX.Tests.ViewModels
             };
 
             // mock methods with fake results
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act
@@ -161,7 +178,7 @@ namespace ServerPickerX.Tests.ViewModels
             };
 
             // mock methods with fake results
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act
@@ -215,7 +232,7 @@ namespace ServerPickerX.Tests.ViewModels
             };
 
             // mock methods with fake results
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act
@@ -277,7 +294,7 @@ namespace ServerPickerX.Tests.ViewModels
                 ClusteredServers = ServerModelFactory.Create(3),
                 UnclusteredServers = ServerModelFactory.CreateWithCluster(3),
             };
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             await _vm.LoadServersAsync();
@@ -327,7 +344,7 @@ namespace ServerPickerX.Tests.ViewModels
                 UnclusteredServers = ServerModelFactory.CreateWithCluster(3),
             };
 
-            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.CompletedTask);
+            _serverDataService.Setup(i => i.LoadServersAsync()).Returns(Task.FromResult(true));
             _serverDataService.Setup(i => i.GetServerData()).Returns(serverData);
 
             // Act

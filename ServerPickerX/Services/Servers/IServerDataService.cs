@@ -6,7 +6,7 @@ namespace ServerPickerX.Services.Servers
 {
     public interface IServerDataService
     {
-        Task LoadServersAsync();
+        Task<bool> LoadServersAsync();
         string GetCurrentRevision();
         ServerData GetServerData();
         List<string> GetClusterKeywords();

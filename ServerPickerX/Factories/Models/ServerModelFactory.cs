@@ -31,7 +31,6 @@ namespace ServerPickerX.Factories.Models
         public static List<ServerModel> CreateWithCluster(int count = 1)
         {
             List<ServerModel> servers = [];
-            List<string> countries = ["(China)", "(Hong Kong)", "(Sweden)"];
 
             Random rand = new();
 
@@ -40,14 +39,14 @@ namespace ServerPickerX.Factories.Models
                 var server = new ServerModel()
                 {
                     Name = "cluster",
-                    Description = $"Cluster{i + 1}",
+                    Description = $"Server Cluster{i + 1}",
                     RelayModels = [new RelayModel { IPv4 = "127.0.0.1" }]
                 };
 
                 servers.Add(server);
             }
 
-            // add non clustered servers
+            // Add non-clustered servers with same count as clustered
             servers.AddRange(Create(count));
 
             return servers;

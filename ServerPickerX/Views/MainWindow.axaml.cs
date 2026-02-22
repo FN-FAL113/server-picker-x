@@ -67,12 +67,12 @@ namespace ServerPickerX.Views
         {
             await InitializeApp();
 
-            ToolTip.SetTip(gameComboBox, "Select game mode");
-            ToolTip.SetTip(clusterUnclusterBtn, $"Group or ungroup servers");
-            ToolTip.SetTip(refreshBtn, "Refresh all server ping");
+            ToolTip.SetTip(GameModeComboBox, "Select game mode");
+            ToolTip.SetTip(ClusterUnclusterBtn, $"Group or ungroup servers");
+            ToolTip.SetTip(RefreshBtn, "Refresh all server ping");
         }
 
-        private async void gameComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        private async void GameModeComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             await HandleGameModeChangeAsync();
         }
@@ -96,15 +96,15 @@ namespace ServerPickerX.Views
             pingSortDirection = pingSortDirection == ListSortDirection.Ascending
                 ? ListSortDirection.Descending
                 : ListSortDirection.Ascending;
-            serverList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
+            ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
         }
 
-        private void clusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            if (!(DataContext as MainWindowViewModel)?.ServersInitialized ?? true) return;
+            if (!((DataContext as MainWindowViewModel)?.ServerModelsInitialized ?? false)) return;
 
             // Update UI content by inverse value
-            clusterUnclusterBtn.Content = clusterUnclusterBtn?.Content?.ToString() == "Cluster Servers"
+            ClusterUnclusterBtn.Content = ClusterUnclusterBtn?.Content?.ToString() == "Cluster Servers"
                 ? "Uncluster Servers"
                 : "Cluster Servers";
         }
@@ -116,10 +116,15 @@ namespace ServerPickerX.Views
             ConfigureControls();
 
             var vm = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            
             await vm.LoadServersAsync();
+
             DataContext = vm;
 
-            await SyncServersAsync(vm);
+            if (vm.ServersLoaded)
+            {
+                await SyncServersAsync(vm);
+            }
 
             await _versionService.CheckVersionAsync();
         }
@@ -129,22 +134,24 @@ namespace ServerPickerX.Views
             bool isGameModeCS2 = _jsonSetting.game_mode == GameModes.CounterStrike2;
 
             // Update game mode combo box selection base on json settings
-            gameComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
+            GameModeComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
 
             // Update cluster button content based on json settings
-            clusterUnclusterBtn.Content = _jsonSetting.is_clustered
+            ClusterUnclusterBtn.Content = _jsonSetting.is_clustered
                 ? "Uncluster Servers"
                 : "Cluster Servers";
         }
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
         {
-            var currentRevision = _jsonSetting.game_mode == GameModes.CounterStrike2
+            var localRevision = _jsonSetting.game_mode == GameModes.CounterStrike2
                 ? _jsonSetting.cs2_server_revision
                 : _jsonSetting.deadlock_server_revision;
 
-            // Skip server revision syncing and unblocking if current json setting revision is equal to server data revision
-            if (currentRevision == vm.GetServerDataService().GetServerData().Revision)
+            var fetchedRevision = vm.GetServerDataService().GetServerData().Revision;
+
+            // Skip server revision syncing and unblocking if local revision is equal to the fetched revision
+            if (localRevision == fetchedRevision)
             {
                 return;
             }
@@ -160,9 +167,9 @@ namespace ServerPickerX.Views
             await vm.UnblockAllAsync();
 
             if (_jsonSetting.game_mode == GameModes.CounterStrike2)
-                _jsonSetting.cs2_server_revision = vm.GetServerDataService().GetServerData().Revision;
+                _jsonSetting.cs2_server_revision = fetchedRevision;
             else
-                _jsonSetting.deadlock_server_revision = vm.GetServerDataService().GetServerData().Revision;
+                _jsonSetting.deadlock_server_revision = fetchedRevision;
 
             await _jsonSetting.SaveSettingsAsync();
         }
@@ -180,9 +187,9 @@ namespace ServerPickerX.Views
             if (!result || vm.PendingOperation)
             {
                 // Revert back selection without triggering the handler
-                gameComboBox.SelectionChanged -= gameComboBox_SelectionChanged;
-                gameComboBox.SelectedItem = _jsonSetting.game_mode;
-                gameComboBox.SelectionChanged += gameComboBox_SelectionChanged;
+                GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
+                GameModeComboBox.SelectedItem = _jsonSetting.game_mode;
+                GameModeComboBox.SelectionChanged += GameModeComboBox_SelectionChanged;
 
                 return;
             }
@@ -191,7 +198,7 @@ namespace ServerPickerX.Views
             await vm.UnblockAllAsync();
 
             // Update json setting game mode and serialize it
-            _jsonSetting.game_mode = (string)gameComboBox.SelectedItem!;
+            _jsonSetting.game_mode = (string)GameModeComboBox.SelectedItem;
             await _jsonSetting.SaveSettingsAsync();
 
             await InitializeApp();
