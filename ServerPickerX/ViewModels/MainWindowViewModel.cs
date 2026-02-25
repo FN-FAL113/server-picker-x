@@ -39,6 +39,7 @@ namespace ServerPickerX.ViewModels
         public bool showProgressBar = false;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FilteredServerModels))]
         public string searchText = string.Empty;
 
         [ObservableProperty]
@@ -85,13 +86,6 @@ namespace ServerPickerX.ViewModels
             _serverDataService = serverDataService;
             _systemFirewallService = systemFirewallService;
             _jsonSetting = jsonSetting;
-        }
-
-        partial void OnSearchTextChanged(string value)
-        {
-            // An observable collection only reacts to add or remove elements
-            // Dispatch prop changed event manually to signal the UI for data binding changes
-            OnPropertyChanged(nameof(FilteredServerModels));
         }
 
         public async Task LoadServersAsync()
@@ -171,7 +165,7 @@ namespace ServerPickerX.ViewModels
                 return false;
             }
 
-            return await PerformOperationAsync(true, ServerModels);
+            return await PerformOperationAsync(true, FilteredServerModels);
         }
 
         [RelayCommand]
@@ -197,7 +191,7 @@ namespace ServerPickerX.ViewModels
                 return false;
             }
 
-            return await PerformOperationAsync(false, ServerModels);
+            return await PerformOperationAsync(false, FilteredServerModels);
         }
 
 

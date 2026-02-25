@@ -58,6 +58,7 @@ namespace ServerPickerX.Tests.ViewModels
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
+            Assert.NotEmpty(_vm.FilteredServerModels);
             Assert.True(_vm.ServerModelsInitialized);
         }
 
@@ -73,6 +74,7 @@ namespace ServerPickerX.Tests.ViewModels
 
             // Assert
             Assert.Empty(_vm.ServerModels);
+            Assert.Empty(_vm.FilteredServerModels);
             Assert.False(_vm.ServerModelsInitialized);
         }
 
@@ -98,6 +100,7 @@ namespace ServerPickerX.Tests.ViewModels
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
+            Assert.NotEmpty(_vm.FilteredServerModels);
             Assert.False(setting.is_clustered);
             Assert.Equal(serverData.UnclusteredServers, _vm.ServerModels);
 
@@ -110,6 +113,7 @@ namespace ServerPickerX.Tests.ViewModels
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
+            Assert.NotEmpty(_vm.FilteredServerModels);
             Assert.True(setting.is_clustered);
             Assert.Equal(serverData.ClusteredServers, _vm.ServerModels);
         }
@@ -441,22 +445,25 @@ namespace ServerPickerX.Tests.ViewModels
         [Fact]
         public void Test_GetServerDataService()
         {
+            // Arrange
             var service = _vm.GetServerDataService();
+
+            // Act and Assert
             Assert.Same(_serverDataService.Object, service);
         }
 
         [Fact]
         public async Task Test_SearchText_FilteredServerModels()
         {
-            // Arrange – add servers with known names/descriptions
+            // Arrange
             ServerModel s1 = new() { Name = "Alpha", Description = "Desc Alpha" };
             ServerModel s2 = new() { Name = "Beta", Description = "Desc Beta" };
             ServerModel s3 = new() { Name = "Gamma", Description = "Gamma Zone" };
             _vm.ServerModels.Clear();
             _vm.ServerModels.AddRange(new List<ServerModel> { s1, s2, s3 });
 
-            // Act – set search text to match 'alpha'
-            _vm.SearchText = "alpha"; // triggers OnSearchTextChanged and raises property changed for FilteredServerModels
+            // Act
+            _vm.SearchText = "alpha";
             var filtered = _vm.FilteredServerModels;
 
             Assert.Single(filtered);
@@ -468,7 +475,7 @@ namespace ServerPickerX.Tests.ViewModels
             FieldInfo prop = obj.GetType().GetField(
                 propertyName,
                 BindingFlags.Instance | BindingFlags.NonPublic
-                );
+                )!;
 
             return prop?.GetValue(obj);
         }
