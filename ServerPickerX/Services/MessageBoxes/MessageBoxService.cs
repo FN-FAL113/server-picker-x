@@ -45,7 +45,7 @@ namespace ServerPickerX.Services.MessageBoxes
             }
             catch (Exception ex)
             {
-                _logger.LogError("Failed to show message box", ex.Message);
+await _logger.LogErrorAsync("Failed to show message box", ex.Message);
             }
         }
 
@@ -76,13 +76,13 @@ namespace ServerPickerX.Services.MessageBoxes
             }
             catch (Exception ex)
             {
-                _logger.LogError("Failed to show message box confirmation", ex.Message);
+await _logger.LogErrorAsync("Failed to show message box confirmation", ex.Message);
                 return false;
             }
         }
 
         public async Task ShowMessageBoxWithLinkAsync(string title, string text, string url, Icon icon = Icon.Info)
-        {
+{
             try
             {
                 var customMbsParams = new MessageBoxCustomParams
@@ -111,9 +111,11 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 await _processService.OpenUrl(url);
             }
-            catch (Exception ex)
+catch (Exception ex)
             {
-                _logger.LogError("Failed to show message box with hyperlink", ex.Message);
+                await _logger.LogErrorAsync("Failed to show message box with hyperlink", ex.Message);
+
+                await _processService.OpenUrl(url);
             }
         }
     }

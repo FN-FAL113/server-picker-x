@@ -43,7 +43,7 @@ namespace ServerPickerX.Services.SystemFirewalls
                 }
                 catch (Exception ex)
                 {
-                    _loggerService.LogError($"Failed to block server {serverModel.Name}", ex.Message);
+                    await _loggerService.LogErrorAsync($"Failed to block server {serverModel.Name}", ex.Message);
 
                     throw;
                 }
@@ -77,7 +77,7 @@ namespace ServerPickerX.Services.SystemFirewalls
                 }
                 catch (Exception ex)
                 {
-                    _loggerService.LogError($"Failed to unblock server {serverModel.Name}", ex.Message);
+                    await _loggerService.LogErrorAsync($"Failed to unblock server {serverModel.Name}", ex.Message);
 
                     throw;
                 }
@@ -120,7 +120,7 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
             catch (Exception ex)
             {
-                _loggerService.LogError(ex.Message, "An error has occured while resetting firewall.");
+                await _loggerService.LogErrorAsync("An error has occured while resetting iptables.", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync(
                     "Error",

@@ -1,18 +1,14 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ServerPickerX.Services.Loggers
 {
     public class FileLoggerService : ILoggerService
     {
-        private readonly string _logFilePath;
+        private readonly string _logFilePath = AppDomain.CurrentDomain.BaseDirectory + "server_picker_x_log.txt";
 
-        public FileLoggerService()
-        {
-            _logFilePath = AppDomain.CurrentDomain.BaseDirectory + "server_picker_x_log.txt";
-        }
-
-        public void LogError(string message, string? details = null)
+        public async Task LogErrorAsync(string message, string? details = null)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR: {message}";
 
@@ -21,21 +17,21 @@ namespace ServerPickerX.Services.Loggers
                 logMessage += $" | Details: {details}";
             }
 
-            File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
+            await File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
         }
 
-        public void LogInfo(string message)
+        public async Task LogInfoAsync(string message)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] INFO: {message}";
 
-            File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
+            await File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
         }
 
-        public void LogWarning(string message)
+        public async Task LogWarningAsync(string message)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] WARNING: {message}";
 
-            File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
+            await File.AppendAllTextAsync(_logFilePath, logMessage + Environment.NewLine);
         }
     }
 }

@@ -1,10 +1,11 @@
 using System;
+using System.Threading.Tasks;
 
 namespace ServerPickerX.Services.Loggers
 {
     public class ConsoleLoggerService : ILoggerService
     {
-        public void LogError(string message, string? details = null)
+        public Task LogErrorAsync(string message, string? details = null)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR: {message}";
 
@@ -14,20 +15,26 @@ namespace ServerPickerX.Services.Loggers
             }
 
             System.Diagnostics.Debug.WriteLine(logMessage);
+
+            return Task.CompletedTask;
         }
 
-        public void LogInfo(string message)
+        public Task LogInfoAsync(string message)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] INFO: {message}";
 
             System.Diagnostics.Debug.WriteLine(logMessage);
+
+            return Task.CompletedTask;
         }
 
-        public void LogWarning(string message)
+        public Task LogWarningAsync(string message)
         {
             string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] WARNING: {message}";
 
             System.Diagnostics.Debug.WriteLine(logMessage);
+
+            return Task.CompletedTask;
         }
 
     }

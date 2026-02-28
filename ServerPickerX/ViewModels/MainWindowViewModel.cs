@@ -233,15 +233,15 @@ namespace ServerPickerX.ViewModels
                 if (shouldBlock)
                 {
                     // offload to background thread, process.waitForExit blocks the UI thread
-                    await Task.Run(() => _systemFirewallService.BlockServersAsync(serverModels));
+await Task.Run(() => _systemFirewallService.BlockServersAsync(serverModels));
 
-                    _loggerService.LogInfo("Servers blocked successfully");
+                    await _loggerService.LogInfoAsync("Servers blocked successfully");
                 }
                 else
                 {
                     await Task.Run(() => _systemFirewallService.UnblockServersAsync(serverModels));
 
-                    _loggerService.LogInfo("Servers unblocked successfully");
+                    await _loggerService.LogInfoAsync("Servers unblocked successfully");
                 }
 
                 // Ping servers (parallel operation)
@@ -249,7 +249,7 @@ namespace ServerPickerX.ViewModels
             }
             catch (Exception ex)
             {
-                _loggerService.LogError("An error has occurred while blocking or unblocking servers.", ex.Message);
+                await _loggerService.LogErrorAsync("An error has occurred while blocking or unblocking servers.", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync(
                     "Error",

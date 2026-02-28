@@ -2,7 +2,7 @@
 using ServerPickerX.Helpers;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
-using ServerPickerX.Settings;
+using ServerPickerX.Services.Settings;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -90,9 +90,9 @@ namespace ServerPickerX.Settings
             }
             catch (Exception ex)
             {
-                _logger.LogError("An error has occured while loading json settings", ex.Message);
+await _logger.LogErrorAsync("An error has occured while loading json settings", ex.Message);
 
-                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
+await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
             }
         }
 
@@ -114,9 +114,9 @@ namespace ServerPickerX.Settings
             }
             catch (Exception ex)
             {
-                _logger.LogError("An error has occured while saving json settings", ex.Message);
+await _logger.LogErrorAsync("An error has occured while saving json settings", ex.Message);
 
-                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
+await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
 
                 return false;
             }

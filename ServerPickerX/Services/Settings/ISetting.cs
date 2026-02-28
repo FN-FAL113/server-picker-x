@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace ServerPickerX.Settings
+namespace ServerPickerX.Services.Settings
 {
     public interface ISetting
     {

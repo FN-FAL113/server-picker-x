@@ -1,9 +1,11 @@
+using System.Threading.Tasks;
+
 namespace ServerPickerX.Services.Loggers
 {
     public interface ILoggerService
     {
-        void LogError(string message, string? details = null);
-        void LogInfo(string message);
-        void LogWarning(string message);
+        Task LogErrorAsync(string message, string? details = null);
+        Task LogInfoAsync(string message);
+        Task LogWarningAsync(string message);
     }
 }

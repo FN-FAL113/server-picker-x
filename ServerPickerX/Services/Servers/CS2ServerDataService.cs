@@ -59,7 +59,7 @@ namespace ServerPickerX.Services.Servers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Failed to load cs2 servers", ex.Message);
+                await _logger.LogErrorAsync("Failed to load cs2 servers", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
