@@ -42,11 +42,10 @@ namespace ServerPickerX
             serviceCollection.AddSingleton<ILoggerService, FileLoggerService>();
             serviceCollection.AddSingleton<IMessageBoxService, MessageBoxService>();
             serviceCollection.AddSingleton<IProcessService, ProcessService>();
+            serviceCollection.AddSingleton<ILocalizationService, LocalizationService>();
             serviceCollection.AddSingleton<VersionService>();
             serviceCollection.AddSingleton<JsonSetting>();
             serviceCollection.AddSingleton<HttpClient>();
-
-            serviceCollection.AddTransient<ILocalizationService, LocalizationService>();
 
             serviceCollection.AddTransient<CS2ServerDataService>();
             serviceCollection.AddTransient<DeadLockServerDataService>();

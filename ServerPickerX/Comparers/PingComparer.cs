@@ -17,12 +17,12 @@ namespace ServerPickerX.Comparers
 
         public int Compare(object? x, object? y)
         {
-            ServerModel model1 = x as ServerModel;
-            ServerModel model2 = y as ServerModel;
+            ServerModel? model1 = x as ServerModel;
+            ServerModel? model2 = y as ServerModel;
 
             // Remove ping "ms" suffix
-            string? ping1Str = Regex.Replace(model1.Ping ?? "", @"[^\d]", "");
-            string? ping2Str = Regex.Replace(model2.Ping ?? "", @"[^\d]", "");
+            string? ping1Str = Regex.Replace(model1?.Ping ?? "", @"[^\d]", "");
+            string? ping2Str = Regex.Replace(model2?.Ping ?? "", @"[^\d]", "");
 
             int ping1 = int.Parse(!String.IsNullOrEmpty(ping1Str) ? ping1Str : "99999");
             int ping2 = int.Parse(!String.IsNullOrEmpty(ping2Str) ? ping2Str : "99999");

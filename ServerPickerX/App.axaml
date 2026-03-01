@@ -3,8 +3,7 @@
              x:Class="ServerPickerX.App"
              xmlns:local="using:ServerPickerX"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
@@ -27,6 +26,4 @@
         <StyleInclude Source="/Styles/TextBoxStyle.axaml" />
         <StyleInclude Source="/Styles/ComboBoxStyle.axaml" />
     </Application.Styles>
-
-   
 </Application>

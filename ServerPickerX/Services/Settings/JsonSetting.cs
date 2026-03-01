@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Helpers;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
@@ -53,7 +54,11 @@ namespace ServerPickerX.Settings
         [JsonIgnore]
         private ILoggerService _logger { get; set; }
 
-        public JsonSetting() { }
+        public JsonSetting()
+        {
+            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
+            _logger = App.ServiceProvider.GetRequiredService<ILoggerService>();
+        }
 
         public JsonSetting(
             IMessageBoxService messageBoxService,

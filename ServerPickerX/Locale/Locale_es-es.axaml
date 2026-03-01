@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Add Resources Here -->
+  <x:String x:Key="LanguageCode">es-es</x:String>
   <x:String x:Key="ClusterServers">Servidores de clúster</x:String>
   <x:String x:Key="UnclusterServers">Servidores Uncluster</x:String>
   <x:String x:Key="Refresh">Refrescar</x:String>

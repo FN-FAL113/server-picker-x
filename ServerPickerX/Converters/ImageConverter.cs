@@ -6,14 +6,14 @@ namespace ServerPickerX.Converters
 {
     public class ImageConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture)
+        public object? Convert(object? value, Type targetType,
+            object? parameter, System.Globalization.CultureInfo culture)
         {
-            return ResourceHelper.LoadImageFromResource((string)value);
+            return ResourceHelper.LoadImageFromResource((string)value!);
         }
 
-        public object ConvertBack(object value, Type targetType,
-            object parameter, System.Globalization.CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType,
+            object? parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException("Not implemented.");
         }

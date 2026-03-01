@@ -19,7 +19,7 @@ public partial class SettingsWindow : Window
     private readonly JsonSetting _jsonSetting;
     private readonly ILocalizationService _localizationService;
 
-    // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
+    // Parameterless constructor, allows design previewer to create its own instance since it doesn't support DI
     public SettingsWindow()
     {
         InitializeComponent();

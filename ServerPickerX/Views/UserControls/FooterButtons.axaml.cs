@@ -39,7 +39,7 @@ public partial class FooterButtons : UserControl
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
-        settingsWindow.ShowDialog(MainWindow.Instance);
+        settingsWindow.ShowDialog(MainWindow.Instance!);
         settingsWindow.Activate();
     }
 }

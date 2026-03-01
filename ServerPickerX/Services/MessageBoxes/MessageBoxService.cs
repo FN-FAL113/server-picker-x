@@ -30,8 +30,8 @@ namespace ServerPickerX.Services.MessageBoxes
                     ContentTitle = title,
                     ContentMessage = text,
                     ButtonDefinitions = [
-                            new() { Name = "Ok", },
-                        ],
+                        new() { Name = "Ok", },
+                    ],
                     WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
                     ShowInCenter = true,
                     CanResize = false,
@@ -41,7 +41,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                await box.ShowWindowDialogAsync(MainWindow.Instance);
+                await box.ShowWindowDialogAsync(MainWindow.Instance!);
             }
             catch (Exception ex)
             {
@@ -58,9 +58,9 @@ namespace ServerPickerX.Services.MessageBoxes
                     ContentTitle = title,
                     ContentMessage = text,
                     ButtonDefinitions = [
-                            new() { Name = "Ok", },
-                            new() { Name = "Cancel", },
-                        ],
+                        new() { Name = "Ok", },
+                        new() { Name = "Cancel", },
+                    ],
                     WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
                     ShowInCenter = true,
                     CanResize = false,
@@ -70,7 +70,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                var result = await box.ShowWindowDialogAsync(MainWindow.Instance);
+                var result = await box.ShowWindowDialogAsync(MainWindow.Instance!);
 
                 return result == "Ok";
             }
@@ -102,7 +102,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                var result = await box.ShowWindowDialogAsync(MainWindow.Instance);
+                var result = await box.ShowWindowDialogAsync(MainWindow.Instance!);
 
                 if (result != "Ok")
                 {
@@ -114,8 +114,6 @@ namespace ServerPickerX.Services.MessageBoxes
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync("Failed to show message box with hyperlink", ex.Message);
-
-                await _processService.OpenUrl(url);
             }
         }
     }

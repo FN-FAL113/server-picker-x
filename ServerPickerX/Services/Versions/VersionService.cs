@@ -54,17 +54,17 @@ namespace ServerPickerX.Services.Versions
                     );
                 }
 
-                var jsonArray = (JsonArray)await JsonArray.ParseAsync(res);
+                var jsonArray = (JsonArray?)await JsonArray.ParseAsync(res);
 
                 if (jsonArray?[0]?["tag_name"] == null)
                 {
                     return;
                 }
 
-                string assemblyVersion = Assembly.GetEntryAssembly().GetName().Version.ToString(3);
+                string assemblyVersion = Assembly.GetEntryAssembly()!.GetName()!.Version!.ToString(3);
 
                 // version is up to date
-                if (assemblyVersion == jsonArray[0]["tag_name"].ToString().Split("v")[1])
+                if (assemblyVersion == jsonArray[0]!["tag_name"]!.ToString().Split("v")[1])
                 {
                     return;
                 }

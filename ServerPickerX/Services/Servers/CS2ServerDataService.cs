@@ -43,7 +43,7 @@ namespace ServerPickerX.Services.Servers
                     throw new Exception("Server relay data unavailable. Please try again later.");
                 }
 
-                string revision = mainJson["revision"].ToString();
+                string revision = mainJson["revision"]!.ToString();
 
                 _serverData.Revision = revision;
 
@@ -74,14 +74,14 @@ namespace ServerPickerX.Services.Servers
             var unclusteredServers = new List<ServerModel>();
             var clusteredServers = new List<ServerModel>();
 
-            foreach (KeyValuePair<string, JsonNode> server in mainJson["pops"] as JsonObject)
+            foreach (KeyValuePair<string, JsonNode?> server in (JsonObject)mainJson["pops"]!)
             {
                 if (server.Value?["relays"] == null)
                 {
                     continue;
                 }
 
-                string serverDescription = server.Value["desc"].ToString();
+                string serverDescription = server.Value["desc"]!.ToString();
 
                 var serverModel = new ServerModel
                 {
@@ -90,11 +90,11 @@ namespace ServerPickerX.Services.Servers
                     Description = serverDescription,
                 };
 
-                foreach (JsonObject relay in server.Value["relays"] as JsonArray)
+                foreach (JsonObject? relay in (JsonArray)server.Value["relays"]!)
                 {
                     serverModel.RelayModels.Add(new RelayModel
                     {
-                        IPv4 = relay["ipv4"]?.ToString()
+                        IPv4 = relay!["ipv4"]?.ToString() ?? ""
                     });
                 }
 

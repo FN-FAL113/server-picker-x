@@ -43,7 +43,7 @@ namespace ServerPickerX.Views
         private readonly IVersionService _versionService;
         private readonly ILocalizationService _localizationService;
 
-        // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
+        // Parameterless constructor, allows design previewer to create its own instance since it doesn't support DI
         public MainWindow()
         {
             InitializeComponent();
@@ -193,7 +193,7 @@ namespace ServerPickerX.Views
 
         private async Task HandleGameModeChangeAsync()
         {
-            if (DataContext is not MainWindowViewModel vm) return;
+            if (DataContext is not MainWindowViewModel vm || GameModeComboBox.SelectedItem == null) return;
 
             bool result = await _messageBoxService.ShowMessageBoxConfirmationAsync(
                     "Info",
