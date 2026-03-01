@@ -48,7 +48,7 @@ namespace ServerPickerX.Services.SystemFirewalls
                 }
                 catch (Exception ex)
                 {
-await _loggerService.LogErrorAsync($"Failed to block server {serverModel.Name}", ex.Message);
+                    await _loggerService.LogErrorAsync($"Failed to block server {serverModel.Name}", ex.Message);
 
                     throw;
                 }

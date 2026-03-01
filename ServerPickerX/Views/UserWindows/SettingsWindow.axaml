@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:userControls="using:ServerPickerX"
+        xmlns:constants="clr-namespace:ServerPickerX.Constants"
         xmlns:viewmodels="using:ServerPickerX.ViewModels"
         mc:Ignorable="d"
         Width="400"
@@ -59,34 +60,50 @@
                 <userControls:TitleBarButtons/>
             </Grid>
 
+            <!-- Main Content -->
             <Grid Grid.Row="1">
 				<Grid.RowDefinitions>
 					<RowDefinition />
-					<RowDefinition Height="64" />
+					<RowDefinition Height="72" />
                 </Grid.RowDefinitions>
 
+                <!-- Main settings -->
                 <Grid>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
 						<CheckBox x:Name="VersionCheckerSetting"
                                 Foreground="White"
                                 IsChecked="{Binding VersionCheckOnStartup}"
-                                Command="{Binding VersionCheckerToggleCommand}">
-                            Check for new version on startup
-                        </CheckBox>
+                                Command="{Binding VersionCheckerToggleCommand}"
+                                Content="{DynamicResource CheckForNewVersion}"/>
                     </StackPanel>
                 </Grid>
 
-                <Grid Grid.Row="1" >
+                <!-- Bottom settings -->
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
+						<ColumnDefinition/>
 						<ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
-                        <Button 
+                         <ComboBox 
+                            x:Name="LanguageComboBox"
+                            Classes="game-combobox"
+                            Width="154" 
+                            Height="34"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            ItemsSource="{Binding Source={x:Static constants:Locales.All}}"
+                            SelectedIndex="0"
+                            SelectionChanged="LanguageComboBox_SelectionChanged">
+                        </ComboBox>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                       <Button 
                             Classes="main-btn" 
                             HorizontalAlignment="Center"
-                            Content="Reset Firewall"
-                            Command="{Binding ResetFirewallCommand}"/>
+                            Command="{Binding ResetFirewallCommand}"
+                            Content="{DynamicResource ResetFirewall}"/>
                     </Grid>
                 </Grid>
             </Grid>
@@ -94,8 +111,9 @@
             <Canvas>
 		          <TextBlock 
                     x:Name="VersionTextBlock"
-                    Canvas.Top="224"
-                    Canvas.Right="8"
+                    Canvas.Top="234"
+                    Canvas.Right="2"
+                    ZIndex="-2"
                     Text="Version: " 
                     Foreground="White"
                     FontSize="10"/>

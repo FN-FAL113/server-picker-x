@@ -76,9 +76,9 @@ namespace ServerPickerX.Services.Versions
                         "https://github.com/FN-FAL113/server-picker-x/releases"
                     );
             }
-catch (Exception ex)
+            catch (Exception ex)
             {
-await _logger.LogErrorAsync("Failed to check version", ex.Message);
+                await _logger.LogErrorAsync("Failed to check version", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
             }

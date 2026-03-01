@@ -26,6 +26,15 @@
   <ItemGroup>
     <AvaloniaResource Include="Styles\**" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <AvaloniaResource Include="Locale\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AvaloniaXaml Remove="Locale\Locale_es-ES.axaml" />
+    <AvaloniaXaml Remove="Locale\Locale_zh-CN.axaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.12" />

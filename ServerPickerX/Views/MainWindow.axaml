@@ -80,8 +80,10 @@
                             Classes="search-textbox"
                             Text="{Binding SearchText}"
                             IsEnabled="{Binding IsOperationAllowed}"
-                            Watermark="Search servers..." 
+                            Watermark="{DynamicResource SearchForServers}"
+                            FontSize="12"
                             VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
                             Width="144"
                             Margin="8,0,0,0"
                             BorderThickness="1"/>
@@ -91,6 +93,7 @@
                              SelectionChanged="GameModeComboBox_SelectionChanged"
                              ItemsSource="{Binding Source={x:Static constants:GameModes.All}}"
                              IsEnabled="{Binding IsOperationAllowed}"
+                             ToolTip.Tip="{DynamicResource GameModeToolTip}"
                              SelectedIndex="0"
                              VerticalAlignment="Center"
                              Width="152"
@@ -104,23 +107,23 @@
                             Classes="main-btn"
                             Command="{Binding ClusterUnclusterServersAsync}"
                             IsEnabled="{Binding IsOperationAllowed}"
+                            Content="{DynamicResource ClusterServers}"
+                            ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
                             Click="ClusterUnclusterBtn_Click"
                             VerticalAlignment="Center"
                             Foreground="White"
-                            Margin="0,0,8,0">
-                            Cluster Servers
-                        </Button>
+                            Margin="0,0,8,0"/>
                         <Button 
                             x:Name="RefreshBtn"
                             Classes="main-btn"
                             Command="{Binding PingServers}" 
                             CommandParameter="{Binding ServerModels}"
                             IsEnabled="{Binding IsOperationAllowed}"
+                            Content="{DynamicResource Refresh}"
+                            ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
                             VerticalAlignment="Center"
                             Foreground="White"
-                            Margin="0,0,8,0">
-                            Refresh
-                        </Button>
+                            Margin="0,0,8,0"/>
                     </StackPanel>
                 </Grid>
 
@@ -176,9 +179,9 @@
                             Command="{Binding BlockAllAsync}"
                             IsEnabled="{Binding IsOperationAllowed}"
                             VerticalAlignment="Center">
-                            <TextBlock FontWeight="Bold">
+                            <TextBlock FontWeight="Bold" >
                                 <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
-                                Block All
+                                <TextBlock Text="{DynamicResource BlockAll}" Margin="0,0,0,-4"/>
                             </TextBlock>
                         </Button>
 						<Button 
@@ -190,7 +193,7 @@
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
-                                Block Selected
+                                <TextBlock Text="{DynamicResource BlockSelected}" Margin="0,0,0,-4"/>
                             </TextBlock>
                         </Button>
                     </StackPanel>
@@ -208,7 +211,7 @@
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
-                                Unblock All
+                                <TextBlock Text="{DynamicResource UnblockAll}" Margin="0,0,0,-4"/>
                             </TextBlock>
                         </Button>
 						<Button 
@@ -220,7 +223,7 @@
                             VerticalAlignment="Center">
                             <TextBlock FontWeight="Bold">
                                 <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
-                                Unblock Selected
+                                <TextBlock Text="{DynamicResource UnblockSelected}" Margin="0,0,0,-4"/>
                             </TextBlock>
                         </Button>
                     </StackPanel>

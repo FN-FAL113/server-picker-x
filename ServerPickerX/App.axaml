@@ -8,6 +8,16 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+
+    <Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceInclude Source="/Locale/Locale_en-us.axaml" />
+				<ResourceInclude Source="/Locale/Locale_es-es.axaml" />
+				<ResourceInclude Source="/Locale/Locale_zh-cn.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
   
     <Application.Styles>
         <FluentTheme />

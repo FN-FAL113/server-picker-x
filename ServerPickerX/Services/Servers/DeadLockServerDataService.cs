@@ -60,7 +60,7 @@ namespace ServerPickerX.Services.Servers
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync("Failed to load deadlock servers", ex.Message);
-                
+
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
                 return false;

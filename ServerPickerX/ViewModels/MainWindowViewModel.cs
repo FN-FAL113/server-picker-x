@@ -233,7 +233,7 @@ namespace ServerPickerX.ViewModels
                 if (shouldBlock)
                 {
                     // offload to background thread, process.waitForExit blocks the UI thread
-await Task.Run(() => _systemFirewallService.BlockServersAsync(serverModels));
+                    await Task.Run(() => _systemFirewallService.BlockServersAsync(serverModels));
 
                     await _loggerService.LogInfoAsync("Servers blocked successfully");
                 }

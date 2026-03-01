@@ -27,6 +27,8 @@ namespace ServerPickerX.Settings
 
         public virtual string game_mode { set; get; } = "Counter Strike 2";
 
+        public virtual string language { set; get; } = "English | en-us";
+
         public virtual string deadlock_server_revision { get; set; } = "-1";
 
         public virtual string cs2_server_revision { get; set; } = "-1";
@@ -63,7 +65,8 @@ namespace ServerPickerX.Settings
         }
 
 #pragma warning disable IL2026
-        // Reflection is partially used here and might not be trim-compatible unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
+        // Reflection is partially used here and might not be trim-compatible
+        // unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
         public async Task LoadSettingsAsync()
         {
             try
@@ -83,6 +86,7 @@ namespace ServerPickerX.Settings
                 JsonSetting localSettings = await JsonSerializer.DeserializeAsync<JsonSetting>(settingsFile, serializerOptions) ?? this;
 
                 game_mode = localSettings.game_mode;
+                language = localSettings.language;
                 cs2_server_revision = localSettings.cs2_server_revision;
                 deadlock_server_revision = localSettings.deadlock_server_revision;
                 is_clustered = localSettings.is_clustered;
@@ -90,13 +94,14 @@ namespace ServerPickerX.Settings
             }
             catch (Exception ex)
             {
-await _logger.LogErrorAsync("An error has occured while loading json settings", ex.Message);
+                await _logger.LogErrorAsync("An error has occured while loading json settings", ex.Message);
 
-await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
+                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
             }
         }
 
-        // Reflection is partially used here and might not be trim-compatible unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
+        // Reflection is partially used here and might not be trim-compatible
+        // unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
         public async Task<bool> SaveSettingsAsync()
         {
             try
@@ -114,9 +119,9 @@ await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured whil
             }
             catch (Exception ex)
             {
-await _logger.LogErrorAsync("An error has occured while saving json settings", ex.Message);
+                await _logger.LogErrorAsync("An error has occured while saving json settings", ex.Message);
 
-await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
+                await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
 
                 return false;
             }

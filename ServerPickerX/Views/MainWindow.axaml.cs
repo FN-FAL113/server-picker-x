@@ -1,14 +1,19 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Comparers;
 using ServerPickerX.Constants;
+using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
 
@@ -33,9 +38,10 @@ namespace ServerPickerX.Views
 
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
 
+        private readonly JsonSetting _jsonSetting;
         private readonly IMessageBoxService _messageBoxService;
         private readonly IVersionService _versionService;
-        private readonly JsonSetting _jsonSetting;
+        private readonly ILocalizationService _localizationService;
 
         // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
         public MainWindow()
@@ -43,16 +49,18 @@ namespace ServerPickerX.Views
             InitializeComponent();
             Instance = this;
 
+            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
             _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
             _versionService = App.ServiceProvider.GetRequiredService<VersionService>();
-            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
+            _localizationService = App.ServiceProvider.GetRequiredService<ILocalizationService>();
         }
 
         // DI constructor, allows inversion of control and unit tests mocking
         public MainWindow(
+            JsonSetting jsonSetting,
             IMessageBoxService messageBoxService,
             IVersionService versionService,
-            JsonSetting jsonSetting
+            ILocalizationService localizationService
             )
         {
             InitializeComponent();
@@ -61,15 +69,12 @@ namespace ServerPickerX.Views
             _messageBoxService = messageBoxService;
             _versionService = versionService;
             _jsonSetting = jsonSetting;
+            _localizationService = localizationService;
         }
 
         private async void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             await InitializeApp();
-
-            ToolTip.SetTip(GameModeComboBox, "Select game mode");
-            ToolTip.SetTip(ClusterUnclusterBtn, $"Group or ungroup servers");
-            ToolTip.SetTip(RefreshBtn, "Refresh all server ping");
         }
 
         private async void GameModeComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -99,24 +104,27 @@ namespace ServerPickerX.Views
             ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
         }
 
-        private void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (!((DataContext as MainWindowViewModel)?.ServerModelsInitialized ?? false)) return;
 
-            // Update UI content by inverse value
-            ClusterUnclusterBtn.Content = ClusterUnclusterBtn?.Content?.ToString() == "Cluster Servers"
-                ? "Uncluster Servers"
-                : "Cluster Servers";
+            // Update button DynamicResource binding base on language setting
+            ClusterUnclusterBtn.Bind(
+                Button.ContentProperty,
+                new DynamicResourceExtension(_jsonSetting.is_clustered ? "ClusterServers" : "UnclusterServers")
+            );
         }
 
         public async Task InitializeApp()
         {
             await _jsonSetting.LoadSettingsAsync();
 
+            SetLanguage();
+
             ConfigureControls();
 
             var vm = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            
+
             await vm.LoadServersAsync();
 
             DataContext = vm;
@@ -129,6 +137,14 @@ namespace ServerPickerX.Views
             await _versionService.CheckVersionAsync();
         }
 
+        private void SetLanguage()
+        {
+            // Extract language code
+            var language = _jsonSetting.language.Replace(" ", "").Split("|")[1];
+
+            _localizationService.SetLanguage(language);
+        }
+
         private void ConfigureControls()
         {
             bool isGameModeCS2 = _jsonSetting.game_mode == GameModes.CounterStrike2;
@@ -136,10 +152,11 @@ namespace ServerPickerX.Views
             // Update game mode combo box selection base on json settings
             GameModeComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
 
-            // Update cluster button content based on json settings
-            ClusterUnclusterBtn.Content = _jsonSetting.is_clustered
-                ? "Uncluster Servers"
-                : "Cluster Servers";
+            // Update button DynamicResource binding base on language setting
+            ClusterUnclusterBtn.Bind(
+                Button.ContentProperty,
+                new DynamicResourceExtension(_jsonSetting.is_clustered ? "UnclusterServers" : "ClusterServers")
+                );
         }
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
@@ -180,7 +197,7 @@ namespace ServerPickerX.Views
 
             bool result = await _messageBoxService.ShowMessageBoxConfirmationAsync(
                     "Info",
-                    "This action will unblock all servers first to prevent firewall conflicts.",
+                    _localizationService.GetLocaleValue("UnblockAllConflict"),
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 

@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Add Resources Here -->
+  <x:String x:Key="ClusterServers">Servidores de clúster</x:String>
+  <x:String x:Key="UnclusterServers">Servidores Uncluster</x:String>
+  <x:String x:Key="Refresh">Refrescar</x:String>
+  <x:String x:Key="SearchForServers">Buscar servidores...</x:String>
+  <x:String x:Key="BlockAll">Bloquear Todo</x:String>
+  <x:String x:Key="BlockSelected">Bloque Seleccionado</x:String>
+  <x:String x:Key="UnblockAll">Desbloquear Todo</x:String>
+  <x:String x:Key="UnblockSelected">Desbloquear Seleccionado</x:String>
+  <x:String x:Key="CheckForNewVersion">Comprobar si hay nueva versión al iniciar</x:String>
+  <x:String x:Key="ResetFirewall">Restablecer el cortafuegos</x:String>
+  <x:String x:Key="GameModeToolTip">Seleccionar modo de juego</x:String>
+  <x:String x:Key="ClusterUnclusterToolTip">Agrupar o desagrupar servidores</x:String>
+  <x:String x:Key="RefreshToolTip">Actualizar el ping de todos los servidores</x:String>
+  <x:String x:Key="UnblockAllConflict">Esta acción desbloqueará primero todos los servidores para evitar conflictos de firewall.</x:String>
+</ResourceDictionary>
