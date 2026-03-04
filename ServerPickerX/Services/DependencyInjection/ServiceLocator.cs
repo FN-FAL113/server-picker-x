@@ -7,9 +7,6 @@ namespace ServerPickerX.Services.DependencyInjection
     {
         private static IServiceProvider? _provider;
 
-        // Exposed for unit testing purposes only
-        public static IServiceProvider? Provider => _provider;
-
         public static void Initialize(IServiceProvider provider) => _provider = provider;
 
         public static T GetService<T>() where T : class

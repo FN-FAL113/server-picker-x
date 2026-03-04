@@ -83,7 +83,7 @@ namespace ServerPickerX.Tests.ViewModels
         {
             // Arrange
             // Test servers are unclustered by default
-            JsonSetting setting = (JsonSetting)reflectGetField(_vm, "_jsonSetting");
+            JsonSetting setting = (JsonSetting)ReflectGetField(_vm, "_jsonSetting");
             ServerData serverData = new()
             {
                 ClusteredServers = ServerModelFactory.Create(3),
@@ -470,7 +470,7 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.Contains(s1, filtered);
         }
 
-        public object reflectGetField(object obj, string propertyName)
+        public object ReflectGetField(object obj, string propertyName)
         {
             FieldInfo prop = obj.GetType().GetField(
                 propertyName,

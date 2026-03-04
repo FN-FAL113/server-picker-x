@@ -1,22 +1,35 @@
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using ServerPickerX.Services.DependencyInjection;
+using System.Reflection;
 using Xunit;
 
 namespace ServerPickerX.Services.DependencyInjection.Tests
 {
     public class ServiceLocatorTests
     {
+        public object ReflectGetStaticField(Type classType, string propertyName)
+        {
+            FieldInfo prop = classType.GetField(
+                propertyName,
+                BindingFlags.Static | BindingFlags.NonPublic
+                )!;
+
+            return prop?.GetValue(null);
+        }
+
         [Fact]
         public void Initialize_SetsServiceProvider()
         {
             // Arrange
             var mockProvider = new Mock<IServiceProvider>();
+
             ServiceLocator.Initialize(mockProvider.Object);
 
+
             // Act & Assert
-            Assert.NotNull(ServiceLocator.Provider);
-            Assert.Same(mockProvider.Object, ServiceLocator.Provider);
+            var serviceProvider = ReflectGetStaticField(typeof(ServiceLocator), "_provider");
+
+            Assert.NotNull(serviceProvider);
+            Assert.Same(mockProvider.Object, serviceProvider);
         }
 
         [Fact]
@@ -25,7 +38,9 @@ namespace ServerPickerX.Services.DependencyInjection.Tests
             // Arrange
             var mockProvider = new Mock<IServiceProvider>();
             var mockService = new Mock<IServiceProvider>();
+
             mockProvider.Setup(p => p.GetService(typeof(IServiceProvider))).Returns(mockService.Object);
+
             ServiceLocator.Initialize(mockProvider.Object);
 
             // Act
