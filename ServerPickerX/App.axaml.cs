@@ -1,10 +1,8 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +14,7 @@ using ServerPickerX.Services.Processes;
 using ServerPickerX.Services.Servers;
 using ServerPickerX.Services.SystemFirewalls;
 using ServerPickerX.Services.Versions;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using ServerPickerX.Views;
@@ -81,6 +80,8 @@ namespace ServerPickerX
             serviceCollection.AddTransient<SettingsWindowViewModel>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
+
+            ServiceLocator.Initialize(ServiceProvider);
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

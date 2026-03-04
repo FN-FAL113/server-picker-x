@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
 using MsBox.Avalonia.Enums;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Servers;
@@ -65,11 +65,11 @@ namespace ServerPickerX.ViewModels
         // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
         public MainWindowViewModel()
         {
-            _loggerService = App.ServiceProvider.GetRequiredService<ILoggerService>();
-            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
-            _serverDataService = App.ServiceProvider.GetRequiredService<IServerDataService>();
-            _systemFirewallService = App.ServiceProvider.GetRequiredService<ISystemFirewallService>();
-            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
+            _loggerService = ServiceLocator.GetRequiredService<ILoggerService>();
+            _messageBoxService = ServiceLocator.GetRequiredService<IMessageBoxService>();
+            _serverDataService = ServiceLocator.GetRequiredService<IServerDataService>();
+            _systemFirewallService = ServiceLocator.GetRequiredService<ISystemFirewallService>();
+            _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
         }
 
         // DI constructor, allows inversion of control and unit tests mocking

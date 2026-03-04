@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Servers;
@@ -19,8 +19,8 @@ namespace ServerPickerX.ViewModels
         // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
         public SettingsWindowViewModel()
         {
-            _systemFirewallService = App.ServiceProvider.GetRequiredService<ISystemFirewallService>();
-            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
+_systemFirewallService = ServiceLocator.GetRequiredService<ISystemFirewallService>();
+            _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
 
             VersionCheckOnStartup = _jsonSetting.version_check_on_startup;
         }

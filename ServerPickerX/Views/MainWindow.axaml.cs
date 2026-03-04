@@ -3,9 +3,9 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
-using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Comparers;
 using ServerPickerX.Constants;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Versions;
@@ -49,10 +49,10 @@ namespace ServerPickerX.Views
             InitializeComponent();
             Instance = this;
 
-            _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
-            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
-            _versionService = App.ServiceProvider.GetRequiredService<VersionService>();
-            _localizationService = App.ServiceProvider.GetRequiredService<ILocalizationService>();
+            _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
+            _messageBoxService = ServiceLocator.GetRequiredService<IMessageBoxService>();
+            _versionService = ServiceLocator.GetRequiredService<VersionService>();
+            _localizationService = ServiceLocator.GetRequiredService<ILocalizationService>();
         }
 
         // DI constructor, allows inversion of control and unit tests mocking
@@ -123,7 +123,7 @@ namespace ServerPickerX.Views
 
             ConfigureControls();
 
-            var vm = App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            var vm = ServiceLocator.GetRequiredService<MainWindowViewModel>();
 
             await vm.LoadServersAsync();
 

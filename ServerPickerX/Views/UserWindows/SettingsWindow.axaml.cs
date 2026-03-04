@@ -2,9 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
-using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Helpers;
-using ServerPickerX.Services;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
@@ -24,8 +23,8 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
 
-        _jsonSetting = App.ServiceProvider.GetRequiredService<JsonSetting>();
-        _localizationService = App.ServiceProvider.GetRequiredService<ILocalizationService>();
+        _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
+        _localizationService = ServiceLocator.GetRequiredService<ILocalizationService>();
     }
 
     // DI constructor, allows inversion of control and unit tests mocking
@@ -45,7 +44,7 @@ public partial class SettingsWindow : Window
         // Set data context and configure UI controls
         await _jsonSetting.LoadSettingsAsync();
 
-        DataContext = App.ServiceProvider.GetRequiredService<SettingsWindowViewModel>();
+        DataContext = ServiceLocator.GetRequiredService<SettingsWindowViewModel>();
 
         VersionTextBlock.Text = "Version: " + Assembly.GetEntryAssembly()!.GetName().Version!.ToString(3);
 

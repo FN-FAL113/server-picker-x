@@ -1,6 +1,6 @@
 ﻿
-using Microsoft.Extensions.DependencyInjection;
 using ServerPickerX.Helpers;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Settings;
@@ -52,13 +52,9 @@ namespace ServerPickerX.Settings
         [JsonIgnore]
         private IMessageBoxService _messageBoxService { get; set; }
         [JsonIgnore]
-        private ILoggerService _logger { get; set; }
+        private ILoggerService _loggerService { get; set; }
 
-        public JsonSetting()
-        {
-            _messageBoxService = App.ServiceProvider.GetRequiredService<IMessageBoxService>();
-            _logger = App.ServiceProvider.GetRequiredService<ILoggerService>();
-        }
+        public JsonSetting() {}
 
         public JsonSetting(
             IMessageBoxService messageBoxService,
@@ -66,7 +62,7 @@ namespace ServerPickerX.Settings
             )
         {
             _messageBoxService = messageBoxService;
-            _logger = logger;
+            _loggerService = logger;
         }
 
 #pragma warning disable IL2026
@@ -99,7 +95,7 @@ namespace ServerPickerX.Settings
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("An error has occured while loading json settings", ex.Message);
+                await _loggerService.LogErrorAsync("An error has occured while loading json settings", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while loading json settings");
             }
@@ -124,7 +120,7 @@ namespace ServerPickerX.Settings
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("An error has occured while saving json settings", ex.Message);
+                await _loggerService.LogErrorAsync("An error has occured while saving json settings", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", "An error has occured while saving json settings");
 
