@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">ゲームモードを選択</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">サーバーをグループ化またはグループ解除</x:String>
   <x:String x:Key="RefreshToolTip">すべてのサーバーの ping を更新</x:String>
-  <x:String x:Key="UnblockAllConflict">この操作は、ファイアウォールの競合を防ぐためにまずすべてのサーバーを解除します。</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">この操作は、ファイアウォールの競合を防ぐためにまずすべてのサーバーを解除します。</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">言語を選択</x:String>
   <x:String x:Key="ResetFirewallToolTip">ファイアウォールルールをリセット</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">情報</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valveによってサーバーデータが更新されました！新しいサーバーデータを同期するために、ブロックされていたすべてのサーバーのブロックが解除されます。</x:String>
+  <x:String x:Key="NewVersionDialogue">新バージョンがリリースされました！リリース一覧へどうぞ。</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">こんにちは！ブロックするサーバーを少なくとも1つ選択してください。</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">ブロックを解除したいサーバーを少なくとも1つ選択してください。</x:String>
+  <x:String x:Key="PendingOperationDialogue">おっと！既に処理が実行されています。しばらくお待ちください。</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">これにより、ファイアウォールがデフォルトの状態にリセットされます。操作を確定しますか？</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">ファイアウォールが正常にリセットされました！</x:String>
 </ResourceDictionary>

@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Välj spelläge</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Gruppera eller avgruppera servrar</x:String>
   <x:String x:Key="RefreshToolTip">Uppdatera ping för alla servrar</x:String>
-  <x:String x:Key="UnblockAllConflict">Detta åtgärder kommer att avblockera alla servrar först för att undvika brandvägskonflikter.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">Detta åtgärder kommer att avblockera alla servrar först för att undvika brandvägskonflikter.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Välj språk</x:String>
   <x:String x:Key="ResetFirewallToolTip">Återställ brandväggsregler</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">info</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Serverdata har precis uppdaterats av Valve! Alla blockerade servrar kommer att avblockeras för att synkronisera ny serverdata.</x:String>
+  <x:String x:Key="NewVersionDialogue">Ny version tillgänglig! Gå till utgåvor?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Välj minst en server att blockera</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Välj minst en server att avblockera.</x:String>
+  <x:String x:Key="PendingOperationDialogue">Oj! Det finns redan en väntande åtgärd. Vänta...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">Detta kommer att försöka återställa brandväggen till standardläget. Bekräfta åtgärd?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">Brandväggen har återställts!</x:String>
 </ResourceDictionary>

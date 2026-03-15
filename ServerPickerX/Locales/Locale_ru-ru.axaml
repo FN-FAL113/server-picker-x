@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Выберите режим игры</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Группировать или разгруппировать серверы</x:String>
   <x:String x:Key="RefreshToolTip">Обновить пинг всех серверов</x:String>
-  <x:String x:Key="UnblockAllConflict">Это действие сначала разблокирует все сервера для предотвращения конфликтов брандмауэра.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">Это действие сначала разблокирует все сервера для предотвращения конфликтов брандмауэра.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Выберите язык</x:String>
   <x:String x:Key="ResetFirewallToolTip">Сбросить правила брандмауэра</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">информация</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve обновила данные серверов! Все заблокированные серверы будут разблокированы для синхронизации новых данных.</x:String>
+  <x:String x:Key="NewVersionDialogue">Доступна новая версия! Перейти к релизам?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Пожалуйста, выберите хотя бы один сервер для блокировки.</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Пожалуйста, выберите хотя бы один сервер для разблокировки.</x:String>
+  <x:String x:Key="PendingOperationDialogue">Ого! Уже есть ожидающая операция. Пожалуйста, подождите...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">Это попытается сбросить брандмауэр до состояния по умолчанию. Подтвердите действие?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">Межсетевой экран успешно перезагружен и вернулся в состояние по умолчанию!</x:String>
 </ResourceDictionary>

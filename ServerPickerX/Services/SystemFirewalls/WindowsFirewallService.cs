@@ -1,5 +1,6 @@
 using Avalonia.Logging;
 using ServerPickerX.Models;
+using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Processes;
@@ -14,6 +15,7 @@ namespace ServerPickerX.Services.SystemFirewalls
 {
     public class WindowsFirewallService(
         ILoggerService _loggerService,
+        ILocalizationService _localizationService,
         IMessageBoxService _messageBoxService,
         IProcessService _processService
         ) : ISystemFirewallService
@@ -37,19 +39,17 @@ namespace ServerPickerX.Services.SystemFirewalls
                     process.Start();
                     await process.WaitForExitAsync();
 
-                    string stdOut = process.StandardOutput.ReadToEnd();
-                    string stdErr = process.StandardError.ReadToEnd();
+                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
+                    string stdErr = process.StandardError.ReadToEnd().Trim();
 
-                    if ((process.ExitCode == 1 || process.ExitCode < 0) &&
-                        !($"{stdOut} {stdErr}".Contains("No rules match")))
+                    if (process.ExitCode > 0)
                     {
-                        throw new Exception("StdOut: " + stdOut + Environment.NewLine + "StdErr: " + stdErr);
+                        await _loggerService.LogWarningAsync("StdOut: " + stdOut + " StdErr: " + stdErr);
                     }
                 }
                 catch (Exception ex)
                 {
-                    await _loggerService.LogErrorAsync($"Failed to block server {serverModel.Name}", ex.Message);
-
+                    // Perform debugging here if necessary (log error or through debugger breakpoints)
                     throw;
                 }
             }
@@ -73,19 +73,17 @@ namespace ServerPickerX.Services.SystemFirewalls
                     process.Start();
                     await process.WaitForExitAsync();
 
-                    string stdOut = process.StandardOutput.ReadToEnd();
-                    string stdErr = process.StandardError.ReadToEnd();
+                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
+                    string stdErr = process.StandardError.ReadToEnd().Trim();
 
-                    if ((process.ExitCode == 1 || process.ExitCode < 0) &&
-                        !($"{stdOut} {stdErr}".Contains("No rules match")))
+                    if (process.ExitCode > 0)
                     {
-                        throw new Exception("StdOut: " + stdOut + Environment.NewLine + "StdErr: " + stdErr);
+                        await _loggerService.LogWarningAsync("StdOut: " + stdOut + " StdErr: " + stdErr);
                     }
                 }
                 catch (Exception ex)
                 {
-                    await _loggerService.LogErrorAsync($"Failed to unblock server {serverModel.Name}", ex.Message);
-
+                    // Perform debugging here if necessary (log error or through debugger breakpoints)
                     throw;
                 }
             }
@@ -94,8 +92,8 @@ namespace ServerPickerX.Services.SystemFirewalls
         public async Task ResetFirewallAsync()
         {
             var result = await _messageBoxService.ShowMessageBoxConfirmationAsync(
-                    "Warning",
-                    "This will attempt to reset firewall to its default state. Confirm action?",
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("FirewallResetConfirmDialogue"),
                     MsBox.Avalonia.Enums.Icon.Warning
                 );
 
@@ -113,26 +111,24 @@ namespace ServerPickerX.Services.SystemFirewalls
                 process.Start();
                 process.WaitForExit();
 
-                if (process.ExitCode == 1 || process.ExitCode < 0)
+                string stdOut = process.StandardOutput.ReadToEnd().Trim();
+                string stdErr = process.StandardError.ReadToEnd().Trim();
+
+                if (process.ExitCode > 0)
                 {
-                    throw new Exception("StdOut: " + process.StandardOutput.ReadToEnd() +
-                        Environment.NewLine + "StdErr: " + process.StandardError.ReadToEnd());
+                    await _loggerService.LogWarningAsync("StdOut: " + stdOut + " StdErr: " + stdErr);
                 }
 
                 await _messageBoxService.ShowMessageBoxAsync(
-                    "Info",
-                    "Successfully reset windows firewall!",
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("FirewallResetSuccessDialogue"),
                     MsBox.Avalonia.Enums.Icon.Success
                     );
             }
             catch (Exception ex)
             {
-                await _loggerService.LogErrorAsync("An error has occured while resetting firewall.", ex.Message);
-
-                await _messageBoxService.ShowMessageBoxAsync(
-                    "Error",
-                    "An error has occured while resetting windows firewall! Please upload log file to github."
-                    );
+                // Perform debugging here if necessary (log error or through debugger breakpoints)
+                throw;
             }
         }
     }

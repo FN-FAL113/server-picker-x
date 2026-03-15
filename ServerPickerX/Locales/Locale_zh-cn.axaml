@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">选择游戏模式</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">分组或取消分组服务器</x:String>
   <x:String x:Key="RefreshToolTip">刷新所有服务器 ping</x:String>
-  <x:String x:Key="UnblockAllConflict">此操作将首先解除所有服务器的阻止，以防止防火墙冲突。</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">此操作将首先解除所有服务器的阻止，以防止防火墙冲突。</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">选择语言</x:String>
   <x:String x:Key="ResetFirewallToolTip">重置防火墙规则</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">信息</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve刚刚更新了服务器数据！所有被屏蔽的服务器都将被解除屏蔽，以便同步新的服务器数据。</x:String>
+  <x:String x:Key="NewVersionDialogue">新版本已发布！前往发布页面？</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">嘿！请至少选择一个服务器进行屏蔽。</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">嘿！请至少选择一个服务器进行解锁。</x:String>
+  <x:String x:Key="PendingOperationDialogue">目前有待处理的操作。请稍候……</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">此操作将尝试把防火墙重置为默认状态。确认操作？</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">防火墙已成功重置！</x:String>
 </ResourceDictionary>

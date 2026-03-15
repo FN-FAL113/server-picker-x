@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Spielmodus auswählen</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Server gruppieren oder entgruppieren</x:String>
   <x:String x:Key="RefreshToolTip">Ping aller Server aktualisieren</x:String>
-  <x:String x:Key="UnblockAllConflict">Diese Aktion wird zuerst alle Server freigeben, um Firewall-Konflikte zu vermeiden.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">Diese Aktion wird zuerst alle Server freigeben, um Firewall-Konflikte zu vermeiden.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Sprache auswählen</x:String>
   <x:String x:Key="ResetFirewallToolTip">Firewall-Regeln zurücksetzen</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">Info</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Die Serverdaten wurden soeben von Valve aktualisiert! Alle gesperrten Server werden entsperrt, um die neuen Serverdaten zu synchronisieren.</x:String>
+  <x:String x:Key="NewVersionDialogue">Neue Version verfügbar! Zu den Veröffentlichungen?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Hey! Bitte wähle mindestens einen Server zum Blockieren aus.</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Bitte wählen Sie mindestens einen Server aus, um die Entsperrung aufzuheben.</x:String>
+  <x:String x:Key="PendingOperationDialogue">Moment! Ein Vorgang läuft bereits. Bitte warten Sie...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">Dadurch wird versucht, die Firewall auf den Standardzustand zurückzusetzen. Aktion bestätigen?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">Firewall erfolgreich zurückgesetzt!</x:String>
 </ResourceDictionary>

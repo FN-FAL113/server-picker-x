@@ -85,8 +85,12 @@ namespace ServerPickerX.Views
         private async void DataGrid_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             var source = e.Source;
-            if (source is Border || source is TextBlock || source is Image)
-                (DataContext as MainWindowViewModel)?.PingSelectedServer();
+
+            if (source is  Border or TextBlock or Image)
+            {
+                var vm = DataContext as MainWindowViewModel;
+                vm?.PingSelectedServer();
+            }
         }
 
         private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
@@ -101,12 +105,19 @@ namespace ServerPickerX.Views
             pingSortDirection = pingSortDirection == ListSortDirection.Ascending
                 ? ListSortDirection.Descending
                 : ListSortDirection.Ascending;
+
             ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
         }
 
         private async void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            if (!((DataContext as MainWindowViewModel)?.ServerModelsInitialized ?? false)) return;
+            var vm = DataContext as MainWindowViewModel;
+
+            // Check if servers are loaded and initialized
+            if (!vm?.ServerModelsInitialized ?? false)
+            {
+                return;
+            }
 
             // Update button DynamicResource binding base on language setting
             ClusterUnclusterBtn.Bind(
@@ -129,6 +140,7 @@ namespace ServerPickerX.Views
 
             DataContext = vm;
 
+           
             if (vm.ServersLoaded)
             {
                 await SyncServersAsync(vm);
@@ -139,7 +151,7 @@ namespace ServerPickerX.Views
 
         private void SetLanguage()
         {
-            // Extract language code
+            // Extract language code from enum text
             var language = _jsonSetting.language.Replace(" ", "").Split("|")[1];
 
             _localizationService.SetLanguage(language);
@@ -149,7 +161,7 @@ namespace ServerPickerX.Views
         {
             bool isGameModeCS2 = _jsonSetting.game_mode == GameModes.CounterStrike2;
 
-            // Update game mode combo box selection base on json settings
+            // Swap game mode combo box selection based on json settings
             GameModeComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
 
             // Update button DynamicResource binding base on language setting
@@ -161,9 +173,9 @@ namespace ServerPickerX.Views
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
         {
-            var localRevision = _jsonSetting.game_mode == GameModes.CounterStrike2
-                ? _jsonSetting.cs2_server_revision
-                : _jsonSetting.deadlock_server_revision;
+            // If Steam SDR API data got updated, sync the changes
+            var localRevision = _jsonSetting.game_mode == GameModes.CounterStrike2 ? 
+                _jsonSetting.cs2_server_revision : _jsonSetting.deadlock_server_revision;
 
             var fetchedRevision = vm.GetServerDataService().GetServerData().Revision;
 
@@ -174,10 +186,8 @@ namespace ServerPickerX.Views
             }
 
             await _messageBoxService.ShowMessageBoxAsync(
-                    "Please Standby",
-                    "Server data just got updated by Valve! All blocked servers "
-                    + Environment.NewLine +
-                    "will be unblocked in order to synchronize new server data",
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("SyncServersUnblockAllDialogue"),
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
@@ -193,17 +203,20 @@ namespace ServerPickerX.Views
 
         private async Task HandleGameModeChangeAsync()
         {
-            if (DataContext is not MainWindowViewModel vm || GameModeComboBox.SelectedItem == null) return;
+            if (DataContext is not MainWindowViewModel vm || GameModeComboBox?.SelectedItem == null)
+            {
+                return;
+            }
 
             bool result = await _messageBoxService.ShowMessageBoxConfirmationAsync(
-                    "Info",
-                    _localizationService.GetLocaleValue("UnblockAllConflict"),
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("SwapGameModeUnblockAllConflict"),
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
             if (!result || vm.PendingOperation)
             {
-                // Revert back selection without triggering the handler
+                // Revert back selection without triggering event handler
                 GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
                 GameModeComboBox.SelectedItem = _jsonSetting.game_mode;
                 GameModeComboBox.SelectionChanged += GameModeComboBox_SelectionChanged;
