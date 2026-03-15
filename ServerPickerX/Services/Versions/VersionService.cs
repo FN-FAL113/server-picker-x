@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.Localizations;
 
 namespace ServerPickerX.Services.Versions
 {
@@ -16,18 +17,21 @@ namespace ServerPickerX.Services.Versions
     {
         private readonly ILoggerService _logger;
         private readonly IMessageBoxService _messageBoxService;
+        private readonly ILocalizationService _localizationService;
         private readonly HttpClient _httpClient;
         private readonly JsonSetting _jsonSettings;
 
         public VersionService(
             ILoggerService logger,
             IMessageBoxService messageBoxService,
+            ILocalizationService localizationService,
             HttpClient httpClient,
             JsonSetting jsonSettings
             )
         {
             _logger = logger;
             _messageBoxService = messageBoxService;
+            _localizationService = localizationService;
             _httpClient = httpClient;
             _jsonSettings = jsonSettings;
         }
@@ -71,8 +75,8 @@ namespace ServerPickerX.Services.Versions
 
                 // prompt user to visit gh releases page for newer version
                 await _messageBoxService.ShowMessageBoxWithLinkAsync(
-                        "Version Check",
-                        "New version available! Go to releases?",
+                        _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                        _localizationService.GetLocaleValue("NewVersionDialogue"),
                         "https://github.com/FN-FAL113/server-picker-x/releases"
                     );
             }

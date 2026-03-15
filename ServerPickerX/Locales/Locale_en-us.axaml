@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Select game mode</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Group or ungroup servers</x:String>
   <x:String x:Key="RefreshToolTip">Refresh all server ping</x:String>
-  <x:String x:Key="UnblockAllConflict">This action will unblock all servers first to prevent firewall conflicts.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">This action will unblock all servers first to prevent firewall conflicts.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Select language</x:String>
   <x:String x:Key="ResetFirewallToolTip">Reset firewall rules</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">Info</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Server data just got updated by Valve! All blocked servers will be unblocked in order to synchronize new server data</x:String>
+  <x:String x:Key="NewVersionDialogue">New version available! Go to releases?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Hey! Please select at least one server to block</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Hey! Please select at least one server to unblock</x:String>
+  <x:String x:Key="PendingOperationDialogue">Whoa! There's already a pending operation. Please wait...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">This will attempt to reset firewall to its default state. Confirm action?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">Firewall has been successfully reset!</x:String>
 </ResourceDictionary>

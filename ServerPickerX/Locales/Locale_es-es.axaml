@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Seleccionar modo de juego</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Agrupar o desagrupar servidores</x:String>
   <x:String x:Key="RefreshToolTip">Actualizar el ping de todos los servidores</x:String>
-  <x:String x:Key="UnblockAllConflict">Esta acción desbloqueará primero todos los servidores para evitar conflictos de firewall.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">Esta acción desbloqueará primero todos los servidores para evitar conflictos de firewall.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Seleccionar idioma</x:String>
   <x:String x:Key="ResetFirewallToolTip">Restablecer reglas del firewall</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">Información</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">¡Valve acaba de actualizar los datos del servidor! Todos los servidores bloqueados serán desbloqueados para sincronizar los nuevos datos.</x:String>
+  <x:String x:Key="NewVersionDialogue">¡Nueva versión disponible! ¿Ir a lanzamientos?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Por favor, selecciona al menos un servidor para bloquear.</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Seleccione al menos un servidor para desbloquear.</x:String>
+  <x:String x:Key="PendingOperationDialogue">¡Vaya! Ya hay una operación pendiente. Por favor, espere...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">Esto intentará restablecer el cortafuegos a su estado predeterminado. ¿Confirma la acción?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">¡El cortafuegos se ha restablecido correctamente a su estado predeterminado!</x:String>
 </ResourceDictionary>

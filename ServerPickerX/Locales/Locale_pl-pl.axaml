@@ -14,7 +14,15 @@
   <x:String x:Key="GameModeToolTip">Wybierz Tryb gry</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Grupowanie lub rozgrupowywanie serwerów</x:String>
   <x:String x:Key="RefreshToolTip">Odśwież ping wszystkich serwerów</x:String>
-  <x:String x:Key="UnblockAllConflict">Ta czynność odblokuje najpierw wszystkie serwery, aby zapobiec konfliktom z zaporą sieciową.</x:String>
+  <x:String x:Key="SwapGameModeUnblockAllConflict">Ta czynność odblokuje najpierw wszystkie serwery, aby zapobiec konfliktom z zaporą sieciową.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Wybierz język</x:String>
   <x:String x:Key="ResetFirewallToolTip">Zresetuj reguły zapory sieciowej</x:String>
+  <x:String x:Key="MessageBoxInfoTitle">informacje</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve właśnie zaktualizowało dane serwera! Wszystkie zablokowane serwery zostaną odblokowane, aby zsynchronizować nowe dane serwera.</x:String>
+  <x:String x:Key="NewVersionDialogue">Nowa wersja dostępna! Przejdź do wydań?</x:String>
+  <x:String x:Key="SelectOneServerToBlockDialogue">Hej! Wybierz co najmniej jeden serwer do zablokowania</x:String>
+  <x:String x:Key="SelectOneServerToUnblockDialogue">Hej! Wybierz co najmniej jeden serwer do odblokowania</x:String>
+  <x:String x:Key="PendingOperationDialogue">Ojej! Jest już operacja w toku. Proszę czekać...</x:String>
+  <x:String x:Key="FirewallResetConfirmDialogue">Spowoduje to próbę przywrócenia zapory do stanu domyślnego. Czy potwierdzić działanie?</x:String>
+  <x:String x:Key="FirewallResetSuccessDialogue">Zapora sieciowa została pomyślnie zresetowana!</x:String>
 </ResourceDictionary>

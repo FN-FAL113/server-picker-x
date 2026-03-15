@@ -4,6 +4,7 @@ using MsBox.Avalonia.Enums;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
+using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Servers;
@@ -22,7 +23,7 @@ namespace ServerPickerX.ViewModels
     {
         public ObservableCollectionExtended<ServerModel> ServerModels { get; set; } = [];
 
-        // Property resolve through expression body that react to changes from another observable property
+        // Property resolved through expression body that react to changes from another observable property
         public ObservableCollectionExtended<ServerModel> FilteredServerModels =>
              string.IsNullOrWhiteSpace(SearchText)
                 ? ServerModels
@@ -34,7 +35,7 @@ namespace ServerPickerX.ViewModels
         public ServerModel? SelectedDataGridServerModel { get; set; }
 
         // Mvvm tool kit will auto generate source code to make this property observable
-        // When updating this property, reference it by its auto property name (PascalCase)
+        // When updating a data binding property, reference by its auto property name (PascalCase)
         [ObservableProperty]
         public bool showProgressBar = false;
 
@@ -58,6 +59,7 @@ namespace ServerPickerX.ViewModels
 
         private readonly ILoggerService _loggerService;
         private readonly IMessageBoxService _messageBoxService;
+        private readonly ILocalizationService _localizationService;
         private readonly IServerDataService _serverDataService;
         private readonly ISystemFirewallService _systemFirewallService;
         private readonly JsonSetting _jsonSetting;
@@ -67,6 +69,7 @@ namespace ServerPickerX.ViewModels
         {
             _loggerService = ServiceLocator.GetRequiredService<ILoggerService>();
             _messageBoxService = ServiceLocator.GetRequiredService<IMessageBoxService>();
+            _localizationService = ServiceLocator.GetRequiredService<ILocalizationService>();
             _serverDataService = ServiceLocator.GetRequiredService<IServerDataService>();
             _systemFirewallService = ServiceLocator.GetRequiredService<ISystemFirewallService>();
             _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
@@ -76,6 +79,7 @@ namespace ServerPickerX.ViewModels
         public MainWindowViewModel(
             ILoggerService loggerService,
             IMessageBoxService messageBoxService,
+            ILocalizationService localizationService,
             IServerDataService serverDataService,
             ISystemFirewallService systemFirewallService,
             JsonSetting jsonSetting
@@ -83,6 +87,7 @@ namespace ServerPickerX.ViewModels
         {
             _loggerService = loggerService;
             _messageBoxService = messageBoxService;
+            _localizationService = localizationService;
             _serverDataService = serverDataService;
             _systemFirewallService = systemFirewallService;
             _jsonSetting = jsonSetting;
@@ -173,7 +178,10 @@ namespace ServerPickerX.ViewModels
         {
             if (selectedServers.Count == 0)
             {
-                await _messageBoxService.ShowMessageBoxAsync("Info", "Hey! Please select at least one server to block");
+                await _messageBoxService.ShowMessageBoxAsync(
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("SelectOneServerToBlockDialogue")
+                    );
 
                 return false;
             }
@@ -200,7 +208,10 @@ namespace ServerPickerX.ViewModels
         {
             if (selectedServers.Count == 0)
             {
-                await _messageBoxService.ShowMessageBoxAsync("Info", "Hey! Please select at least one server to unblock");
+                await _messageBoxService.ShowMessageBoxAsync(
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("SelectOneServerToUnblockDialogue")
+                    );
 
                 return false;
             }
@@ -215,8 +226,8 @@ namespace ServerPickerX.ViewModels
             if (PendingOperation)
             {
                 await _messageBoxService.ShowMessageBoxAsync(
-                    "Info",
-                    "Whoa! There's already a pending operation. Please wait...",
+                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
+                    _localizationService.GetLocaleValue("PendingOperationDialogue"),
                     Icon.Setting
                     );
 
