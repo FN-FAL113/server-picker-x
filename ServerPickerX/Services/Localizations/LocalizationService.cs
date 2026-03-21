@@ -24,7 +24,7 @@ namespace ServerPickerX.Services.Localizations
             // Create a copy for iteration and prevent modifying the original collection while iterating
             var mergedDictionariesCopy = new List<IResourceProvider>(mergedDictionaries);
 
-            // Selectively remove resource dictionaries instead of clearing the list for flexibility if there are non-locale dictionaries
+            // Remove locale resource dictionaries instead of clearing the list for flexibility if there are non-locale resources
             foreach (IResourceProvider dictionary in mergedDictionariesCopy)
             {
                 if (dictionary.TryGetResource("LanguageCode", null, out object? value))
