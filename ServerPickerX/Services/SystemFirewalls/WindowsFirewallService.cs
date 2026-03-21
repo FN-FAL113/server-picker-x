@@ -1,10 +1,11 @@
-using Avalonia.Logging;
+using ServerPickerX.Constants;
 using ServerPickerX.Models;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Processes;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -31,16 +32,14 @@ namespace ServerPickerX.Services.SystemFirewalls
                 process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} " +
                         "advfirewall firewall " +
                         "add rule " +
-                        "name=server_picker_x_" + serverModel.Description.Replace(" ", "") +
+                        "name=" + WindowsFirewallRuleName.ForServer(serverModel) +
                         " dir=out action=block protocol=ANY " + "remoteip=" + ipAddresses;
 
                 try
                 {
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
+                    var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                    stdOut = stdOut.Trim();
+                    stdErr = stdErr.Trim();
 
                     if (process.ExitCode > 0)
                     {
@@ -66,15 +65,13 @@ namespace ServerPickerX.Services.SystemFirewalls
                 process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} " +
                         "advfirewall firewall " +
                         "delete rule " +
-                        "name=server_picker_x_" + serverModel.Description.Replace(" ", "");
+                        "name=" + WindowsFirewallRuleName.ForServer(serverModel);
 
                 try
                 {
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
+                    var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                    stdOut = stdOut.Trim();
+                    stdErr = stdErr.Trim();
 
                     if (process.ExitCode > 0)
                     {
@@ -108,11 +105,9 @@ namespace ServerPickerX.Services.SystemFirewalls
             {
                 process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} advfirewall reset";
 
-                process.Start();
-                process.WaitForExit();
-
-                string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                string stdErr = process.StandardError.ReadToEnd().Trim();
+                var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                stdOut = stdOut.Trim();
+                stdErr = stdErr.Trim();
 
                 if (process.ExitCode > 0)
                 {
@@ -129,6 +124,55 @@ namespace ServerPickerX.Services.SystemFirewalls
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
                 throw;
+            }
+        }
+
+        public async Task SyncBlockedStateAsync(IReadOnlyList<ServerModel> servers)
+        {
+            if (servers.Count == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                using var process = _processService.CreateProcess("cmd.exe");
+                process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} " +
+                    "advfirewall firewall show rule name=all";
+
+                var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                stdErr = stdErr.Trim();
+
+                if (process.ExitCode > 0)
+                {
+                    await _loggerService.LogWarningAsync(
+                        "SyncBlockedState netsh exit " + process.ExitCode + " StdErr: " + stdErr);
+                    ClearBlockedStatus(servers);
+                    return;
+                }
+
+                var ruleNames = NetshAdvFirewallRuleNameParser.ParseRuleNames(stdOut);
+
+                foreach (var server in servers)
+                {
+                    bool blocked = ruleNames.Contains(WindowsFirewallRuleName.ForServer(server));
+                    server.BlockedStatus = blocked
+                        ? BlockedServerDisplayGlyphs.Blocked
+                        : BlockedServerDisplayGlyphs.NotBlocked;
+                }
+            }
+            catch (Exception ex)
+            {
+                await _loggerService.LogErrorAsync("SyncBlockedStateAsync (Windows) failed.", ex.Message);
+                ClearBlockedStatus(servers);
+            }
+        }
+
+        private static void ClearBlockedStatus(IReadOnlyList<ServerModel> servers)
+        {
+            foreach (var server in servers)
+            {
+                server.BlockedStatus = "";
             }
         }
     }

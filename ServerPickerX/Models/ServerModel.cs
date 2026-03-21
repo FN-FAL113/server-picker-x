@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -22,6 +22,9 @@ namespace ServerPickerX.Models
 
         [ObservableProperty]
         public string? status;
+
+        [ObservableProperty]
+        public string? blockedStatus;
 
         public List<RelayModel> RelayModels { get; set; } = [];
 

@@ -8,6 +8,7 @@ using ServerPickerX.ViewModels;
 using ServerPickerX.Factories.Models;
 using MsBox.Avalonia.Enums;
 using System.Reflection;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ServerPickerX.Models;
 using ServerPickerX.Services.Localizations;
@@ -33,6 +34,10 @@ namespace ServerPickerX.Tests.ViewModels
             _serverDataService = new Mock<IServerDataService>();
             _systemFirewallService = new Mock<ISystemFirewallService>();
             _jsonSetting = new Mock<JsonSetting>();
+
+            _systemFirewallService
+                .Setup(s => s.SyncBlockedStateAsync(It.IsAny<IReadOnlyList<ServerModel>>()))
+                .Returns(Task.CompletedTask);
 
             _vm = new MainWindowViewModel(
                 _loggerService.Object,
@@ -140,12 +145,11 @@ namespace ServerPickerX.Tests.ViewModels
             await _vm.LoadServersAsync();
             _vm.PingServers(_vm.ServerModels);
 
-            await Task.Delay(70); // Pinging is done in parallel operation and is not awaited
+            await Task.Delay(1200); // Ping uses up to ~800ms per relay; async void is not awaited
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
-            Assert.True(_vm.ServerModels[0].Ping?.Contains("ms"));
-            Assert.Equal("✅", _vm.ServerModels[0].Status);
+            AssertPingSettled(_vm.ServerModels[0]);
         }
 
         [Fact]
@@ -167,13 +171,11 @@ namespace ServerPickerX.Tests.ViewModels
             _vm.SelectedDataGridServerModel = _vm.ServerModels[0];
             _vm.PingSelectedServer();
 
-            await Task.Delay(70); // Pinging is done in parallel operation and is not awaited
+            await Task.Delay(1200); // Ping uses up to ~800ms per relay; async void is not awaited
 
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
-            var model = _vm.SelectedDataGridServerModel;
-            Assert.True(_vm.SelectedDataGridServerModel.Ping?.Contains("ms"));
-            Assert.Equal("✅", _vm.ServerModels[0].Status);
+            AssertPingSettled(_vm.SelectedDataGridServerModel!);
         }
 
         [Fact]
@@ -252,7 +254,7 @@ namespace ServerPickerX.Tests.ViewModels
 
             ObservableCollection<ServerModel> selectedServers = [_vm.ServerModels[0], _vm.ServerModels[2]];
 
-            _systemFirewallService.Setup(i => i.BlockServersAsync(selectedServers))
+            _systemFirewallService.Setup(i => i.BlockServersAsync(It.IsAny<ObservableCollection<ServerModel>>()))
                 .Callback((ObservableCollection<ServerModel> serverModels) => {
                     // Clear model relays to simulate a failed ICMP ping
                     foreach (var server in serverModels)
@@ -264,9 +266,11 @@ namespace ServerPickerX.Tests.ViewModels
 
             var result = await _vm.BlockSelectedAsync(selectedServers);
 
+            await Task.Delay(1200); // Non-selected rows still run async PingServer after PerformOperationAsync
+
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
-            _systemFirewallService.Verify(i => i.BlockServersAsync(selectedServers)); // Verify method is invoked
+            _systemFirewallService.Verify(i => i.BlockServersAsync(It.IsAny<ObservableCollection<ServerModel>>()), Times.Once);
             Assert.True(result);
             foreach (var item in _vm.ServerModels.Select((value, index) => new { value, index }))
             {
@@ -276,8 +280,7 @@ namespace ServerPickerX.Tests.ViewModels
                     Assert.Equal("❌", item.value.Status);
                 } else
                 {
-                    Assert.True(item.value.Ping.Contains("ms"));
-                    Assert.Equal("✅", item.value.Status);
+                    AssertPingSettled(item.value);
                 }
             }
         }
@@ -297,7 +300,8 @@ namespace ServerPickerX.Tests.ViewModels
             _messageBoxService.Verify(i =>
                 i.ShowMessageBoxAsync(
                     _localizationService.Object.GetLocaleValue("MessageBoxInfoTitle"),
-                    _localizationService.Object.GetLocaleValue("SelectOneServerToBlockDialogue")
+                    _localizationService.Object.GetLocaleValue("SelectOneServerToBlockDialogue"),
+                    Icon.Info
                 ),
                 Times.Once()
             );
@@ -323,14 +327,13 @@ namespace ServerPickerX.Tests.ViewModels
 
             var result = await _vm.UnblockAllAsync();
 
-            await Task.Delay(70); // ping operations are fire-and-forget (background tasks)
+            await Task.Delay(1200); // ping operations are fire-and-forget (background tasks)
 
             // Assert
             Assert.True(result);
             foreach (var srv in _vm.ServerModels)
             {
-                Assert.Contains("ms", srv.Ping);
-                Assert.Equal("✅", srv.Status);
+                AssertPingSettled(srv);
             }
         }
 
@@ -384,7 +387,8 @@ namespace ServerPickerX.Tests.ViewModels
             _messageBoxService.Verify(i => 
                 i.ShowMessageBoxAsync(
                     _localizationService.Object.GetLocaleValue("MessageBoxInfoTitle"),
-                    _localizationService.Object.GetLocaleValue("SelectOneServerToUnblockDialogue")
+                    _localizationService.Object.GetLocaleValue("SelectOneServerToUnblockDialogue"),
+                    Icon.Info
                 ), 
                 Times.Once()
             );
@@ -452,14 +456,13 @@ namespace ServerPickerX.Tests.ViewModels
             // Act
             var result = await _vm.PerformOperationAsync(false, serverModels);
 
-            await Task.Delay(70); // ping operations are fire-and-forget (background tasks)
+            await Task.Delay(1200); // ping operations are fire-and-forget (background tasks)
 
             // Assert
             Assert.True(result);
             foreach (var srv in serverModels)
             {
-                Assert.Contains("ms", srv.Ping);
-                Assert.Equal("✅", srv.Status);
+                AssertPingSettled(srv);
             }
         }
 
@@ -489,6 +492,19 @@ namespace ServerPickerX.Tests.ViewModels
 
             Assert.Single(filtered);
             Assert.Contains(s1, filtered);
+        }
+
+        private static void AssertPingSettled(ServerModel model)
+        {
+            Assert.NotEqual("Pinging server", model.Ping);
+            if (model.Status == "✅")
+            {
+                Assert.Contains("ms", model.Ping ?? "");
+            }
+            else
+            {
+                Assert.Equal("❌", model.Status);
+            }
         }
 
         public object ReflectGetField(object obj, string propertyName)

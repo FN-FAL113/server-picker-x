@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <!-- Ensures all required .NET files are bundled -->
         <SelfContained>true</SelfContained> 
@@ -12,7 +12,7 @@
         <!-- Still have to enable this despite using source generators or JsonSerializerContext when serializing a class as json -->
         <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>

@@ -144,6 +144,8 @@ namespace ServerPickerX.Views
             if (vm.ServersLoaded)
             {
                 await SyncServersAsync(vm);
+                // Fire-and-forget: firewall rule dump must not delay first paint / DataContext binding
+                _ = vm.SyncBlockedStateAsync();
             }
 
             await _versionService.CheckVersionAsync();

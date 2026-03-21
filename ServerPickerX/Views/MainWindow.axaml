@@ -159,6 +159,7 @@
 							<DataGridTextColumn Width="*" Header="Server Name" Binding="{Binding Description}" />
 							<DataGridTextColumn Width="128" Header="Ping" Binding="{Binding Ping}" HeaderPointerPressed="DataGridTextColumn_HeaderPointerPressed" />
 							<DataGridTextColumn Width="100" Header="Status" Binding="{Binding Status}" />
+							<DataGridTextColumn Width="100" Header="Blocked" Binding="{Binding BlockedStatus}" />
                         </DataGrid.Columns>
 						<DataGrid.Styles>
                             <Style Selector="DataGridColumnHeader">

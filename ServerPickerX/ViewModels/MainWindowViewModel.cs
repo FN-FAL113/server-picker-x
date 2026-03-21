@@ -129,6 +129,10 @@ namespace ServerPickerX.ViewModels
             ServerModels.AddRange(serverModels);
 
             PingServers(serverModels);
+
+            // Do not await: netsh "show rule name=all" can take a long time and would block LoadServersAsync
+            // before DataContext is assigned (empty grid + stuck-looking UI).
+            _ = SyncBlockedStateAsync();
         }
 
         [RelayCommand]
@@ -239,6 +243,7 @@ namespace ServerPickerX.ViewModels
             PendingOperation = true;
             ShowProgressBar = true;
 
+            var success = true;
             try
             {
                 if (shouldBlock)
@@ -259,25 +264,49 @@ namespace ServerPickerX.ViewModels
             }
             catch (Exception ex)
             {
+                success = false;
                 await _loggerService.LogErrorAsync("An error has occurred while blocking or unblocking servers.", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync(
                     "Error",
                     "Oops! Something went wrong. Please upload the log file to GitHub."
                     );
-
-                return false;
+            }
+            finally
+            {
+                PendingOperation = false;
+                ShowProgressBar = false;
             }
 
-            PendingOperation = false;
-            ShowProgressBar = false;
+            // Refresh blocked column without blocking the progress UI on slow netsh dump
+            if (ServerModels.Count > 0)
+            {
+                _ = SyncBlockedStateAsync();
+            }
 
-            return true;
+            return success;
         }
 
         public IServerDataService GetServerDataService()
         {
             return _serverDataService;
+        }
+
+        public async Task SyncBlockedStateAsync()
+        {
+            if (ServerModels.Count == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                await _systemFirewallService.SyncBlockedStateAsync(ServerModels.ToList());
+            }
+            catch (Exception ex)
+            {
+                await _loggerService.LogErrorAsync("SyncBlockedStateAsync failed.", ex.Message);
+            }
         }
 
     }

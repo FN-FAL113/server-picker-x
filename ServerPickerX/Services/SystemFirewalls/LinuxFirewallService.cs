@@ -1,9 +1,11 @@
+using ServerPickerX.Constants;
 using ServerPickerX.Models;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Processes;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -31,11 +33,9 @@ namespace ServerPickerX.Services.SystemFirewalls
                     process.StartInfo.Arguments = "iptables " +
                         "-A INPUT -s " + ipAddresses + " -j DROP";
 
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
+                    var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                    stdOut = stdOut.Trim();
+                    stdErr = stdErr.Trim();
 
                     if (process.ExitCode > 0)
                     {
@@ -63,11 +63,9 @@ namespace ServerPickerX.Services.SystemFirewalls
                     process.StartInfo.Arguments = "iptables " +
                        "-D INPUT -s " + ipAddresses + " -j DROP";
 
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
+                    var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                    stdOut = stdOut.Trim();
+                    stdErr = stdErr.Trim();
 
                     if (process.ExitCode > 0)
                     {
@@ -101,11 +99,9 @@ namespace ServerPickerX.Services.SystemFirewalls
             {
                 process.StartInfo.Arguments = $"iptables -F";
 
-                process.Start();
-                process.WaitForExit();
-
-                string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                string stdErr = process.StandardError.ReadToEnd().Trim();
+                var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                stdOut = stdOut.Trim();
+                stdErr = stdErr.Trim();
 
                 if (process.ExitCode > 0)
                 {
@@ -122,6 +118,65 @@ namespace ServerPickerX.Services.SystemFirewalls
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
                 throw;
+            }
+        }
+
+        public async Task SyncBlockedStateAsync(IReadOnlyList<ServerModel> servers)
+        {
+            if (servers.Count == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                using var process = _processService.CreateProcess("sudo");
+                process.StartInfo.Arguments = "iptables -S INPUT";
+
+                var (stdOut, stdErr) = await RedirectedProcess.RunAsync(process);
+                stdErr = stdErr.Trim();
+
+                if (process.ExitCode > 0)
+                {
+                    await _loggerService.LogWarningAsync(
+                        "SyncBlockedState iptables exit " + process.ExitCode + " StdErr: " + stdErr);
+                    ClearBlockedStatus(servers);
+                    return;
+                }
+
+                var dropSets = IptablesInputDropParser.ParseDropSourceIpSets(stdOut);
+
+                foreach (var server in servers)
+                {
+                    var relaySet = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (var relay in server.RelayModels)
+                    {
+                        if (!string.IsNullOrWhiteSpace(relay.IPv4))
+                        {
+                            relaySet.Add(relay.IPv4.Trim());
+                        }
+                    }
+
+                    bool blocked = relaySet.Count > 0
+                        && dropSets.Exists(ds => ds.SetEquals(relaySet));
+
+                    server.BlockedStatus = blocked
+                        ? BlockedServerDisplayGlyphs.Blocked
+                        : BlockedServerDisplayGlyphs.NotBlocked;
+                }
+            }
+            catch (Exception ex)
+            {
+                await _loggerService.LogErrorAsync("SyncBlockedStateAsync (Linux) failed.", ex.Message);
+                ClearBlockedStatus(servers);
+            }
+        }
+
+        private static void ClearBlockedStatus(IReadOnlyList<ServerModel> servers)
+        {
+            foreach (var server in servers)
+            {
+                server.BlockedStatus = "";
             }
         }
     }
