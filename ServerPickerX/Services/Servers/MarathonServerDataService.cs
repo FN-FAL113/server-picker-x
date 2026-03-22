@@ -11,7 +11,7 @@ using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
-    public class CS2ServerDataService(
+    public class MarathonServerDataService(
         ILoggerService _logger,
         IMessageBoxService _messageBoxService,
         HttpClient _httpClient,
@@ -24,7 +24,7 @@ namespace ServerPickerX.Services.Servers
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730");
+                var response = await _httpClient.GetAsync("https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=3065800");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -48,7 +48,7 @@ namespace ServerPickerX.Services.Servers
                 _serverData.Revision = revision;
 
                 // Update settings if app is initialized for the first time
-                if (_jsonSettings.cs2_server_revision == "-1")
+                if (_jsonSettings.marathon_server_revision == "-1")
                 {
                     await _jsonSettings.SetRevisionByGameModeAsync(revision);
                 }
@@ -57,7 +57,7 @@ namespace ServerPickerX.Services.Servers
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("Failed to load cs2 servers", ex.Message);
+                await _logger.LogErrorAsync("Failed to load marathon servers", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
@@ -80,13 +80,6 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string serverDescription = server.Value["desc"]!.ToString();
-                var excludedServerKeyword = GetExcludedServerKeywords().FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
-
-                // Skip processing the server that contains the excluded keyword
-                if (!string.IsNullOrEmpty(excludedServerKeyword))
-                {
-                    continue;
-                }
 
                 var serverModel = new ServerModel
                 {
@@ -148,11 +141,6 @@ namespace ServerPickerX.Services.Servers
             [
                 "Hong Kong", "Sweden", "India", "Netherlands"
             ];
-        }
-
-        private List<string> GetExcludedServerKeywords()
-        {
-            return ["China"];
         }
     }
 }

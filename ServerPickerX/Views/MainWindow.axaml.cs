@@ -7,6 +7,7 @@ using ServerPickerX.Comparers;
 using ServerPickerX.Constants;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
+using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
@@ -28,16 +29,17 @@ namespace ServerPickerX.Views
         {
             get
             {
-#if DEBUG
-                return true;
-#else
-                return false;
-#endif
+                #if DEBUG
+                    return true;
+                #else
+                    return false;
+                #endif
             }
         }
 
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
 
+        private readonly ILoggerService _loggerService;
         private readonly JsonSetting _jsonSetting;
         private readonly IMessageBoxService _messageBoxService;
         private readonly IVersionService _versionService;
@@ -49,6 +51,7 @@ namespace ServerPickerX.Views
             InitializeComponent();
             Instance = this;
 
+            _loggerService = ServiceLocator.GetRequiredService<ILoggerService>();
             _jsonSetting = ServiceLocator.GetRequiredService<JsonSetting>();
             _messageBoxService = ServiceLocator.GetRequiredService<IMessageBoxService>();
             _versionService = ServiceLocator.GetRequiredService<IVersionService>();
@@ -57,6 +60,7 @@ namespace ServerPickerX.Views
 
         // DI constructor, allows inversion of control and unit tests mocking
         public MainWindow(
+            ILoggerService loggerService,
             JsonSetting jsonSetting,
             IMessageBoxService messageBoxService,
             IVersionService versionService,
@@ -66,6 +70,7 @@ namespace ServerPickerX.Views
             InitializeComponent();
             Instance = this;
 
+            _loggerService = loggerService;
             _messageBoxService = messageBoxService;
             _versionService = versionService;
             _jsonSetting = jsonSetting;
@@ -130,16 +135,15 @@ namespace ServerPickerX.Views
         {
             await _jsonSetting.LoadSettingsAsync();
 
-            SetLanguage();
+            await SetLanguage();
 
-            ConfigureControls();
+            await ConfigureControls();
 
             var vm = ServiceLocator.GetRequiredService<MainWindowViewModel>();
 
             await vm.LoadServersAsync();
 
             DataContext = vm;
-
            
             if (vm.ServersLoaded)
             {
@@ -149,22 +153,41 @@ namespace ServerPickerX.Views
             await _versionService.CheckVersionAsync();
         }
 
-        private void SetLanguage()
+        private async Task SetLanguage()
         {
             // Extract language code from enum text
             var language = _jsonSetting.language.Replace(" ", "").Split("|")[1];
 
-            _localizationService.SetLanguage(language);
+            await _localizationService.SetLanguage(language);
         }
 
-        private void ConfigureControls()
+        private async Task ConfigureControls()
         {
-            bool isGameModeCS2 = _jsonSetting.game_mode == GameModes.CounterStrike2;
+            try
+            {
+                switch (_jsonSetting.game_mode)
+                {
+                    case GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld:
+                        GameModeComboBox.SelectedIndex = !_jsonSetting.game_mode.Contains("Perfect") ? 0 : 1;
+                        break;
+                    case GameModes.Deadlock:
+                        GameModeComboBox.SelectedIndex = 2;
+                        break;
+                    case GameModes.Marathon:
+                        GameModeComboBox.SelectedIndex = 3;
+                        break;
+                    default:
+                        throw new NotSupportedException($"Unsupported game mode: {_jsonSetting.game_mode}");
+                };
+            }
+            catch (NotSupportedException ex)
+            {
+                await _loggerService.LogErrorAsync("An error has occured while setting game mode combo box", ex.Message);
 
-            // Swap game mode combo box selection based on json settings
-            GameModeComboBox.SelectedIndex = isGameModeCS2 ? 0 : 1;
+                throw;
+            }
 
-            // Update button DynamicResource binding base on language setting
+            // Update button content property DynamicResource binding based on json setting
             ClusterUnclusterBtn.Bind(
                 Button.ContentProperty,
                 new DynamicResourceExtension(_jsonSetting.is_clustered ? "UnclusterServers" : "ClusterServers")
@@ -174,12 +197,11 @@ namespace ServerPickerX.Views
         private async Task SyncServersAsync(MainWindowViewModel vm)
         {
             // If Steam SDR API data got updated, sync the changes
-            var localRevision = _jsonSetting.game_mode == GameModes.CounterStrike2 ? 
-                _jsonSetting.cs2_server_revision : _jsonSetting.deadlock_server_revision;
+            var localRevision = await _jsonSetting.GetRevisionByGameModeAsync();
 
-            var fetchedRevision = vm.GetServerDataService().GetServerData().Revision;
+            var fetchedRevision = vm.GetServerDataService().GetFetchedRevision();
 
-            // Skip server revision syncing and unblocking if local revision is equal to the fetched revision
+            // Skip server unblocking and revision sync if local revision is equal to fetched revision
             if (localRevision == fetchedRevision)
             {
                 return;
@@ -193,12 +215,7 @@ namespace ServerPickerX.Views
 
             await vm.UnblockAllAsync();
 
-            if (_jsonSetting.game_mode == GameModes.CounterStrike2)
-                _jsonSetting.cs2_server_revision = fetchedRevision;
-            else
-                _jsonSetting.deadlock_server_revision = fetchedRevision;
-
-            await _jsonSetting.SaveSettingsAsync();
+            await _jsonSetting.SetRevisionByGameModeAsync(fetchedRevision);
         }
 
         private async Task HandleGameModeChangeAsync()
@@ -214,7 +231,7 @@ namespace ServerPickerX.Views
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
-            if (!result || vm.PendingOperation)
+            if (!result)
             {
                 // Revert back selection without triggering event handler
                 GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
@@ -228,8 +245,7 @@ namespace ServerPickerX.Views
             await vm.UnblockAllAsync();
 
             // Update json setting game mode and serialize it
-            _jsonSetting.game_mode = (string)GameModeComboBox.SelectedItem;
-            await _jsonSetting.SaveSettingsAsync();
+            await _jsonSetting.SetGameModeAsync((string)GameModeComboBox.SelectedItem);
 
             await InitializeApp();
         }

@@ -20,8 +20,8 @@
         <PackageProjectUrl>https://github.com/FN-FAL113/server-picker-x</PackageProjectUrl>
         <RepositoryUrl>https://github.com/FN-FAL113/server-picker-x</RepositoryUrl>
         <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
-        <AssemblyVersion>1.0.2.0</AssemblyVersion>
-        <FileVersion>1.0.2.0</FileVersion>
+        <AssemblyVersion>1.0.3.0</AssemblyVersion>
+        <FileVersion>1.0.3.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>

@@ -50,9 +50,7 @@ namespace ServerPickerX.Services.Servers
                 // Update settings if app is initialized for the first time
                 if (_jsonSettings.deadlock_server_revision == "-1")
                 {
-                    _jsonSettings.deadlock_server_revision = revision;
-
-                    await _jsonSettings.SaveSettingsAsync();
+                    await _jsonSettings.SetRevisionByGameModeAsync(revision);
                 }
 
                 ProcessServers(mainJson, _serverData);
@@ -126,7 +124,7 @@ namespace ServerPickerX.Services.Servers
             serverData.ClusteredServers = clusteredServers;
         }
 
-        public string GetCurrentRevision()
+        public string GetFetchedRevision()
         {
             return _serverData.Revision;
         }

@@ -71,9 +71,8 @@ public partial class SettingsWindow : Window
         var selectedLanguage = (string)LanguageComboBox.SelectedItem;
         var language = selectedLanguage.Replace(" ", "").Split("|")[1];
 
-        _jsonSetting.language = selectedLanguage;
-        await _jsonSetting.SaveSettingsAsync();
+        await _jsonSetting.SetLanguageAsync(selectedLanguage);
 
-        _localizationService.SetLanguage(language);
+        await _localizationService.SetLanguage(language);
     }
 }
