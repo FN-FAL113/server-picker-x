@@ -19,6 +19,7 @@
 				<ResourceInclude Source="/Locales/Locale_ru-ru.axaml" />
 				<ResourceInclude Source="/Locales/Locale_de-de.axaml" />
 				<ResourceInclude Source="/Locales/Locale_pl-pl.axaml" />
+				<ResourceInclude Source="/Locales/Locale_tr-tr.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

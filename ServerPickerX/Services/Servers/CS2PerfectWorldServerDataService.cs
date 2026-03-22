@@ -11,7 +11,7 @@ using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
-    public class CS2ServerDataService(
+    public class CS2PerfectWorldServerDataService(
         ILoggerService _logger,
         IMessageBoxService _messageBoxService,
         HttpClient _httpClient,
@@ -50,14 +50,16 @@ namespace ServerPickerX.Services.Servers
                 // Update settings if app is initialized for the first time
                 if (_jsonSettings.cs2_server_revision == "-1")
                 {
-                    await _jsonSettings.SetRevisionByGameModeAsync(revision);
+                    _jsonSettings.cs2_server_revision = revision;
+
+                    await _jsonSettings.SaveSettingsAsync();
                 }
 
                 ProcessServers(mainJson, _serverData);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("Failed to load cs2 servers", ex.Message);
+                await _logger.LogErrorAsync("Failed to load cs2 perfect world servers", ex.Message);
 
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
@@ -80,10 +82,11 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string serverDescription = server.Value["desc"]!.ToString();
-                var excludedServerKeyword = GetExcludedServerKeywords().FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
+                var whiteListedServerKeyword = GetWhiteListedServerKeywords()
+                    .FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
 
-                // Skip processing the server that contains the excluded keyword
-                if (!string.IsNullOrEmpty(excludedServerKeyword))
+                // Skip processing the server that doesn't contain the whitelisted keyword
+                if (string.IsNullOrEmpty(whiteListedServerKeyword))
                 {
                     continue;
                 }
@@ -146,11 +149,11 @@ namespace ServerPickerX.Services.Servers
         {
             return
             [
-                "Hong Kong", "Sweden", "India", "Netherlands"
+                "Tencent", "Alibaba", "Perfect World"
             ];
         }
 
-        private List<string> GetExcludedServerKeywords()
+        private List<string> GetWhiteListedServerKeywords()
         {
             return ["China"];
         }

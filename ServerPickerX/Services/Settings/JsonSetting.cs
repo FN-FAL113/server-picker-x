@@ -1,4 +1,5 @@
 ﻿
+using ServerPickerX.Constants;
 using ServerPickerX.Helpers;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
@@ -14,9 +15,9 @@ using System.Threading.Tasks;
 
 namespace ServerPickerX.Settings
 {
-    // publishing an app with trimmed assemblies or using Ahead-of-Time compilation for 
-    // reduced build size can limit the functionality of serialization since it requires reflection 
-    // to determine dynamic types on runtime which is not possible with trimmed or AOT applications.
+    // Publishing an app with trimmed assemblies or using AOT compilation for reduced
+    // build size can limit the serialization functionality since it requires reflection 
+    // to determine dynamic types on runtime which is not possible with trimmed or AOT apps.
     // JsonSerializerContext preserves the types and provides serialization metadata on compile-time.
     [JsonSerializable(typeof(JsonSetting))]
     internal partial class SourceGenerationContext : JsonSerializerContext { }
@@ -30,9 +31,11 @@ namespace ServerPickerX.Settings
 
         public virtual string language { set; get; } = "English | en-us";
 
+        public virtual string cs2_server_revision { get; set; } = "-1";
+
         public virtual string deadlock_server_revision { get; set; } = "-1";
 
-        public virtual string cs2_server_revision { get; set; } = "-1";
+        public virtual string marathon_server_revision { get; set; } = "-1";
 
         public virtual bool is_clustered { get; set; } = false;
 
@@ -65,7 +68,7 @@ namespace ServerPickerX.Settings
             _loggerService = logger;
         }
 
-#pragma warning disable IL2026
+        #pragma warning disable IL2026
         // Reflection is partially used here and might not be trim-compatible
         // unless JsonSerializerIsReflectionEnabledByDefault is set to true in .csproj
         public async Task LoadSettingsAsync()
@@ -90,6 +93,7 @@ namespace ServerPickerX.Settings
                 language = localSettings.language;
                 cs2_server_revision = localSettings.cs2_server_revision;
                 deadlock_server_revision = localSettings.deadlock_server_revision;
+                marathon_server_revision = localSettings.marathon_server_revision;
                 is_clustered = localSettings.is_clustered;
                 version_check_on_startup = localSettings.version_check_on_startup;
             }
@@ -126,6 +130,67 @@ namespace ServerPickerX.Settings
 
                 return false;
             }
+        }
+
+        public async Task<string> GetRevisionByGameModeAsync()
+        {
+            try
+            {
+                return this.game_mode switch
+                {
+                    GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld => this.cs2_server_revision,
+                    GameModes.Deadlock => this.deadlock_server_revision,
+                    GameModes.Marathon => this.marathon_server_revision,
+                    _ => throw new NotSupportedException($"Unsupported game mode: {this.game_mode}"),
+                };
+            } catch (NotSupportedException ex) {
+                await _loggerService.LogErrorAsync("An error has occured while getting server revision by current game mode", ex.Message);
+
+                throw;
+            }
+        }
+
+        public async Task SetRevisionByGameModeAsync(string revision)
+        {
+            try
+            {
+                switch (this.game_mode)
+                {
+                    case GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld:
+                        this.cs2_server_revision = revision;
+                        break;
+                    case GameModes.Deadlock:
+                        this.deadlock_server_revision = revision;
+                        break;
+                    case GameModes.Marathon:
+                        this.marathon_server_revision = revision;
+                        break;
+                    default:
+                        throw new NotSupportedException($"Unsupported game mode: {this.game_mode}");
+                };
+
+                await this.SaveSettingsAsync();
+            }
+            catch (NotSupportedException ex)
+            {
+                await _loggerService.LogErrorAsync("An error has occured while setting server revision by current game mode", ex.Message);
+
+                throw;
+            }
+        }
+
+        public async Task SetGameModeAsync(string gameMode)
+        {
+            this.game_mode = gameMode;
+
+            await this.SaveSettingsAsync();
+        }
+
+        public async Task SetLanguageAsync(string language)
+        {
+            this.language = language;
+
+            await this.SaveSettingsAsync();
         }
     }
 }

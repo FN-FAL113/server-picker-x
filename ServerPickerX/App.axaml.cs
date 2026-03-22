@@ -44,34 +44,59 @@ namespace ServerPickerX
             serviceCollection.AddSingleton<JsonSetting>();
             serviceCollection.AddSingleton<HttpClient>();
 
-            // Register concrete services and contionally use these services inside parent interface service resolver
+            // Register concrete services and contionally provide these services through parent interface service resolver
             serviceCollection.AddTransient<CS2ServerDataService>();
+            serviceCollection.AddTransient<CS2PerfectWorldServerDataService>();
             serviceCollection.AddTransient<DeadLockServerDataService>();
+            serviceCollection.AddTransient<MarathonServerDataService>();
             serviceCollection.AddTransient<IServerDataService>(serviceProvider =>
             {
                 JsonSetting jsonSetting = serviceProvider.GetRequiredService<JsonSetting>();
+                ILoggerService loggerService = serviceProvider.GetRequiredService<ILoggerService>();
 
-                return jsonSetting.game_mode switch
+                try
                 {
-                    GameModes.CounterStrike2 => serviceProvider.GetRequiredService<CS2ServerDataService>(),
-                    GameModes.Deadlock => serviceProvider.GetRequiredService<DeadLockServerDataService>(),
-                    _ => throw new NotSupportedException($"Unsupported game mode: {jsonSetting.game_mode}")
-                };
+                    // Factory method may be suitable if more entries are added in the future
+                    return jsonSetting.game_mode switch
+                    {
+                        GameModes.CounterStrike2 => serviceProvider.GetRequiredService<CS2ServerDataService>(),
+                        GameModes.CounterStrike2PerfectWorld => serviceProvider.GetRequiredService<CS2PerfectWorldServerDataService>(),
+                        GameModes.Deadlock => serviceProvider.GetRequiredService<DeadLockServerDataService>(),
+                        GameModes.Marathon => serviceProvider.GetRequiredService<MarathonServerDataService>(),
+                        _ => throw new NotSupportedException($"Unsupported game mode: {jsonSetting.game_mode}")
+                    };
+                } catch (NotSupportedException ex)
+                {
+                    loggerService.LogErrorAsync(ex.Message);
+
+                    throw;
+                }
+                
             });
             serviceCollection.AddTransient<WindowsFirewallService>();
             serviceCollection.AddTransient<LinuxFirewallService>();
             serviceCollection.AddTransient<ISystemFirewallService>(serviceProvider =>
             {
-                if (OperatingSystem.IsWindows())
-                {
-                    return serviceProvider.GetRequiredService<WindowsFirewallService>();
-                }
-                else if (OperatingSystem.IsLinux())
-                {
-                    return serviceProvider.GetRequiredService<LinuxFirewallService>();
-                }
+                ILoggerService loggerService = serviceProvider.GetRequiredService<ILoggerService>();
 
-                throw new PlatformNotSupportedException("Firewall services are only available for Windows and Linux");
+                try
+                {
+                    if (OperatingSystem.IsWindows())
+                    {
+                        return serviceProvider.GetRequiredService<WindowsFirewallService>();
+                    }
+                    else if (OperatingSystem.IsLinux())
+                    {
+                        return serviceProvider.GetRequiredService<LinuxFirewallService>();
+                    }
+
+                    throw new PlatformNotSupportedException("Firewall services are only available for Windows and Linux");
+                } catch (PlatformNotSupportedException ex)
+                {
+                    loggerService.LogErrorAsync(ex.Message);
+
+                    throw;
+                }
             });
 
             // Register view model services

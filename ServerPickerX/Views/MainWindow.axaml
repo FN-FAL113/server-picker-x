@@ -96,8 +96,9 @@
                             ToolTip.Tip="{DynamicResource GameModeToolTip}"
                             ToolTip.ShowDelay="20"
                             SelectedIndex="0"
+                            FontSize="12"
                             VerticalAlignment="Center"
-                            Width="152"
+                            Width="158"
                             Margin="8,0,0,0"
                             BorderThickness="1">
                         </ComboBox>
