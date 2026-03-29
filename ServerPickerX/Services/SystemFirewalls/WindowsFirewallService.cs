@@ -20,73 +20,68 @@ namespace ServerPickerX.Services.SystemFirewalls
         IProcessService _processService
         ) : ISystemFirewallService
     {
-        public async Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
+        private const string FirewallPolicyProgId = "HNetCfg.FwPolicy2";
+        private const string FirewallRuleProgId = "HNetCfg.FWRule";
+        private const string FirewallRulePrefix = "server_picker_x_";
+        private const int FirewallRuleDirectionOutbound = 2;
+        private const int FirewallRuleActionBlock = 0;
+        private const int FirewallRuleProtocolAny = 256;
+        private const int FirewallRuleProfilesAll = int.MaxValue;
+
+        public Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            foreach (var serverModel in serverModels)
+            dynamic firewallRules = GetFirewallRules();
+
+            try
             {
-                string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4).ToList());
-
-                using var process = _processService.CreateProcess("cmd.exe");
-
-                process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} " +
-                        "advfirewall firewall " +
-                        "add rule " +
-                        "name=server_picker_x_" + serverModel.Description.Replace(" ", "") +
-                        " dir=out action=block protocol=ANY " + "remoteip=" + ipAddresses;
-
-                try
+                foreach (var serverModel in serverModels)
                 {
-                    process.Start();
-                    await process.WaitForExitAsync();
+                    string ruleName = GetFirewallRuleName(serverModel);
+                    string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4).ToList());
 
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
+                    RemoveFirewallRuleByName(firewallRules, ruleName);
 
-                    if (process.ExitCode > 0)
-                    {
-                        await _loggerService.LogWarningAsync("StdOut: " + stdOut + " StdErr: " + stdErr);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Perform debugging here if necessary (log error or through debugger breakpoints)
-                    throw;
+                    dynamic firewallRule = CreateFirewallRule();
+                    firewallRule.Name = ruleName;
+                    firewallRule.Description = serverModel.Description;
+                    firewallRule.Direction = FirewallRuleDirectionOutbound;
+                    firewallRule.Action = FirewallRuleActionBlock;
+                    firewallRule.Protocol = FirewallRuleProtocolAny;
+                    firewallRule.RemoteAddresses = ipAddresses;
+                    firewallRule.Enabled = true;
+                    firewallRule.Profiles = FirewallRuleProfilesAll;
+
+                    firewallRules.Add(firewallRule);
                 }
             }
+            catch (Exception)
+            {
+                // Perform debugging here if necessary (log error or through debugger breakpoints)
+                throw;
+            }
+
+            return Task.CompletedTask;
         }
 
-        public async Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
+        public Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            foreach (var serverModel in serverModels)
+            dynamic firewallRules = GetFirewallRules();
+
+            try
             {
-                string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4).ToList());
-
-                using var process = _processService.CreateProcess("cmd.exe");
-
-                process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} " +
-                        "advfirewall firewall " +
-                        "delete rule " +
-                        "name=server_picker_x_" + serverModel.Description.Replace(" ", "");
-
-                try
+                foreach (var serverModel in serverModels)
                 {
-                    process.Start();
-                    await process.WaitForExitAsync();
-
-                    string stdOut = process.StandardOutput.ReadToEnd().Trim();
-                    string stdErr = process.StandardError.ReadToEnd().Trim();
-
-                    if (process.ExitCode > 0)
-                    {
-                        await _loggerService.LogWarningAsync("StdOut: " + stdOut + " StdErr: " + stdErr);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Perform debugging here if necessary (log error or through debugger breakpoints)
-                    throw;
+                    string ruleName = GetFirewallRuleName(serverModel);
+                    RemoveFirewallRuleByName(firewallRules, ruleName);
                 }
             }
+            catch (Exception)
+            {
+                // Perform debugging here if necessary (log error or through debugger breakpoints)
+                throw;
+            }
+
+            return Task.CompletedTask;
         }
 
         public async Task ResetFirewallAsync()
@@ -125,10 +120,59 @@ namespace ServerPickerX.Services.SystemFirewalls
                     MsBox.Avalonia.Enums.Icon.Success
                     );
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
                 throw;
+            }
+        }
+
+        private static dynamic CreateComObject(string progId)
+        {
+            Type? comType = Type.GetTypeFromProgID(progId);
+
+            if (comType == null)
+            {
+                throw new InvalidOperationException($"Unable to resolve COM ProgID '{progId}'.");
+            }
+
+            return Activator.CreateInstance(comType)
+                ?? throw new InvalidOperationException($"Unable to create COM instance for '{progId}'.");
+        }
+
+        private static dynamic GetFirewallRules()
+        {
+            dynamic firewallPolicy = CreateComObject(FirewallPolicyProgId);
+            return firewallPolicy.Rules;
+        }
+
+        private static dynamic CreateFirewallRule()
+        {
+            return CreateComObject(FirewallRuleProgId);
+        }
+
+        private static string GetFirewallRuleName(ServerModel serverModel)
+        {
+            return FirewallRulePrefix + serverModel.Description.Replace(" ", "");
+        }
+
+        private static void RemoveFirewallRuleByName(dynamic firewallRules, string ruleName)
+        {
+            while (TryGetFirewallRule(firewallRules, ruleName) != null)
+            {
+                firewallRules.Remove(ruleName);
+            }
+        }
+
+        private static dynamic? TryGetFirewallRule(dynamic firewallRules, string ruleName)
+        {
+            try
+            {
+                return firewallRules.Item(ruleName);
+            }
+            catch
+            {
+                return null;
             }
         }
     }

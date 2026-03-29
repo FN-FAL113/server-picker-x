@@ -6,6 +6,8 @@
         <PublishSingleFile>true</PublishSingleFile> 
         <!-- Unnecessary assemblies or unused code are trimmed to reduce build size, this is very fragile to code changes -->
         <PublishTrimmed>true</PublishTrimmed>
+        <!-- Required for Windows firewall COM interop -->
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<!-- Use partial trim mode else XAML processing (Locale dictionaries will cause errors if property is not set) -->
 		<!-- Had to search the entire internet for this, AvaloniaUI lacks proper documentations -->
 		<TrimMode>partial</TrimMode>
