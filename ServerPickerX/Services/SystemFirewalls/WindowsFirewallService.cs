@@ -30,7 +30,8 @@ namespace ServerPickerX.Services.SystemFirewalls
 
         public Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            dynamic firewallRules = GetFirewallRules();
+            dynamic firewallPolicy = GetFirewallPolicyApi();
+            dynamic firewallRules = firewallPolicy.Rules;
 
             try
             {
@@ -41,7 +42,7 @@ namespace ServerPickerX.Services.SystemFirewalls
 
                     RemoveFirewallRuleByName(firewallRules, ruleName);
 
-                    dynamic firewallRule = CreateFirewallRule();
+                    dynamic firewallRule = CreateFirewallRuleApi();
                     firewallRule.Name = ruleName;
                     firewallRule.Description = serverModel.Description;
                     firewallRule.Direction = FirewallRuleDirectionOutbound;
@@ -65,7 +66,8 @@ namespace ServerPickerX.Services.SystemFirewalls
 
         public Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            dynamic firewallRules = GetFirewallRules();
+            dynamic firewallPolicy = GetFirewallPolicyApi();
+            dynamic firewallRules = firewallPolicy.Rules;
 
             try
             {
@@ -140,13 +142,12 @@ namespace ServerPickerX.Services.SystemFirewalls
                 ?? throw new InvalidOperationException($"Unable to create COM instance for '{progId}'.");
         }
 
-        private static dynamic GetFirewallRules()
+        private static dynamic GetFirewallPolicyApi()
         {
-            dynamic firewallPolicy = CreateComObject(FirewallPolicyProgId);
-            return firewallPolicy.Rules;
+            return CreateComObject(FirewallPolicyProgId);
         }
 
-        private static dynamic CreateFirewallRule()
+        private static dynamic CreateFirewallRuleApi()
         {
             return CreateComObject(FirewallRuleProgId);
         }
