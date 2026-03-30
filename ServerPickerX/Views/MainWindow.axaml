@@ -10,8 +10,8 @@
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="850"
-        MinWidth="850"
+        Width="980"
+        MinWidth="980"
         MaxWidth="1280"
         Height="640"
         MinHeight="500"
@@ -74,8 +74,14 @@
 					<RowDefinition Height="48"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <Grid>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                         <TextBox
                             Classes="search-textbox"
                             Text="{Binding SearchText}"
@@ -102,12 +108,76 @@
                             Margin="8,0,0,0"
                             BorderThickness="1">
                         </ComboBox>
+                        <Grid MinWidth="146" Margin="8,0,20,0">
+                            <ComboBox
+                                x:Name="PresetComboBox"
+                                Classes="game-combobox"
+                                ItemsSource="{Binding PresetItems}"
+                                SelectedItem="{Binding SelectedPreset}"
+                                SelectionChanged="PresetComboBox_SelectionChanged"
+                                IsVisible="{Binding HasPresets}"
+                                IsEnabled="{Binding CanSelectPresets}"
+                                ToolTip.Tip="{DynamicResource PresetToolTip}"
+                                ToolTip.ShowDelay="20"
+                                FontSize="12"
+                                Width="146"
+                                MinWidth="146"
+                                Height="32"
+                                VerticalAlignment="Center"
+                                BorderThickness="1">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Border
+                                IsVisible="{Binding !HasPresets}"
+                                Width="146"
+                                MinWidth="146"
+                                Height="32"
+                                VerticalAlignment="Center"
+                                BorderBrush="#575cd4"
+                                BorderThickness="1"
+                                Background="#804a4e8a"
+                                CornerRadius="2">
+                                <TextBlock
+                                    Margin="12,0,12,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Foreground="White"
+                                    Opacity="0.55"
+                                    TextTrimming="CharacterEllipsis"
+                                    Text="{DynamicResource NoPresets}" />
+                            </Border>
+                        </Grid>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button
+                            x:Name="SavePresetBtn"
+                            Classes="main-btn"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            Content="{DynamicResource SavePreset}"
+                            ToolTip.Tip="{DynamicResource SavePresetToolTip}"
+                            ToolTip.ShowDelay="20"
+                            Click="SavePresetBtn_Click"
+                            VerticalAlignment="Center"
+                            Foreground="White"
+                            Margin="0,0,8,0"/>
+                        <Button
+                            x:Name="DeletePresetBtn"
+                            Classes="main-btn"
+                            IsEnabled="{Binding CanDeletePreset}"
+                            Content="{DynamicResource DeletePreset}"
+                            ToolTip.Tip="{DynamicResource DeletePresetToolTip}"
+                            ToolTip.ShowDelay="20"
+                            Click="DeletePresetBtn_Click"
+                            VerticalAlignment="Center"
+                            Foreground="White"
+                            Margin="0,0,8,0"/>
                         <Button 
                             x:Name="ClusterUnclusterBtn"
                             Classes="main-btn"
-                            Command="{Binding ClusterUnclusterServersAsync}"
                             IsEnabled="{Binding IsOperationAllowed}"
                             Content="{DynamicResource ClusterServers}"
                             ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
