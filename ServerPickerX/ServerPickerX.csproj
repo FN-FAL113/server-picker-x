@@ -6,6 +6,8 @@
         <PublishSingleFile>true</PublishSingleFile> 
         <!-- Unnecessary assemblies or unused code are trimmed to reduce build size, this is very fragile to code changes -->
         <PublishTrimmed>true</PublishTrimmed>
+        <!-- Required for Windows firewall COM interop -->
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<!-- Use partial trim mode else XAML processing (Locale dictionaries will cause errors if property is not set) -->
 		<!-- Had to search the entire internet for this, AvaloniaUI lacks proper documentations -->
 		<TrimMode>partial</TrimMode>
@@ -20,8 +22,8 @@
         <PackageProjectUrl>https://github.com/FN-FAL113/server-picker-x</PackageProjectUrl>
         <RepositoryUrl>https://github.com/FN-FAL113/server-picker-x</RepositoryUrl>
         <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
-        <AssemblyVersion>1.0.3.0</AssemblyVersion>
-        <FileVersion>1.0.3.0</FileVersion>
+        <AssemblyVersion>1.0.4.0</AssemblyVersion>
+        <FileVersion>1.0.4.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,6 +33,10 @@
     </ItemGroup>
 	
     <ItemGroup>
+		<Reference Include="Interop.NetFwTypeLib">
+			<HintPath>libs\Interop.NetFwTypeLib.dll</HintPath>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</Reference>
         <PackageReference Include="Avalonia" Version="11.3.12" />
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.12" />
         <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
