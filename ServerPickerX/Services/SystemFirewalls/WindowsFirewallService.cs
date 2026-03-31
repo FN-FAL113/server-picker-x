@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NetFwTypeLib;
 
 namespace ServerPickerX.Services.SystemFirewalls
 {
@@ -20,11 +21,9 @@ namespace ServerPickerX.Services.SystemFirewalls
         IProcessService _processService
         ) : ISystemFirewallService
     {
-        private const string FirewallPolicyProgId = "HNetCfg.FwPolicy2";
-        private const string FirewallRuleProgId = "HNetCfg.FWRule";
         private const string FirewallRulePrefix = "server_picker_x_";
-        private const int FirewallRuleDirectionOutbound = 2;
-        private const int FirewallRuleActionBlock = 0;
+        private const NET_FW_RULE_DIRECTION_ FirewallRuleDirectionOutbound = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
+        private const NET_FW_ACTION_ FirewallRuleActionBlock = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
         private const int FirewallRuleProtocolAny = 256;
         private const int FirewallRuleProfilesAll = int.MaxValue;
 
@@ -32,17 +31,17 @@ namespace ServerPickerX.Services.SystemFirewalls
         {
             try
             {
-                dynamic firewallPolicy = GetFirewallPolicyApi();
-                dynamic firewallRules = firewallPolicy.Rules;
+                INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
+                INetFwRules firewallRules = firewallPolicy.Rules;
 
                 foreach (var serverModel in serverModels)
                 {
                     string ruleName = GetFirewallRuleName(serverModel);
-                    string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4).ToList());
+                    string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4));
 
                     RemoveFirewallRuleByName(firewallRules, ruleName);
 
-                    dynamic firewallRule = CreateFirewallRuleApi();
+                    INetFwRule firewallRule = CreateFirewallRuleApi();
                     firewallRule.Name = ruleName;
                     firewallRule.Description = serverModel.Description;
                     firewallRule.Direction = FirewallRuleDirectionOutbound;
@@ -57,7 +56,6 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
             catch (Exception ex)
             {
-                // Perform debugging here if necessary (log error or through debugger breakpoints)
                 await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
@@ -67,8 +65,8 @@ namespace ServerPickerX.Services.SystemFirewalls
         {
             try
             {
-                dynamic firewallPolicy = GetFirewallPolicyApi();
-                dynamic firewallRules = firewallPolicy.Rules;
+                INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
+                INetFwRules firewallRules = firewallPolicy.Rules;
 
                 foreach (var serverModel in serverModels)
                 {
@@ -78,7 +76,6 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
             catch (Exception ex)
             {
-                // Perform debugging here if necessary (log error or through debugger breakpoints)
                 await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
@@ -92,10 +89,7 @@ namespace ServerPickerX.Services.SystemFirewalls
                     MsBox.Avalonia.Enums.Icon.Warning
                 );
 
-            if (!result)
-            {
-                return;
-            }
+            if (!result) return;
 
             using Process process = _processService.CreateProcess("cmd.exe");
 
@@ -122,41 +116,21 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
             catch (Exception ex)
             {
-                // Perform debugging here if necessary (log error or through debugger breakpoints)
                 await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
         }
 
-        private static dynamic CreateComObject(string progId)
-        {
-            Type? comType = Type.GetTypeFromProgID(progId);
+        private static INetFwPolicy2 GetFirewallPolicyApi()
+            => (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("E2B3C97F-6AE1-41AC-817A-F6F92166D7DD"))!)!;
 
-            if (comType == null)
-            {
-                throw new InvalidOperationException($"Unable to resolve COM ProgID '{progId}'.");
-            }
-
-            return Activator.CreateInstance(comType)
-                ?? throw new InvalidOperationException($"Unable to create COM instance for '{progId}'.");
-        }
-
-        private static dynamic GetFirewallPolicyApi()
-        {
-            return CreateComObject(FirewallPolicyProgId);
-        }
-
-        private static dynamic CreateFirewallRuleApi()
-        {
-            return CreateComObject(FirewallRuleProgId);
-        }
+        private static INetFwRule CreateFirewallRuleApi()
+            => (INetFwRule)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("2C5BC43E-3369-4C33-AB0C-BE9469677AF4"))!)!;
 
         private static string GetFirewallRuleName(ServerModel serverModel)
-        {
-            return FirewallRulePrefix + serverModel.Description.Replace(" ", "");
-        }
+            => FirewallRulePrefix + serverModel.Description.Replace(" ", "");
 
-        private static void RemoveFirewallRuleByName(dynamic firewallRules, string ruleName)
+        private static void RemoveFirewallRuleByName(INetFwRules firewallRules, string ruleName)
         {
             while (TryGetFirewallRule(firewallRules, ruleName) != null)
             {
@@ -164,16 +138,10 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
         }
 
-        private static dynamic? TryGetFirewallRule(dynamic firewallRules, string ruleName)
+        private static INetFwRule? TryGetFirewallRule(INetFwRules firewallRules, string ruleName)
         {
-            try
-            {
-                return firewallRules.Item(ruleName);
-            }
-            catch
-            {
-                return null;
-            }
+            try { return firewallRules.Item(ruleName); }
+            catch { return null; }
         }
     }
 }
