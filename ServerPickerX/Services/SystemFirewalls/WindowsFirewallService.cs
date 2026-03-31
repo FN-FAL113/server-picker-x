@@ -28,13 +28,13 @@ namespace ServerPickerX.Services.SystemFirewalls
         private const int FirewallRuleProtocolAny = 256;
         private const int FirewallRuleProfilesAll = int.MaxValue;
 
-        public Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
+        public async Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            dynamic firewallPolicy = GetFirewallPolicyApi();
-            dynamic firewallRules = firewallPolicy.Rules;
-
             try
             {
+                dynamic firewallPolicy = GetFirewallPolicyApi();
+                dynamic firewallRules = firewallPolicy.Rules;
+
                 foreach (var serverModel in serverModels)
                 {
                     string ruleName = GetFirewallRuleName(serverModel);
@@ -55,35 +55,33 @@ namespace ServerPickerX.Services.SystemFirewalls
                     firewallRules.Add(firewallRule);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
+                await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
-
-            return Task.CompletedTask;
         }
 
-        public Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
+        public async Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
-            dynamic firewallPolicy = GetFirewallPolicyApi();
-            dynamic firewallRules = firewallPolicy.Rules;
-
             try
             {
+                dynamic firewallPolicy = GetFirewallPolicyApi();
+                dynamic firewallRules = firewallPolicy.Rules;
+
                 foreach (var serverModel in serverModels)
                 {
                     string ruleName = GetFirewallRuleName(serverModel);
                     RemoveFirewallRuleByName(firewallRules, ruleName);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
+                await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
-
-            return Task.CompletedTask;
         }
 
         public async Task ResetFirewallAsync()
@@ -122,9 +120,10 @@ namespace ServerPickerX.Services.SystemFirewalls
                     MsBox.Avalonia.Enums.Icon.Success
                     );
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Perform debugging here if necessary (log error or through debugger breakpoints)
+                await _loggerService.LogErrorAsync(ex.Message);
                 throw;
             }
         }
