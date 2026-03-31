@@ -21,11 +21,11 @@ namespace ServerPickerX.Services.SystemFirewalls
         IProcessService _processService
         ) : ISystemFirewallService
     {
-        private const string FirewallRulePrefix = "server_picker_x_";
-        private const NET_FW_RULE_DIRECTION_ FirewallRuleDirectionOutbound = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
-        private const NET_FW_ACTION_ FirewallRuleActionBlock = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
-        private const int FirewallRuleProtocolAny = 256;
-        private const int FirewallRuleProfilesAll = int.MaxValue;
+        private const string _firewallRulePrefix = "server_picker_x_";
+        private const NET_FW_RULE_DIRECTION_ _firewallRuleDirectionOutbound = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
+        private const NET_FW_ACTION_ _firewallRuleActionBlock = NET_FW_ACTION_.NET_FW_ACTION_BLOCK;
+        private const int _firewallRuleProtocolAny = 256;
+        private const int _firewallRuleProfilesAll = int.MaxValue;
 
         public async Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
@@ -44,12 +44,12 @@ namespace ServerPickerX.Services.SystemFirewalls
                     INetFwRule firewallRule = CreateFirewallRuleApi();
                     firewallRule.Name = ruleName;
                     firewallRule.Description = serverModel.Description;
-                    firewallRule.Direction = FirewallRuleDirectionOutbound;
-                    firewallRule.Action = FirewallRuleActionBlock;
-                    firewallRule.Protocol = FirewallRuleProtocolAny;
+                    firewallRule.Direction = _firewallRuleDirectionOutbound;
+                    firewallRule.Action = _firewallRuleActionBlock;
+                    firewallRule.Protocol = _firewallRuleProtocolAny;
                     firewallRule.RemoteAddresses = ipAddresses;
                     firewallRule.Enabled = true;
-                    firewallRule.Profiles = FirewallRuleProfilesAll;
+                    firewallRule.Profiles = _firewallRuleProfilesAll;
 
                     firewallRules.Add(firewallRule);
                 }
@@ -121,16 +121,16 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
         }
 
-        private static INetFwPolicy2 GetFirewallPolicyApi()
+        public INetFwPolicy2 GetFirewallPolicyApi()
             => (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("E2B3C97F-6AE1-41AC-817A-F6F92166D7DD"))!)!;
 
-        private static INetFwRule CreateFirewallRuleApi()
+        public INetFwRule CreateFirewallRuleApi()
             => (INetFwRule)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("2C5BC43E-3369-4C33-AB0C-BE9469677AF4"))!)!;
 
-        private static string GetFirewallRuleName(ServerModel serverModel)
-            => FirewallRulePrefix + serverModel.Description.Replace(" ", "");
+        public string GetFirewallRuleName(ServerModel serverModel)
+            => _firewallRulePrefix + serverModel.Description.Replace(" ", "");
 
-        private static void RemoveFirewallRuleByName(INetFwRules firewallRules, string ruleName)
+        public void RemoveFirewallRuleByName(INetFwRules firewallRules, string ruleName)
         {
             while (TryGetFirewallRule(firewallRules, ruleName) != null)
             {
@@ -138,10 +138,14 @@ namespace ServerPickerX.Services.SystemFirewalls
             }
         }
 
-        private static INetFwRule? TryGetFirewallRule(INetFwRules firewallRules, string ruleName)
+        public INetFwRule? TryGetFirewallRule(INetFwRules firewallRules, string ruleName)
         {
-            try { return firewallRules.Item(ruleName); }
-            catch { return null; }
+            try 
+            {
+                return firewallRules.Item(ruleName);
+            } catch { 
+                return null;
+            }
         }
     }
 }
