@@ -62,12 +62,12 @@
                     Spacing="8">
                     <Button
                         Classes="main-btn"
-                        Content="{DynamicResource CancelButtonText}"
-                        Click="CancelBtn_Click" />
-                    <Button
-                        Classes="main-btn"
                         Content="{DynamicResource SaveButtonText}"
                         Click="SaveBtn_Click" />
+                    <Button
+                        Classes="main-btn"
+                        Content="{DynamicResource CancelButtonText}"
+                        Click="CancelBtn_Click" />
                 </StackPanel>
             </Grid>
         </Grid>
