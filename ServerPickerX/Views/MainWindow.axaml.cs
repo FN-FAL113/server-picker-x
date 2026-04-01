@@ -170,7 +170,7 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            presetName = presetName?.Trim() ?? string.Empty;
+            presetName = presetName.Trim();
 
             if (string.IsNullOrWhiteSpace(presetName))
             {
@@ -259,13 +259,15 @@ namespace ServerPickerX.Views
 
             DataContext = vm;
 
-            ConfigurePresetControls(vm);
-            RefreshClusterButtonContent();
-
             if (vm.ServersLoaded)
             {
                 await SyncServersAsync(vm);
+                vm.LoadPresetPickerItems();
+                await vm.RestoreLastSelectedPresetAsync();
             }
+
+            ConfigurePresetControls(vm);
+            RefreshClusterButtonContent();
 
             await _versionService.CheckVersionAsync();
         }
@@ -314,10 +316,23 @@ namespace ServerPickerX.Views
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
         {
-            // If Steam SDR API data got updated, sync the changes
             var localRevision = await _jsonSetting.GetRevisionByGameModeAsync();
 
             var fetchedRevision = vm.GetServerDataService().GetFetchedRevision();
+
+            bool isCounterStrikeFamilyGame = _jsonSetting.game_mode is
+                GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld;
+            bool hasAffectedPresets = isCounterStrikeFamilyGame
+                ? _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2).Count > 0 ||
+                  _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2PerfectWorld).Count > 0
+                : _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode).Count > 0;
+
+            // Store the initial revision without a reset when this game has no saved presets yet.
+            if (localRevision == "-1" && !hasAffectedPresets)
+            {
+                await _jsonSetting.SetRevisionByGameModeAsync(fetchedRevision);
+                return;
+            }
 
             // Skip server unblocking and revision sync if local revision is equal to fetched revision
             if (localRevision == fetchedRevision)
@@ -325,13 +340,29 @@ namespace ServerPickerX.Views
                 return;
             }
 
+            // This only happens on successful load and sync on startup or game switch
             await _messageBoxService.ShowMessageBoxAsync(
                     _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
                     _localizationService.GetLocaleValue("SyncServersUnblockAllDialogue"),
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
-            await vm.UnblockCurrentGameServersAsync();
+            bool unblocked = await vm.UnblockCurrentGameServersAsync();
+
+            if (!unblocked)
+            {
+                return;
+            }
+
+            await vm.PruneCurrentGamePresetEntriesAsync();
+
+            if (isCounterStrikeFamilyGame)
+            {
+                if (!await vm.PruneCounterStrikeFamilyPresetEntriesAsync())
+                {
+                    return;
+                }
+            }
 
             await _jsonSetting.SetRevisionByGameModeAsync(fetchedRevision);
         }

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia.Enums;
+using ServerPickerX.Constants;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
@@ -123,9 +124,6 @@ namespace ServerPickerX.ViewModels
             await SetClusterStateAsync(_jsonSetting.is_clustered, false, false);
 
             ServerModelsInitialized = true;
-
-            LoadPresetPickerItems();
-            await RestoreLastSelectedPresetAsync();
         }
 
         [RelayCommand]
@@ -384,7 +382,7 @@ namespace ServerPickerX.ViewModels
         {
             if (ServerModels.Count == 0)
             {
-                return false;
+                return true;
             }
 
             return await PerformOperationAsync(false, new ObservableCollection<ServerModel>(ServerModels), false);
@@ -480,6 +478,74 @@ namespace ServerPickerX.ViewModels
             return _serverDataService;
         }
 
+        public async Task<bool> PruneCurrentGamePresetEntriesAsync()
+        {
+            if (!ServersLoaded)
+            {
+                return false;
+            }
+
+            return await PrunePresetEntriesAsync(_jsonSetting.game_mode, _serverDataService.GetServerData());
+        }
+
+        public async Task<bool> PruneCounterStrikeFamilyPresetEntriesAsync()
+        {
+            // CS2 and Perfect World share one revision bucket, but their filtered server sets differ.
+            // When either mode syncs, prune the sibling mode too before marking the shared revision current.
+            if (_jsonSetting.game_mode == GameModes.CounterStrike2)
+            {
+                CS2PerfectWorldServerDataService perfectWorldServerDataService =
+                    ServiceLocator.GetRequiredService<CS2PerfectWorldServerDataService>();
+
+                if (!await perfectWorldServerDataService.LoadServersAsync())
+                {
+                    return false;
+                }
+
+                await PrunePresetEntriesAsync(
+                    GameModes.CounterStrike2PerfectWorld,
+                    perfectWorldServerDataService.GetServerData()
+                    );
+
+                return true;
+            }
+
+            CS2ServerDataService counterStrikeServerDataService =
+                ServiceLocator.GetRequiredService<CS2ServerDataService>();
+
+            if (!await counterStrikeServerDataService.LoadServersAsync())
+            {
+                return false;
+            }
+
+            await PrunePresetEntriesAsync(
+                GameModes.CounterStrike2,
+                counterStrikeServerDataService.GetServerData()
+                );
+
+            return true;
+        }
+
+        public async Task<bool> PrunePresetEntriesAsync(string gameMode, ServerData serverData)
+        {
+            HashSet<string> clusteredServerKeys = serverData.ClusteredServers
+                .Select(serverModel => serverModel.Description)
+                .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> unclusteredServerKeys = serverData.UnclusteredServers
+                .Select(serverModel => serverModel.Name)
+                .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            bool presetsPruned = await _jsonSetting.PrunePresetEntriesByGameModeAsync(
+                gameMode,
+                clusteredServerKeys,
+                unclusteredServerKeys
+                );
+
+            return presetsPruned;
+        }
+
         private void TrackBlockedServerKeys(IEnumerable<ServerModel> serverModels, bool shouldBlock)
         {
             foreach (ServerModel serverModel in serverModels)
@@ -504,7 +570,7 @@ namespace ServerPickerX.ViewModels
                 : serverModel.Name;
         }
 
-        private async Task RestoreLastSelectedPresetAsync()
+        public async Task RestoreLastSelectedPresetAsync()
         {
             if (!HasPresets)
             {
@@ -571,7 +637,7 @@ namespace ServerPickerX.ViewModels
         {
             return new ObservableCollection<ServerModel>(
                 ServerModels.Where(serverModel =>
-                    (serverPreset.BlockedServerKeys ?? [])
+                    serverPreset.BlockedServerKeys
                         .Contains(GetServerKey(serverModel), StringComparer.OrdinalIgnoreCase))
                 );
         }

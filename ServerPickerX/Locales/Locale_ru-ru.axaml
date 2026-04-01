@@ -32,7 +32,7 @@
   <x:String x:Key="PresetNamePrompt">Введите имя пресета для текущей игры.</x:String>
   <x:String x:Key="PresetNameWatermark">Имя пресета</x:String>
   <x:String x:Key="MessageBoxInfoTitle">информация</x:String>
-  <x:String x:Key="SyncServersUnblockAllDialogue">Valve обновила данные серверов! Все заблокированные серверы будут разблокированы для синхронизации новых данных.</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve обновила данные серверов. Все заблокированные серверы будут разблокированы для синхронизации новых данных. Записи пресета для серверов, которые больше не существуют, будут удалены, а последний выбранный пресет будет применен снова, если он доступен.</x:String>
   <x:String x:Key="NewVersionDialogue">Доступна новая версия! Перейти к релизам?</x:String>
   <x:String x:Key="SelectOneServerToBlockDialogue">Пожалуйста, выберите хотя бы один сервер для блокировки.</x:String>
   <x:String x:Key="SelectOneServerToUnblockDialogue">Пожалуйста, выберите хотя бы один сервер для разблокировки.</x:String>

@@ -1,4 +1,3 @@
-using ServerPickerX.Settings;
 using ServerPickerX.Models;
 using System;
 using System.Collections.Generic;
@@ -14,8 +13,7 @@ namespace ServerPickerX.Services.Servers
     public class DeadLockServerDataService(
         ILoggerService _logger,
         IMessageBoxService _messageBoxService,
-        HttpClient _httpClient,
-        JsonSetting _jsonSettings
+        HttpClient _httpClient
         ) : IServerDataService
     {
         private ServerData _serverData = new();
@@ -46,12 +44,6 @@ namespace ServerPickerX.Services.Servers
                 string revision = mainJson["revision"]!.ToString();
 
                 _serverData.Revision = revision;
-
-                // Update settings if app is initialized for the first time
-                if (_jsonSettings.deadlock_server_revision == "-1")
-                {
-                    await _jsonSettings.SetRevisionByGameModeAsync(revision);
-                }
 
                 ProcessServers(mainJson, _serverData);
             }

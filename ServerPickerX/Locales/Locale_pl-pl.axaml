@@ -32,7 +32,7 @@
   <x:String x:Key="PresetNamePrompt">Wpisz nazwę presetu dla bieżącej gry.</x:String>
   <x:String x:Key="PresetNameWatermark">Nazwa presetu</x:String>
   <x:String x:Key="MessageBoxInfoTitle">informacje</x:String>
-  <x:String x:Key="SyncServersUnblockAllDialogue">Valve właśnie zaktualizowało dane serwera! Wszystkie zablokowane serwery zostaną odblokowane, aby zsynchronizować nowe dane serwera.</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve właśnie zaktualizowało dane serwerów. Wszystkie zablokowane serwery zostaną odblokowane, aby zsynchronizować nowe dane serwera. Wpisy presetów dla serwerów, które już nie istnieją, zostaną usunięte, a ostatnio wybrany preset zostanie zastosowany ponownie, jeśli jest dostępny.</x:String>
   <x:String x:Key="NewVersionDialogue">Nowa wersja dostępna! Przejdź do wydań?</x:String>
   <x:String x:Key="SelectOneServerToBlockDialogue">Hej! Wybierz co najmniej jeden serwer do zablokowania</x:String>
   <x:String x:Key="SelectOneServerToUnblockDialogue">Hej! Wybierz co najmniej jeden serwer do odblokowania</x:String>

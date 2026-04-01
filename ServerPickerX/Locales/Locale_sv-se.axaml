@@ -32,7 +32,7 @@
   <x:String x:Key="PresetNamePrompt">Ange ett namn på förinställningen för det aktuella spelet.</x:String>
   <x:String x:Key="PresetNameWatermark">Namn på förinställning</x:String>
   <x:String x:Key="MessageBoxInfoTitle">info</x:String>
-  <x:String x:Key="SyncServersUnblockAllDialogue">Serverdata har precis uppdaterats av Valve! Alla blockerade servrar kommer att avblockeras för att synkronisera ny serverdata.</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Serverdata har just uppdaterats av Valve. Alla blockerade servrar kommer att avblockeras för att synkronisera ny serverdata. Förinställningsposter för servrar som inte längre finns kommer att tas bort, och den senast valda förinställningen kommer att tillämpas igen om den fortfarande finns.</x:String>
   <x:String x:Key="NewVersionDialogue">Ny version tillgänglig! Gå till utgåvor?</x:String>
   <x:String x:Key="SelectOneServerToBlockDialogue">Välj minst en server att blockera</x:String>
   <x:String x:Key="SelectOneServerToUnblockDialogue">Välj minst en server att avblockera.</x:String>

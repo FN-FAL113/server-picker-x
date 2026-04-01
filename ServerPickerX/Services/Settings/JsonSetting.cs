@@ -296,5 +296,60 @@ namespace ServerPickerX.Settings
 
             await SaveSettingsAsync();
         }
+
+        public async Task<bool> PrunePresetEntriesByGameModeAsync(
+            string gameMode,
+            HashSet<string> clusteredServerKeys,
+            HashSet<string> unclusteredServerKeys
+            )
+        {
+            if (string.IsNullOrWhiteSpace(gameMode))
+            {
+                return false;
+            }
+
+            server_presets ??= [];
+
+            bool presetsChanged = false;
+
+            foreach (ServerPresetModel preset in server_presets.Where(preset =>
+                         (preset.GameMode ?? string.Empty).Equals(gameMode, StringComparison.OrdinalIgnoreCase)))
+            {
+                HashSet<string> validServerKeys = preset.IsClustered
+                    ? clusteredServerKeys
+                    : unclusteredServerKeys;
+
+                List<string> prunedServerKeys = (preset.BlockedServerKeys ?? [])
+                    .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey) && validServerKeys.Contains(serverKey))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                List<string> currentServerKeys = (preset.BlockedServerKeys ?? [])
+                    .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (currentServerKeys.SequenceEqual(prunedServerKeys, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                preset.BlockedServerKeys = prunedServerKeys;
+                presetsChanged = true;
+            }
+
+            if (!presetsChanged)
+            {
+                return false;
+            }
+
+            await SaveSettingsAsync();
+
+            return true;
+        }
+
+
     }
 }

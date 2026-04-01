@@ -32,7 +32,7 @@
   <x:String x:Key="PresetNamePrompt">为当前游戏输入一个预设名称。</x:String>
   <x:String x:Key="PresetNameWatermark">预设名称</x:String>
   <x:String x:Key="MessageBoxInfoTitle">信息</x:String>
-  <x:String x:Key="SyncServersUnblockAllDialogue">Valve刚刚更新了服务器数据！所有被屏蔽的服务器都将被解除屏蔽，以便同步新的服务器数据。</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve 刚刚更新了服务器数据。所有被屏蔽的服务器都将被解除屏蔽，以便同步新的服务器数据。对于已不存在的服务器，其预设条目将被移除，并且如果可用，最后选中的预设将被重新应用。</x:String>
   <x:String x:Key="NewVersionDialogue">新版本已发布！前往发布页面？</x:String>
   <x:String x:Key="SelectOneServerToBlockDialogue">嘿！请至少选择一个服务器进行屏蔽。</x:String>
   <x:String x:Key="SelectOneServerToUnblockDialogue">嘿！请至少选择一个服务器进行解锁。</x:String>

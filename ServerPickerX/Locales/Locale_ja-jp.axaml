@@ -32,7 +32,7 @@
   <x:String x:Key="PresetNamePrompt">現在のゲーム用のプリセット名を入力してください。</x:String>
   <x:String x:Key="PresetNameWatermark">プリセット名</x:String>
   <x:String x:Key="MessageBoxInfoTitle">情報</x:String>
-  <x:String x:Key="SyncServersUnblockAllDialogue">Valveによってサーバーデータが更新されました！新しいサーバーデータを同期するために、ブロックされていたすべてのサーバーのブロックが解除されます。</x:String>
+  <x:String x:Key="SyncServersUnblockAllDialogue">Valve によってサーバーデータが更新されました。新しいサーバーデータと同期するために、ブロックされていたすべてのサーバーのブロックが解除されます。存在しなくなったサーバーのプリセット項目は削除され、可能であれば最後に選択したプリセットが再適用されます。</x:String>
   <x:String x:Key="NewVersionDialogue">新バージョンがリリースされました！リリース一覧へどうぞ。</x:String>
   <x:String x:Key="SelectOneServerToBlockDialogue">こんにちは！ブロックするサーバーを少なくとも1つ選択してください。</x:String>
   <x:String x:Key="SelectOneServerToUnblockDialogue">ブロックを解除したいサーバーを少なくとも1つ選択してください。</x:String>
