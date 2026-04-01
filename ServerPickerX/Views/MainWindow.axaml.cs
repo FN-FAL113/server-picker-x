@@ -441,8 +441,7 @@ namespace ServerPickerX.Views
                 return left == null && right == null;
             }
 
-            return left.GameMode.Equals(right.GameMode, StringComparison.OrdinalIgnoreCase) &&
-                left.Name.Equals(right.Name, StringComparison.OrdinalIgnoreCase);
+            return left.Equals(right);
         }
 
         private void RefreshClusterButtonContent()
