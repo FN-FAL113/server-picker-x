@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">de-de</x:String>
   <x:String x:Key="ClusterServers">Server gruppieren</x:String>
@@ -10,8 +10,6 @@
   <x:String x:Key="BlockSelected">Ausgewählte blockieren</x:String>
   <x:String x:Key="UnblockAll">Alle freigeben</x:String>
   <x:String x:Key="UnblockSelected">Ausgewählte freigeben</x:String>
-  <x:String x:Key="SavePreset">Preset speichern</x:String>
-  <x:String x:Key="DeletePreset">Preset löschen</x:String>
   <x:String x:Key="SaveButtonText">Speichern</x:String>
   <x:String x:Key="CancelButtonText">Abbrechen</x:String>
   <x:String x:Key="CheckForNewVersion">Bei Start nach neuen Versionen suchen</x:String>
@@ -20,17 +18,9 @@
   <x:String x:Key="PresetToolTip">Preset auswählen</x:String>
   <x:String x:Key="ClusterUnclusterToolTip">Server gruppieren oder entgruppieren</x:String>
   <x:String x:Key="RefreshToolTip">Ping aller Server aktualisieren</x:String>
-  <x:String x:Key="SavePresetToolTip">Aktuell blockierte Server als Preset speichern</x:String>
-  <x:String x:Key="DeletePresetToolTip">Ausgewähltes Preset löschen</x:String>
   <x:String x:Key="SwapGameModeUnblockAllConflict">Diese Aktion wird zuerst alle Server freigeben, um Firewall-Konflikte zu vermeiden.</x:String>
-  <x:String x:Key="PresetDeleteConfirmDialogue">Preset '{0}' löschen?</x:String>
-  <x:String x:Key="PresetOverwriteConfirmDialogue">Ein Preset mit dem Namen '{0}' existiert für dieses Spiel bereits. Überschreiben?</x:String>
-  <x:String x:Key="PresetNameRequiredDialogue">Der Preset-Name darf nicht leer sein.</x:String>
   <x:String x:Key="LanguageComboBoxToolTip">Sprache auswählen</x:String>
   <x:String x:Key="ResetFirewallToolTip">Firewall-Regeln zurücksetzen</x:String>
-  <x:String x:Key="PresetNameTitle">Preset speichern</x:String>
-  <x:String x:Key="PresetNamePrompt">Einen Preset-Namen für das aktuelle Spiel eingeben.</x:String>
-  <x:String x:Key="PresetNameWatermark">Preset-Name</x:String>
   <x:String x:Key="MessageBoxInfoTitle">Info</x:String>
   <x:String x:Key="SyncServersUnblockAllDialogue">Die Serverdaten wurden gerade von Valve aktualisiert! Alle blockierten Server werden entsperrt, um die neuen Serverdaten zu synchronisieren. Preset-Einträge für Server, die nicht mehr existieren, werden entfernt, und das zuletzt ausgewählte Preset wird erneut angewendet, falls verfügbar.</x:String>
   <x:String x:Key="NewVersionDialogue">Neue Version verfügbar! Zu den Veröffentlichungen?</x:String>
@@ -39,4 +29,22 @@
   <x:String x:Key="PendingOperationDialogue">Moment! Ein Vorgang läuft bereits. Bitte warten Sie...</x:String>
   <x:String x:Key="FirewallResetConfirmDialogue">Dadurch wird versucht, die Firewall auf den Standardzustand zurückzusetzen. Aktion bestätigen?</x:String>
   <x:String x:Key="FirewallResetSuccessDialogue">Firewall erfolgreich zurückgesetzt!</x:String>
+  <x:String x:Key="Presets">Voreinstellungen</x:String>
+  <x:String x:Key="PresetsToolTip">Voreinstellungen verwalten</x:String>
+  <x:String x:Key="AddPreset">Hinzufügen</x:String>
+  <x:String x:Key="NewPresetName">Neues Preset</x:String>
+  <x:String x:Key="AddPresetToolTip">Neues Preset erstellen</x:String>
+  <x:String x:Key="DeletePreset">Löschen</x:String>
+  <x:String x:Key="DeletePresetToolTip">Ausgewählte Presets löschen</x:String>
+  <x:String x:Key="ApplyPreset">Anwenden</x:String>
+  <x:String x:Key="ApplyPresetToolTip">Ausgewähltes Preset anwenden</x:String>
+  <x:String x:Key="PresetsWindowTitle">Voreinstellungen</x:String>
+  <x:String x:Key="PresetServersHeader">Blockierte Server</x:String>
+  <x:String x:Key="BlockedColumnHeader">Blockiert</x:String>
+  <x:String x:Key="PresetListHeader">Voreinstellung</x:String>
+  <x:String x:Key="PresetDeleteConfirmDialogue">Preset '{0}' löschen?</x:String>
+  <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Die {0} ausgewählten Presets löschen?</x:String>
+  <x:String x:Key="PresetOverwriteConfirmDialogue">Ein Preset mit dem Namen '{0}' existiert für dieses Spiel bereits. Überschreiben?</x:String>
+  <x:String x:Key="PresetChangeViewModeConfirmDialogue">Das Wechseln zwischen gruppierter und entgruppierter Ansicht löscht die blockierten Einträge dieses Presets. Fortfahren?</x:String>
+  <x:String x:Key="PresetNameRequiredDialogue">Der Preset-Name darf nicht leer sein.</x:String>
 </ResourceDictionary>

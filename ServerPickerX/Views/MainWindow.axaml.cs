@@ -151,98 +151,23 @@ namespace ServerPickerX.Views
             RefreshClusterButtonContent();
         }
 
-        private async void SavePresetBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void PresetsBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (DataContext is not MainWindowViewModel vm)
             {
                 return;
             }
 
-            PresetNameWindow presetNameWindow = new(vm.GetPresetNameSuggestion())
+            PresetManagerWindow presetManagementWindow = new(vm)
             {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
 
-            string? presetName = await presetNameWindow.ShowDialog<string?>(this);
+            await presetManagementWindow.ShowDialog(this);
 
-            if (presetName == null)
-            {
-                return;
-            }
-
-            presetName = presetName.Trim();
-
-            if (string.IsNullOrWhiteSpace(presetName))
-            {
-                await _messageBoxService.ShowMessageBoxAsync(
-                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
-                    _localizationService.GetLocaleValue("PresetNameRequiredDialogue")
-                    );
-
-                return;
-            }
-
-            ServerPresetModel? existingPreset = vm.GetCurrentGamePreset(presetName);
-            bool isSuggestedPresetName = vm.IsSuggestedPresetName(presetName);
-
-            if (existingPreset != null && !isSuggestedPresetName)
-            {
-                bool overwriteResult = await _messageBoxService.ShowMessageBoxConfirmationAsync(
-                    _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
-                    string.Format(_localizationService.GetLocaleValue("PresetOverwriteConfirmDialogue"), presetName),
-                    MsBox.Avalonia.Enums.Icon.Setting
-                    );
-
-                if (!overwriteResult)
-                {
-                    return;
-                }
-            }
-
-            _suppressPresetSelectionChanged = true;
-
-            try
-            {
-                await vm.SavePresetAsync(presetName);
-
-                SyncPresetSelection(vm.SelectedPreset);
-            }
-            finally
-            {
-                _suppressPresetSelectionChanged = false;
-            }
-        }
-
-        private async void DeletePresetBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            if (DataContext is not MainWindowViewModel vm || vm.SelectedPreset == null)
-            {
-                return;
-            }
-
-            bool deleteResult = await _messageBoxService.ShowMessageBoxConfirmationAsync(
-                _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
-                string.Format(_localizationService.GetLocaleValue("PresetDeleteConfirmDialogue"), vm.SelectedPreset.Name),
-                MsBox.Avalonia.Enums.Icon.Warning
-                );
-
-            if (!deleteResult)
-            {
-                return;
-            }
-
-            _suppressPresetSelectionChanged = true;
-
-            try
-            {
-                await vm.DeleteSelectedPresetAsync();
-
-                SyncPresetSelection(vm.SelectedPreset);
-            }
-            finally
-            {
-                _suppressPresetSelectionChanged = false;
-            }
+            vm.LoadPresetPickerItems();
+            SyncPresetSelection(vm.SelectedPreset);
+            RefreshClusterButtonContent();
         }
 
         public async Task InitializeApp()

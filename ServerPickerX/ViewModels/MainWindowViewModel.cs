@@ -51,18 +51,15 @@ namespace ServerPickerX.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
-        [NotifyPropertyChangedFor(nameof(CanDeletePreset))]
         [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
         public bool serverModelsInitialized = false;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
-        [NotifyPropertyChangedFor(nameof(CanDeletePreset))]
         [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
         public bool pendingOperation = false;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(CanDeletePreset))]
         public ServerPresetModel? selectedPreset;
 
         [ObservableProperty]
@@ -71,8 +68,6 @@ namespace ServerPickerX.ViewModels
 
         // Dependent/Computed prop for main UI buttons `IsEnabled` state
         public bool IsOperationAllowed => !PendingOperation && ServerModelsInitialized;
-
-        public bool CanDeletePreset => IsOperationAllowed && SelectedPreset != null;
 
         public bool CanSelectPresets => IsOperationAllowed && HasPresets;
 
@@ -225,44 +220,20 @@ namespace ServerPickerX.ViewModels
                 preset.Name.Equals(presetName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task SavePresetAsync(string presetName)
+        public string GetCurrentGameMode() => _jsonSetting.game_mode;
+
+        public IReadOnlyList<ServerModel> GetCurrentGameServerModels(bool isClustered)
         {
-            ServerPresetModel serverPreset = new()
-            {
-                Name = presetName.Trim(),
-                GameMode = _jsonSetting.game_mode,
-                IsClustered = _jsonSetting.is_clustered,
-                BlockedServerKeys = _blockedServerKeys
-                    .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
-                    .ToList(),
-            };
+            ServerData serverData = _serverDataService.GetServerData();
 
-            await _jsonSetting.AddOrUpdatePresetAsync(serverPreset);
-            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(serverPreset.Name);
-
-            _presetNameSuggestion = serverPreset.Name;
-            LoadPresetPickerItems();
-            SelectPresetByName(serverPreset.Name);
+            return isClustered
+                ? serverData.ClusteredServers
+                : serverData.UnclusteredServers;
         }
 
-        public string GetPresetNameSuggestion()
+        public async Task DeletePresetAsync(ServerPresetModel preset)
         {
-            return SelectedPreset?.Name ?? _presetNameSuggestion;
-        }
-
-        public bool IsSuggestedPresetName(string presetName)
-        {
-            return GetPresetNameSuggestion().Equals(presetName, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public async Task DeleteSelectedPresetAsync()
-        {
-            if (SelectedPreset == null)
-            {
-                return;
-            }
-
-            string deletedPresetName = SelectedPreset.Name;
+            string deletedPresetName = preset.Name;
 
             await _jsonSetting.RemovePresetAsync(_jsonSetting.game_mode, deletedPresetName);
 
@@ -271,13 +242,18 @@ namespace ServerPickerX.ViewModels
                 await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
             }
 
-            if (GetPresetNameSuggestion().Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase))
+            if ((SelectedPreset?.Name ?? string.Empty).Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase) ||
+                _presetNameSuggestion.Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase))
             {
                 _presetNameSuggestion = string.Empty;
             }
 
             LoadPresetPickerItems();
-            ClearSelectedPreset();
+
+            if (SelectedPreset?.Equals(preset) == true)
+            {
+                ClearSelectedPreset();
+            }
         }
 
         public async Task<bool> ApplyPresetAsync(ServerPresetModel serverPreset)
@@ -563,11 +539,18 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        private string GetServerKey(ServerModel serverModel)
+        public string GetCurrentServerKey(ServerModel serverModel) => GetServerKey(serverModel);
+
+        public string GetServerKey(ServerModel serverModel, bool isClustered)
         {
-            return _jsonSetting.is_clustered
+            return isClustered
                 ? serverModel.Description
                 : serverModel.Name;
+        }
+
+        private string GetServerKey(ServerModel serverModel)
+        {
+            return GetServerKey(serverModel, _jsonSetting.is_clustered);
         }
 
         public async Task RestoreLastSelectedPresetAsync()

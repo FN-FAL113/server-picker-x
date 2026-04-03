@@ -245,7 +245,6 @@ namespace ServerPickerX.Settings
 
             return (server_presets ?? [])
                 .Where(preset => (preset.GameMode ?? string.Empty).Equals(normalizedGameMode, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
