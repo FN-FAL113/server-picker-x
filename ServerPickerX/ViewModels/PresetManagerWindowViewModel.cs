@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MsBox.Avalonia.Enums;
-using Avalonia.Platform;
 using ServerPickerX.Comparers;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
@@ -11,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.ViewModels
@@ -19,16 +17,16 @@ namespace ServerPickerX.ViewModels
     public partial class PresetManagerWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollectionExtended<PresetListItemViewModel> presets = [];
+        private ObservableCollectionExtended<PresetItemModel> presets = [];
 
-        public ObservableCollectionExtended<PresetServerSelectionItem> ServerItems { get; } = [];
+        public ObservableCollectionExtended<PresetServerItemModel> ServerItems { get; } = [];
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanDelete))]
         [NotifyPropertyChangedFor(nameof(CanApply))]
         [NotifyPropertyChangedFor(nameof(CanEditPreset))]
         [NotifyPropertyChangedFor(nameof(CanToggleClusterMode))]
-        private PresetListItemViewModel? selectedPresetItem;
+        private PresetItemModel? selectedPresetItem;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanDelete))]
@@ -73,13 +71,8 @@ namespace ServerPickerX.ViewModels
             ReloadPresets(_mainVm.SelectedPreset?.Name);
         }
 
-        partial void OnSelectedPresetItemChanged(PresetListItemViewModel? oldValue, PresetListItemViewModel? newValue)
+        partial void OnSelectedPresetItemChanged(PresetItemModel? oldValue, PresetItemModel? newValue)
         {
-            if (oldValue != null && !ReferenceEquals(oldValue, newValue))
-            {
-                oldValue.IsEditing = false;
-            }
-
             if (newValue != null)
             {
                 EditorIsClustered = newValue.Preset.IsClustered;
@@ -187,7 +180,7 @@ namespace ServerPickerX.ViewModels
             return await _mainVm.ApplyPresetAsync(ClonePreset(SelectedPresetItem.Preset));
         }
 
-        public async Task<bool> RenamePresetAsync(PresetListItemViewModel presetItem, string originalPresetName)
+        public async Task<bool> RenamePresetAsync(PresetItemModel presetItem, string originalPresetName)
         {
             if (presetItem == null)
             {
@@ -306,7 +299,7 @@ namespace ServerPickerX.ViewModels
         public void SortPresets(ListSortDirection direction)
         {
             string? selectedPresetName = SelectedPresetItem?.Name;
-            List<PresetListItemViewModel> sortedPresets = (direction == ListSortDirection.Ascending
+            List<PresetItemModel> sortedPresets = (direction == ListSortDirection.Ascending
                 ? Presets.OrderBy(preset => preset.Name, NaturalStringComparer.OrdinalIgnoreCase)
                 : Presets.OrderByDescending(preset => preset.Name, NaturalStringComparer.OrdinalIgnoreCase))
                 .ToList();
@@ -323,7 +316,7 @@ namespace ServerPickerX.ViewModels
 
         public void SortServerItems(string sortKey, ListSortDirection direction)
         {
-            List<PresetServerSelectionItem> sortedItems = sortKey switch
+            List<PresetServerItemModel> sortedItems = sortKey switch
             {
                 "Blocked" => (direction == ListSortDirection.Ascending
                     ? ServerItems.OrderBy(serverItem => serverItem.IsBlocked)
@@ -358,8 +351,8 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            Presets = new ObservableCollectionExtended<PresetListItemViewModel>(
-                currentPresets.Select(preset => new PresetListItemViewModel(ClonePreset(preset))).ToList()
+            Presets = new ObservableCollectionExtended<PresetItemModel>(
+                currentPresets.Select(preset => new PresetItemModel(ClonePreset(preset))).ToList()
                 );
 
             SelectedPresetItem = !string.IsNullOrWhiteSpace(presetNameToSelect)
@@ -386,15 +379,7 @@ namespace ServerPickerX.ViewModels
             {
                 string serverKey = _mainVm.GetServerKey(serverModel, SelectedPresetItem.Preset.IsClustered);
 
-                ServerItems.Add(new PresetServerSelectionItem(serverModel, serverKey, blockedServerKeys.Contains(serverKey)));
-            }
-        }
-
-        public void StopEditingPresets()
-        {
-            foreach (PresetListItemViewModel preset in Presets)
-            {
-                preset.IsEditing = false;
+                ServerItems.Add(new PresetServerItemModel(serverModel, serverKey, blockedServerKeys.Contains(serverKey)));
             }
         }
 
@@ -503,100 +488,7 @@ namespace ServerPickerX.ViewModels
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
                     .ToList(),
-            };
-        }
-    }
-
-    public partial class PresetListItemViewModel : ObservableObject
-    {
-        public ServerPresetModel Preset { get; }
-
-        public string Name
-        {
-            get => Preset.Name;
-            set
-            {
-                if (Preset.Name == value)
-                {
-                    return;
-                }
-
-                Preset.Name = value;
-                OnPropertyChanged();
-            }
-        }
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsDisplayVisible))]
-        [NotifyPropertyChangedFor(nameof(IsEditorVisible))]
-        private bool isEditing;
-
-        public bool IsDisplayVisible => !IsEditing;
-
-        public bool IsEditorVisible => IsEditing;
-
-        public PresetListItemViewModel(ServerPresetModel preset)
-        {
-            Preset = preset;
-        }
-    }
-
-    public partial class PresetServerSelectionItem : ObservableObject
-    {
-        private static readonly Dictionary<string, string> FlagSortKeyCache = new(StringComparer.OrdinalIgnoreCase);
-
-        public ServerModel ServerModel { get; }
-
-        public string Key { get; }
-
-        public string Flag => ServerModel.Flag;
-
-        public string FlagSortKey { get; }
-
-        public string Name => ServerModel.Name;
-
-        public string Description => ServerModel.Description;
-
-        [ObservableProperty]
-        private bool isBlocked;
-
-        public PresetServerSelectionItem(ServerModel serverModel, string key, bool isBlocked)
-        {
-            ServerModel = serverModel;
-            Key = key;
-            IsBlocked = isBlocked;
-            FlagSortKey = GetFlagSortKey(serverModel.Flag);
-        }
-
-        private static string GetFlagSortKey(string flagPath)
-        {
-            if (string.IsNullOrWhiteSpace(flagPath))
-            {
-                return string.Empty;
-            }
-
-            if (FlagSortKeyCache.TryGetValue(flagPath, out string? cachedValue))
-            {
-                return cachedValue;
-            }
-
-            string assetUri = $"avares://ServerPickerX{flagPath}";
-
-            try
-            {
-                using var stream = AssetLoader.Open(new Uri(assetUri));
-                byte[] hash = SHA256.HashData(stream);
-                string flagSortKey = Convert.ToHexString(hash);
-                FlagSortKeyCache[flagPath] = flagSortKey;
-
-                return flagSortKey;
-            }
-            catch
-            {
-                FlagSortKeyCache[flagPath] = flagPath;
-
-                return flagPath;
-            }
+                };
         }
     }
 }

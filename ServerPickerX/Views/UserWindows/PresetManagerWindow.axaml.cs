@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.MessageBoxes;
@@ -18,7 +19,6 @@ namespace ServerPickerX.Views
 {
     public partial class PresetManagerWindow : Window
     {
-        private readonly MainWindowViewModel? _mainVm;
         private bool _allowPresetNameEdit;
         private bool _committingPresetName;
         private bool _isEditingPresetName;
@@ -35,9 +35,8 @@ namespace ServerPickerX.Views
         public PresetManagerWindow(MainWindowViewModel mainVm)
         {
             InitializeComponent();
-            _mainVm = mainVm;
             DataContext = new PresetManagerWindowViewModel(
-                _mainVm,
+                mainVm,
                 ServiceLocator.GetRequiredService<JsonSetting>(),
                 ServiceLocator.GetRequiredService<IMessageBoxService>(),
                 ServiceLocator.GetRequiredService<ILocalizationService>()
@@ -117,7 +116,7 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            if (e.Row.DataContext is not PresetListItemViewModel presetItem)
+            if (e.Row.DataContext is not PresetItemModel presetItem)
             {
                 return;
             }
@@ -132,7 +131,7 @@ namespace ServerPickerX.Views
             _isEditingPresetName = false;
             PresetListGrid.IsReadOnly = true;
 
-            if (e.EditAction != DataGridEditAction.Commit || e.Row.DataContext is not PresetListItemViewModel presetItem)
+            if (e.EditAction != DataGridEditAction.Commit || e.Row.DataContext is not PresetItemModel presetItem)
             {
                 return;
             }
@@ -157,7 +156,7 @@ namespace ServerPickerX.Views
             BeginEditingSelectedPreset();
         }
 
-        private async Task CommitPresetNameAsync(PresetListItemViewModel presetItem, string originalPresetName)
+        private async Task CommitPresetNameAsync(PresetItemModel presetItem, string originalPresetName)
         {
             if (_committingPresetName || DataContext is not PresetManagerWindowViewModel vm)
             {
@@ -188,7 +187,7 @@ namespace ServerPickerX.Views
 
             if (e.Key == Key.Delete)
             {
-                List<PresetListItemViewModel> selectedPresetItems = GetSelectedPresetItems();
+                List<PresetItemModel> selectedPresetItems = GetSelectedPresetItems();
 
                 if (selectedPresetItems.Count == 0)
                 {
@@ -252,8 +251,8 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            List<PresetServerSelectionItem> selectedItems = ServerItemsGrid.SelectedItems
-                .OfType<PresetServerSelectionItem>()
+            List<PresetServerItemModel> selectedItems = ServerItemsGrid.SelectedItems
+                .OfType<PresetServerItemModel>()
                 .ToList();
 
             if (selectedItems.Count == 0)
@@ -265,7 +264,7 @@ namespace ServerPickerX.Views
 
             bool shouldBlock = selectedItems.Any(serverItem => !serverItem.IsBlocked);
 
-            foreach (PresetServerSelectionItem serverItem in selectedItems)
+            foreach (PresetServerItemModel serverItem in selectedItems)
             {
                 serverItem.IsBlocked = shouldBlock;
             }
@@ -353,7 +352,6 @@ namespace ServerPickerX.Views
                     return;
                 }
 
-                vm.StopEditingPresets();
                 PresetListGrid.Focus();
                 _allowPresetNameEdit = true;
                 PresetListGrid.IsReadOnly = false;
@@ -362,11 +360,11 @@ namespace ServerPickerX.Views
             });
         }
 
-        private List<PresetListItemViewModel> GetSelectedPresetItems()
+        private List<PresetItemModel> GetSelectedPresetItems()
         {
             IEnumerable selectedItems = PresetListGrid.SelectedItems ?? System.Array.Empty<object>();
-            List<PresetListItemViewModel> selectedPresetItems = selectedItems
-                .OfType<PresetListItemViewModel>()
+            List<PresetItemModel> selectedPresetItems = selectedItems
+                .OfType<PresetItemModel>()
                 .Distinct()
                 .ToList();
 

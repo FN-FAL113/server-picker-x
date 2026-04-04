@@ -539,8 +539,6 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        public string GetCurrentServerKey(ServerModel serverModel) => GetServerKey(serverModel);
-
         public string GetServerKey(ServerModel serverModel, bool isClustered)
         {
             return isClustered
