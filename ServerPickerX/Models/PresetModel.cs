@@ -1,9 +1,10 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 
 namespace ServerPickerX.Models
 {
-    public class ServerPresetModel
+    public class PresetModel : ObservableObject
     {
         public string Name { get; set; } = string.Empty;
 
@@ -15,7 +16,7 @@ namespace ServerPickerX.Models
 
         public override bool Equals(object? obj)
         {
-            return obj is ServerPresetModel other &&
+            return obj is PresetModel other &&
                 GameMode.Equals(other.GameMode, StringComparison.OrdinalIgnoreCase) &&
                 Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
         }

@@ -24,8 +24,6 @@ namespace ServerPickerX.ViewModels
     {
         public ObservableCollectionExtended<ServerModel> ServerModels { get; set; } = [];
 
-        public ObservableCollectionExtended<ServerPresetModel> PresetItems { get; set; } = [];
-
         // Property resolved through expression body that react to changes from another observable property
         public ObservableCollectionExtended<ServerModel> FilteredServerModels =>
              string.IsNullOrWhiteSpace(SearchText)
@@ -34,6 +32,8 @@ namespace ServerPickerX.ViewModels
                     s.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                     s.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
                 ));
+
+        public ObservableCollectionExtended<PresetModel> PresetItems { get; set; } = [];
 
         public ServerModel? SelectedDataGridServerModel { get; set; }
 
@@ -60,7 +60,7 @@ namespace ServerPickerX.ViewModels
         public bool pendingOperation = false;
 
         [ObservableProperty]
-        public ServerPresetModel? selectedPreset;
+        public PresetModel? selectedPreset;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
@@ -78,7 +78,6 @@ namespace ServerPickerX.ViewModels
         private readonly ISystemFirewallService _systemFirewallService;
         private readonly JsonSetting _jsonSetting;
         private readonly HashSet<string> _blockedServerKeys = new(StringComparer.OrdinalIgnoreCase);
-        private string _presetNameSuggestion = string.Empty;
 
         // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
         public MainWindowViewModel()
@@ -111,7 +110,6 @@ namespace ServerPickerX.ViewModels
 
         public async Task LoadServersAsync()
         {
-            _presetNameSuggestion = string.Empty;
             ServersLoaded = await _serverDataService.LoadServersAsync();
 
             if (!ServersLoaded) return;
@@ -178,12 +176,12 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        public List<ServerPresetModel> GetCurrentGamePresets()
+        public List<PresetModel> GetCurrentGamePresets()
         {
             return _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode);
         }
 
-        public ServerPresetModel? GetCurrentGamePreset(string presetName)
+        public PresetModel? GetCurrentGamePreset(string presetName)
         {
             return _jsonSetting.GetPresetByGameMode(_jsonSetting.game_mode, presetName);
         }
@@ -191,7 +189,7 @@ namespace ServerPickerX.ViewModels
         public void LoadPresetPickerItems()
         {
             string? selectedPresetName = SelectedPreset?.Name;
-            List<ServerPresetModel> presetItems = GetCurrentGamePresets();
+            List<PresetModel> presetItems = GetCurrentGamePresets();
 
             PresetItems.Clear();
 
@@ -231,7 +229,7 @@ namespace ServerPickerX.ViewModels
                 : serverData.UnclusteredServers;
         }
 
-        public async Task DeletePresetAsync(ServerPresetModel preset)
+        public async Task DeletePresetAsync(PresetModel preset)
         {
             string deletedPresetName = preset.Name;
 
@@ -242,12 +240,6 @@ namespace ServerPickerX.ViewModels
                 await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
             }
 
-            if ((SelectedPreset?.Name ?? string.Empty).Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase) ||
-                _presetNameSuggestion.Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase))
-            {
-                _presetNameSuggestion = string.Empty;
-            }
-
             LoadPresetPickerItems();
 
             if (SelectedPreset?.Equals(preset) == true)
@@ -256,29 +248,28 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        public async Task<bool> ApplyPresetAsync(ServerPresetModel serverPreset)
+        public async Task<bool> ApplyPresetAsync(PresetModel preset)
         {
             if (!ServersLoaded)
             {
                 return false;
             }
 
-            if (!serverPreset.GameMode.Equals(_jsonSetting.game_mode, StringComparison.OrdinalIgnoreCase))
+            if (!preset.GameMode.Equals(_jsonSetting.game_mode, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            bool presetApplied = await ApplyPresetWithResetAsync(serverPreset);
+            bool presetApplied = await ApplyPresetWithResetAsync(preset);
 
             if (!presetApplied)
             {
                 return false;
             }
 
-            ReplaceBlockedServerKeysFromPreset(serverPreset);
-            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(serverPreset.Name);
-            _presetNameSuggestion = serverPreset.Name;
-            SelectPresetByName(serverPreset.Name);
+            ReplaceBlockedServerKeysFromPreset(preset);
+            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(preset.Name);
+            SelectPresetByName(preset.Name);
 
             return true;
         }
@@ -569,7 +560,7 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            ServerPresetModel? lastSelectedPreset = GetCurrentGamePreset(lastSelectedPresetName);
+            PresetModel? lastSelectedPreset = GetCurrentGamePreset(lastSelectedPresetName);
 
             if (lastSelectedPreset == null)
             {
@@ -586,7 +577,7 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        private async Task<bool> ApplyPresetWithResetAsync(ServerPresetModel serverPreset)
+        private async Task<bool> ApplyPresetWithResetAsync(PresetModel serverPreset)
         {
             if (ServerModels.Count > 0)
             {
@@ -614,7 +605,7 @@ namespace ServerPickerX.ViewModels
             return await PerformOperationAsync(true, matchingServerModels, false);
         }
 
-        private ObservableCollection<ServerModel> GetMatchingServerModels(ServerPresetModel serverPreset)
+        private ObservableCollection<ServerModel> GetMatchingServerModels(PresetModel serverPreset)
         {
             return new ObservableCollection<ServerModel>(
                 ServerModels.Where(serverModel =>
@@ -623,7 +614,7 @@ namespace ServerPickerX.ViewModels
                 );
         }
 
-        private void ReplaceBlockedServerKeysFromPreset(ServerPresetModel serverPreset)
+        private void ReplaceBlockedServerKeysFromPreset(PresetModel serverPreset)
         {
             ObservableCollection<ServerModel> matchingServerModels = GetMatchingServerModels(serverPreset);
 
@@ -642,11 +633,6 @@ namespace ServerPickerX.ViewModels
 
         private async Task MarkPresetSelectionDirtyAsync()
         {
-            if (SelectedPreset != null)
-            {
-                _presetNameSuggestion = SelectedPreset.Name;
-            }
-
             await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
 
             ClearSelectedPreset();

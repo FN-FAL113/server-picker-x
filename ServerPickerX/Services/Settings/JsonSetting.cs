@@ -43,7 +43,7 @@ namespace ServerPickerX.Settings
 
         public virtual bool version_check_on_startup { get; set; } = true;
 
-        public virtual List<ServerPresetModel> server_presets { get; set; } = [];
+        public virtual List<PresetModel> server_presets { get; set; } = [];
 
         public virtual Dictionary<string, string> last_selected_preset_names { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -239,7 +239,7 @@ namespace ServerPickerX.Settings
             await SaveSettingsAsync();
         }
 
-        public List<ServerPresetModel> GetPresetsByGameMode(string gameMode)
+        public List<PresetModel> GetPresetsByGameMode(string gameMode)
         {
             string normalizedGameMode = gameMode ?? string.Empty;
 
@@ -248,7 +248,7 @@ namespace ServerPickerX.Settings
                 .ToList();
         }
 
-        public ServerPresetModel? GetPresetByGameMode(string gameMode, string presetName)
+        public PresetModel? GetPresetByGameMode(string gameMode, string presetName)
         {
             string normalizedGameMode = gameMode ?? string.Empty;
             string normalizedPresetName = presetName ?? string.Empty;
@@ -258,28 +258,41 @@ namespace ServerPickerX.Settings
                 (preset.Name ?? string.Empty).Equals(normalizedPresetName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task AddOrUpdatePresetAsync(ServerPresetModel serverPreset)
+        public bool HasDuplicatePresetNameByCurrentGameMode(string presetName)
+        {
+            string normalizedPresetName = presetName ?? string.Empty;
+
+            return (server_presets ?? [])
+                .Count(preset =>
+                    (preset.GameMode ?? string.Empty).Equals(this.game_mode, StringComparison.OrdinalIgnoreCase) &&
+                    (preset.Name ?? string.Empty).Equals(normalizedPresetName, StringComparison.OrdinalIgnoreCase)
+                ) > 1;
+        }
+
+        public async Task AddOrUpdatePresetAsync(PresetModel preset)
         {
             server_presets ??= [];
-            ServerPresetModel? existingPreset = GetPresetByGameMode(serverPreset.GameMode, serverPreset.Name);
-            List<string> blockedServerKeys = serverPreset.BlockedServerKeys
+
+            PresetModel? existingPreset = GetPresetByGameMode(preset.GameMode, preset.Name);
+
+            List<string> blockedServerKeys = preset.BlockedServerKeys
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             if (existingPreset == null)
             {
-                server_presets.Add(new ServerPresetModel
+                server_presets.Add(new PresetModel
                 {
-                    Name = serverPreset.Name,
-                    GameMode = serverPreset.GameMode,
-                    IsClustered = serverPreset.IsClustered,
+                    Name = preset.Name,
+                    GameMode = preset.GameMode,
+                    IsClustered = preset.IsClustered,
                     BlockedServerKeys = blockedServerKeys,
                 });
             }
             else
             {
-                existingPreset.IsClustered = serverPreset.IsClustered;
+                existingPreset.IsClustered = preset.IsClustered;
                 existingPreset.BlockedServerKeys = blockedServerKeys;
             }
 
@@ -311,7 +324,7 @@ namespace ServerPickerX.Settings
 
             bool presetsChanged = false;
 
-            foreach (ServerPresetModel preset in server_presets.Where(preset =>
+            foreach (PresetModel preset in server_presets.Where(preset =>
                          (preset.GameMode ?? string.Empty).Equals(gameMode, StringComparison.OrdinalIgnoreCase)))
             {
                 HashSet<string> validServerKeys = preset.IsClustered

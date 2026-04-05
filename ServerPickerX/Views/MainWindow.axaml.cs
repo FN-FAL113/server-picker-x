@@ -36,7 +36,7 @@ namespace ServerPickerX.Views
 
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
         private bool _suppressPresetSelectionChanged;
-        private ServerPresetModel? _previousPreset;
+        private PresetModel? _previousPreset;
 
         private readonly ILoggerService _loggerService;
         private readonly JsonSetting _jsonSetting;
@@ -88,8 +88,8 @@ namespace ServerPickerX.Views
 
         private async void PresetComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            ServerPresetModel? previousPreset = e.RemovedItems.Count > 0
-                ? e.RemovedItems[0] as ServerPresetModel
+            PresetModel? previousPreset = e.RemovedItems.Count > 0
+                ? e.RemovedItems[0] as PresetModel
                 : _previousPreset;
 
             if (_suppressPresetSelectionChanged)
@@ -97,7 +97,7 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            if (PresetComboBox?.SelectedItem is not ServerPresetModel selectedPreset)
+            if (PresetComboBox?.SelectedItem is not PresetModel selectedPreset)
             {
                 _previousPreset = null;
                 return;
@@ -325,8 +325,8 @@ namespace ServerPickerX.Views
         }
 
         private async Task HandlePresetChangeAsync(
-            ServerPresetModel selectedPreset,
-            ServerPresetModel? previousPreset
+            PresetModel selectedPreset,
+            PresetModel? previousPreset
             )
         {
             if (DataContext is not MainWindowViewModel vm)
@@ -351,7 +351,7 @@ namespace ServerPickerX.Views
             RefreshClusterButtonContent();
         }
 
-        private void SyncPresetSelection(ServerPresetModel? preset)
+        private void SyncPresetSelection(PresetModel? preset)
         {
             _suppressPresetSelectionChanged = true;
             PresetComboBox.SelectedItem = preset;
@@ -359,7 +359,7 @@ namespace ServerPickerX.Views
             _previousPreset = preset;
         }
 
-        private static bool AreSamePresetSelection(ServerPresetModel? left, ServerPresetModel? right)
+        private static bool AreSamePresetSelection(PresetModel? left, PresetModel? right)
         {
             if (left == null || right == null)
             {

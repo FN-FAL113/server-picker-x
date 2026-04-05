@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace ServerPickerX.Models
 {
-    public partial class PresetServerItemModel : ObservableObject
+    public partial class PresetServerModel : ObservableObject
     {
         private static readonly Dictionary<string, string> FlagSortKeyCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -25,7 +25,7 @@ namespace ServerPickerX.Models
         [ObservableProperty]
         private bool isBlocked;
 
-        public PresetServerItemModel(ServerModel serverModel, string key, bool isBlocked)
+        public PresetServerModel(ServerModel serverModel, string key, bool isBlocked)
         {
             ServerModel = serverModel;
             Key = key;

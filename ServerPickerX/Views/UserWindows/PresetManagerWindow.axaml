@@ -218,7 +218,7 @@
                             x:Name="ServerItemsGrid"
                             Classes="preset-grid"
                             AutoGenerateColumns="False"
-                            ItemsSource="{Binding ServerItems}"
+                            ItemsSource="{Binding PresetServers}"
                             IsReadOnly="False"
                             IsEnabled="{Binding CanEditPreset}"
                             CanUserSortColumns="True"

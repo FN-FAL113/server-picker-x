@@ -63,7 +63,7 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            bool deleted = await vm.DeletePresetsAsync(GetSelectedPresetItems().Select(item => item.Preset).ToList());
+            bool deleted = await vm.DeletePresetsAsync(GetSelectedPresetItems());
 
             if (deleted)
             {
@@ -110,13 +110,7 @@ namespace ServerPickerX.Views
 
         private void PresetListGrid_BeginningEdit(object? sender, DataGridBeginningEditEventArgs e)
         {
-            if (!_allowPresetNameEdit)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            if (e.Row.DataContext is not PresetItemModel presetItem)
+            if (e.Row.DataContext is not PresetModel presetItem)
             {
                 return;
             }
@@ -127,11 +121,10 @@ namespace ServerPickerX.Views
 
         private async void PresetListGrid_RowEditEnded(object? sender, DataGridRowEditEndedEventArgs e)
         {
-            _allowPresetNameEdit = false;
             _isEditingPresetName = false;
             PresetListGrid.IsReadOnly = true;
 
-            if (e.EditAction != DataGridEditAction.Commit || e.Row.DataContext is not PresetItemModel presetItem)
+            if (e.EditAction != DataGridEditAction.Commit || e.Row.DataContext is not PresetModel presetItem)
             {
                 return;
             }
@@ -139,24 +132,7 @@ namespace ServerPickerX.Views
             await CommitPresetNameAsync(presetItem, _editingPresetOriginalName ?? presetItem.Name);
         }
 
-        private void PresetListGrid_DoubleTapped(object? sender, RoutedEventArgs e)
-        {
-            if (_isEditingPresetName || DataContext is not PresetManagerWindowViewModel vm || vm.SelectedPresetItem == null)
-            {
-                return;
-            }
-
-            if (e.Source is not Control sourceControl ||
-                sourceControl.FindAncestorOfType<DataGridColumnHeader>() != null ||
-                sourceControl.FindAncestorOfType<DataGridCell>() == null)
-            {
-                return;
-            }
-
-            BeginEditingSelectedPreset();
-        }
-
-        private async Task CommitPresetNameAsync(PresetItemModel presetItem, string originalPresetName)
+        private async Task CommitPresetNameAsync(PresetModel presetItem, string originalPresetName)
         {
             if (_committingPresetName || DataContext is not PresetManagerWindowViewModel vm)
             {
@@ -178,6 +154,23 @@ namespace ServerPickerX.Views
             }
         }
 
+        private void PresetListGrid_DoubleTapped(object? sender, TappedEventArgs e)
+        {
+            if (_isEditingPresetName || DataContext is not PresetManagerWindowViewModel vm || vm.SelectedPresetItem == null)
+            {
+                return;
+            }
+
+            if (e.Source is not Control sourceControl ||
+                sourceControl.FindAncestorOfType<DataGridColumnHeader>() != null ||
+                sourceControl.FindAncestorOfType<DataGridCell>() == null)
+            {
+                return;
+            }
+
+            BeginEditingSelectedPreset();
+        }
+
         private async void PresetListGrid_KeyDown(object? sender, KeyEventArgs e)
         {
             if (DataContext is not PresetManagerWindowViewModel vm)
@@ -187,7 +180,7 @@ namespace ServerPickerX.Views
 
             if (e.Key == Key.Delete)
             {
-                List<PresetItemModel> selectedPresetItems = GetSelectedPresetItems();
+                List<PresetModel> selectedPresetItems = GetSelectedPresetItems();
 
                 if (selectedPresetItems.Count == 0)
                 {
@@ -195,7 +188,7 @@ namespace ServerPickerX.Views
                 }
 
                 e.Handled = true;
-                bool deleted = await vm.DeletePresetsAsync(selectedPresetItems.Select(item => item.Preset).ToList());
+                bool deleted = await vm.DeletePresetsAsync(selectedPresetItems);
 
                 if (deleted)
                 {
@@ -251,8 +244,8 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            List<PresetServerItemModel> selectedItems = ServerItemsGrid.SelectedItems
-                .OfType<PresetServerItemModel>()
+            List<PresetServerModel> selectedItems = ServerItemsGrid.SelectedItems
+                .OfType<PresetServerModel>()
                 .ToList();
 
             if (selectedItems.Count == 0)
@@ -264,7 +257,7 @@ namespace ServerPickerX.Views
 
             bool shouldBlock = selectedItems.Any(serverItem => !serverItem.IsBlocked);
 
-            foreach (PresetServerItemModel serverItem in selectedItems)
+            foreach (PresetServerModel serverItem in selectedItems)
             {
                 serverItem.IsBlocked = shouldBlock;
             }
@@ -353,18 +346,17 @@ namespace ServerPickerX.Views
                 }
 
                 PresetListGrid.Focus();
-                _allowPresetNameEdit = true;
                 PresetListGrid.IsReadOnly = false;
                 PresetListGrid.CurrentColumn = PresetListGrid.Columns.FirstOrDefault();
                 PresetListGrid.BeginEdit();
             });
         }
 
-        private List<PresetItemModel> GetSelectedPresetItems()
+        private List<PresetModel> GetSelectedPresetItems()
         {
             IEnumerable selectedItems = PresetListGrid.SelectedItems ?? System.Array.Empty<object>();
-            List<PresetItemModel> selectedPresetItems = selectedItems
-                .OfType<PresetItemModel>()
+            List<PresetModel> selectedPresetItems = selectedItems
+                .OfType<PresetModel>()
                 .Distinct()
                 .ToList();
 
@@ -375,6 +367,5 @@ namespace ServerPickerX.Views
 
             return selectedPresetItems;
         }
-
     }
 }

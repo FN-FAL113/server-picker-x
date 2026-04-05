@@ -3,6 +3,7 @@ using MsBox.Avalonia.Enums;
 using ServerPickerX.Comparers;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
+using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Settings;
@@ -17,16 +18,16 @@ namespace ServerPickerX.ViewModels
     public partial class PresetManagerWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollectionExtended<PresetItemModel> presets = [];
+        private ObservableCollectionExtended<PresetModel> presets = [];
 
-        public ObservableCollectionExtended<PresetServerItemModel> ServerItems { get; } = [];
+        public ObservableCollectionExtended<PresetServerModel> PresetServers { get; } = [];
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanDelete))]
         [NotifyPropertyChangedFor(nameof(CanApply))]
         [NotifyPropertyChangedFor(nameof(CanEditPreset))]
         [NotifyPropertyChangedFor(nameof(CanToggleClusterMode))]
-        private PresetItemModel? selectedPresetItem;
+        private PresetModel? selectedPresetItem;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanDelete))]
@@ -71,11 +72,11 @@ namespace ServerPickerX.ViewModels
             ReloadPresets(_mainVm.SelectedPreset?.Name);
         }
 
-        partial void OnSelectedPresetItemChanged(PresetItemModel? oldValue, PresetItemModel? newValue)
+        partial void OnSelectedPresetItemChanged(PresetModel? oldValue, PresetModel? newValue)
         {
             if (newValue != null)
             {
-                EditorIsClustered = newValue.Preset.IsClustered;
+                EditorIsClustered = newValue.IsClustered;
             }
             else
             {
@@ -88,7 +89,7 @@ namespace ServerPickerX.ViewModels
         public async Task AddPresetAsync()
         {
             string presetName = GetNextPresetName();
-            ServerPresetModel newPreset = new()
+            PresetModel newPreset = new()
             {
                 Name = presetName,
                 GameMode = _mainVm.GetCurrentGameMode(),
@@ -101,14 +102,14 @@ namespace ServerPickerX.ViewModels
             ReloadPresets(presetName);
         }
 
-        public async Task<bool> DeletePresetsAsync(IReadOnlyList<ServerPresetModel> presetsToDelete)
+        public async Task<bool> DeletePresetsAsync(IReadOnlyList<PresetModel> presetsToDelete)
         {
             if (presetsToDelete == null || presetsToDelete.Count == 0 || IsDeletingPreset)
             {
                 return false;
             }
 
-            List<ServerPresetModel> normalizedPresets = presetsToDelete
+            List<PresetModel> normalizedPresets = presetsToDelete
                 .Where(preset => preset != null)
                 .Distinct()
                 .ToList();
@@ -143,7 +144,7 @@ namespace ServerPickerX.ViewModels
                     return false;
                 }
 
-                List<ServerPresetModel> currentPresets = GetCurrentGamePresets();
+                List<PresetModel> currentPresets = GetCurrentGamePresets();
                 HashSet<string> deletedPresetNames = normalizedPresets
                     .Select(preset => preset.Name)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -151,7 +152,7 @@ namespace ServerPickerX.ViewModels
                     .FirstOrDefault(preset => !deletedPresetNames.Contains(preset.Name))
                     ?.Name;
 
-                foreach (ServerPresetModel preset in normalizedPresets)
+                foreach (PresetModel preset in normalizedPresets)
                 {
                     await _mainVm.DeletePresetAsync(preset);
                 }
@@ -177,17 +178,17 @@ namespace ServerPickerX.ViewModels
             // Refresh the main preset list before applying so the selected preset can be reselected there too.
             _mainVm.LoadPresetPickerItems();
 
-            return await _mainVm.ApplyPresetAsync(ClonePreset(SelectedPresetItem.Preset));
+            return await _mainVm.ApplyPresetAsync(ClonePreset(SelectedPresetItem));
         }
 
-        public async Task<bool> RenamePresetAsync(PresetItemModel presetItem, string originalPresetName)
+        public async Task<bool> RenamePresetAsync(PresetModel preset, string originalPresetName)
         {
-            if (presetItem == null)
+            if (preset == null)
             {
                 return false;
             }
 
-            string newPresetName = (presetItem.Name ?? string.Empty).Trim();
+            string newPresetName = (preset.Name ?? string.Empty).Trim();
             string currentPresetName = originalPresetName.Trim();
 
             if (string.IsNullOrWhiteSpace(newPresetName))
@@ -207,13 +208,12 @@ namespace ServerPickerX.ViewModels
                 return true;
             }
 
-            ServerPresetModel? existingPreset = _mainVm.GetCurrentGamePreset(newPresetName);
-            bool overwritingDifferentPreset = existingPreset != null &&
-                !existingPreset.Name.Equals(currentPresetName, StringComparison.OrdinalIgnoreCase);
+            bool hasDuplicatePresetName = _jsonSetting.HasDuplicatePresetNameByCurrentGameMode(newPresetName);
+            bool overwroteDifferentPreset = false;
 
-            if (overwritingDifferentPreset)
+            if (hasDuplicatePresetName)
             {
-                bool shouldOverwrite = await _messageBoxService.ShowMessageBoxConfirmationAsync(
+                overwroteDifferentPreset = await _messageBoxService.ShowMessageBoxConfirmationAsync(
                         _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
                         string.Format(
                         _localizationService.GetLocaleValue("PresetOverwriteConfirmDialogue"),
@@ -222,20 +222,18 @@ namespace ServerPickerX.ViewModels
                     Icon.Setting
                     );
 
-                if (!shouldOverwrite)
+                if (!overwroteDifferentPreset)
                 {
+                    // Revert back prename and reload presets
+                    preset.Name = currentPresetName;
                     ReloadPresets(currentPresetName);
                     return false;
                 }
             }
 
-            ServerPresetModel renamedPreset = ClonePreset(presetItem.Preset);
-            renamedPreset.Name = newPresetName;
-
-            await _jsonSetting.AddOrUpdatePresetAsync(renamedPreset);
-
-            await _jsonSetting.RemovePresetAsync(_mainVm.GetCurrentGameMode(), currentPresetName);
-            await SyncPresetReferenceAfterRenameAsync(currentPresetName, newPresetName, overwritingDifferentPreset);
+            await _jsonSetting.RemovePresetAsync(_mainVm.GetCurrentGameMode(), newPresetName);
+            await _jsonSetting.AddOrUpdatePresetAsync(preset);
+            await SyncPresetReferenceAfterRenameAsync(currentPresetName, newPresetName, overwroteDifferentPreset);
 
             ReloadPresets(newPresetName);
 
@@ -249,15 +247,15 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            SelectedPresetItem.Preset.BlockedServerKeys = ServerItems
+            SelectedPresetItem.BlockedServerKeys = PresetServers
                 .Where(serverItem => serverItem.IsBlocked)
                 .Select(serverItem => serverItem.Key)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            await _jsonSetting.AddOrUpdatePresetAsync(ClonePreset(SelectedPresetItem.Preset));
-            await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Preset.Name);
+            await _jsonSetting.AddOrUpdatePresetAsync(ClonePreset(SelectedPresetItem));
+            await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Name);
         }
 
         public async Task ToggleSelectedPresetClusterModeAsync()
@@ -267,7 +265,7 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            bool hasBlockedEntries = (SelectedPresetItem.Preset.BlockedServerKeys?.Count ?? 0) > 0;
+            bool hasBlockedEntries = (SelectedPresetItem.BlockedServerKeys?.Count ?? 0) > 0;
 
             if (hasBlockedEntries)
             {
@@ -283,12 +281,12 @@ namespace ServerPickerX.ViewModels
                 }
             }
 
-            SelectedPresetItem.Preset.IsClustered = !SelectedPresetItem.Preset.IsClustered;
-            SelectedPresetItem.Preset.BlockedServerKeys = [];
-            EditorIsClustered = SelectedPresetItem.Preset.IsClustered;
+            SelectedPresetItem.IsClustered = !SelectedPresetItem.IsClustered;
+            SelectedPresetItem.BlockedServerKeys = [];
+            EditorIsClustered = SelectedPresetItem.IsClustered;
 
-            await _jsonSetting.AddOrUpdatePresetAsync(ClonePreset(SelectedPresetItem.Preset));
-            await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Preset.Name);
+            await _jsonSetting.AddOrUpdatePresetAsync(ClonePreset(SelectedPresetItem));
+            await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Name);
 
             LoadServerItemsForSelectedPreset();
         }
@@ -299,7 +297,7 @@ namespace ServerPickerX.ViewModels
         public void SortPresets(ListSortDirection direction)
         {
             string? selectedPresetName = SelectedPresetItem?.Name;
-            List<PresetItemModel> sortedPresets = (direction == ListSortDirection.Ascending
+            List<PresetModel> sortedPresets = (direction == ListSortDirection.Ascending
                 ? Presets.OrderBy(preset => preset.Name, NaturalStringComparer.OrdinalIgnoreCase)
                 : Presets.OrderByDescending(preset => preset.Name, NaturalStringComparer.OrdinalIgnoreCase))
                 .ToList();
@@ -316,44 +314,42 @@ namespace ServerPickerX.ViewModels
 
         public void SortServerItems(string sortKey, ListSortDirection direction)
         {
-            List<PresetServerItemModel> sortedItems = sortKey switch
+            List<PresetServerModel> sortedItems = sortKey switch
             {
                 "Blocked" => (direction == ListSortDirection.Ascending
-                    ? ServerItems.OrderBy(serverItem => serverItem.IsBlocked)
-                    : ServerItems.OrderByDescending(serverItem => serverItem.IsBlocked)).ToList(),
+                    ? PresetServers.OrderBy(serverItem => serverItem.IsBlocked)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.IsBlocked)).ToList(),
                 "Flag" => (direction == ListSortDirection.Ascending
-                    ? ServerItems.OrderBy(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
+                    ? PresetServers.OrderBy(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)
-                    : ServerItems.OrderByDescending(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)).ToList(),
                 "ServerId" => (direction == ListSortDirection.Ascending
-                    ? ServerItems.OrderBy(serverItem => serverItem.Name, StringComparer.OrdinalIgnoreCase)
-                    : ServerItems.OrderByDescending(serverItem => serverItem.Name, StringComparer.OrdinalIgnoreCase)).ToList(),
+                    ? PresetServers.OrderBy(serverItem => serverItem.Name, StringComparer.OrdinalIgnoreCase)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.Name, StringComparer.OrdinalIgnoreCase)).ToList(),
                 _ => (direction == ListSortDirection.Ascending
-                    ? ServerItems.OrderBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)
-                    : ServerItems.OrderByDescending(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)).ToList(),
+                    ? PresetServers.OrderBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)).ToList(),
             };
 
-            ServerItems.Clear();
-            ServerItems.AddRange(sortedItems);
+            PresetServers.Clear();
+            PresetServers.AddRange(sortedItems);
         }
 
-        private void ReloadPresets(string? preferredPresetName = null)
+        private void ReloadPresets(string? selectedPresetName = null)
         {
-            string? presetNameToSelect = preferredPresetName ?? SelectedPresetItem?.Name;
-            List<ServerPresetModel> currentPresets = GetCurrentGamePresets();
+            string? presetNameToSelect = selectedPresetName ?? SelectedPresetItem?.Name;
+            List<PresetModel> currentPresets = GetCurrentGamePresets();
 
             if (currentPresets.Count == 0)
             {
                 Presets = [];
                 SelectedPresetItem = null;
-                ServerItems.Clear();
+                PresetServers.Clear();
                 return;
             }
 
-            Presets = new ObservableCollectionExtended<PresetItemModel>(
-                currentPresets.Select(preset => new PresetItemModel(ClonePreset(preset))).ToList()
-                );
+            Presets = new ObservableCollectionExtended<PresetModel>(currentPresets);
 
             SelectedPresetItem = !string.IsNullOrWhiteSpace(presetNameToSelect)
                 ? Presets.FirstOrDefault(preset =>
@@ -365,25 +361,25 @@ namespace ServerPickerX.ViewModels
 
         private void LoadServerItemsForSelectedPreset()
         {
-            ServerItems.Clear();
+            PresetServers.Clear();
 
             if (SelectedPresetItem == null)
             {
                 return;
             }
 
-            HashSet<string> blockedServerKeys = (SelectedPresetItem.Preset.BlockedServerKeys ?? [])
+            HashSet<string> blockedServerKeys = (SelectedPresetItem.BlockedServerKeys ?? [])
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            foreach (ServerModel serverModel in _mainVm.GetCurrentGameServerModels(SelectedPresetItem.Preset.IsClustered))
+            foreach (ServerModel serverModel in _mainVm.GetCurrentGameServerModels(SelectedPresetItem.IsClustered))
             {
-                string serverKey = _mainVm.GetServerKey(serverModel, SelectedPresetItem.Preset.IsClustered);
+                string serverKey = _mainVm.GetServerKey(serverModel, SelectedPresetItem.IsClustered);
 
-                ServerItems.Add(new PresetServerItemModel(serverModel, serverKey, blockedServerKeys.Contains(serverKey)));
+                PresetServers.Add(new PresetServerModel(serverModel, serverKey, blockedServerKeys.Contains(serverKey)));
             }
         }
 
-        private List<ServerPresetModel> GetCurrentGamePresets()
+        private List<PresetModel> GetCurrentGamePresets()
         {
             return _jsonSetting.GetPresetsByGameMode(_mainVm.GetCurrentGameMode());
         }
@@ -419,28 +415,16 @@ namespace ServerPickerX.ViewModels
         {
             if (overwroteDifferentPreset)
             {
-                bool targetWasAppliedOrRemembered =
-                    (_mainVm.SelectedPreset?.Name ?? string.Empty).Equals(renamedPresetName, StringComparison.OrdinalIgnoreCase) ||
-                    (_jsonSetting.GetLastSelectedPresetNameByGameMode() ?? string.Empty).Equals(renamedPresetName, StringComparison.OrdinalIgnoreCase);
-
-                if (targetWasAppliedOrRemembered)
-                {
-                    await ClearAppliedPresetReferenceIfNeededAsync(renamedPresetName);
-                }
-
-                if ((_mainVm.SelectedPreset?.Name ?? string.Empty).Equals(originalPresetName, StringComparison.OrdinalIgnoreCase) ||
-                    (_jsonSetting.GetLastSelectedPresetNameByGameMode() ?? string.Empty).Equals(originalPresetName, StringComparison.OrdinalIgnoreCase))
-                {
-                    await ClearAppliedPresetReferenceIfNeededAsync(originalPresetName);
-                }
+                await ClearAppliedPresetReferenceIfNeededAsync(renamedPresetName);
 
                 return;
             }
 
-            bool renamedAppliedPreset = (_mainVm.SelectedPreset?.Name ?? string.Empty)
-                .Equals(originalPresetName, StringComparison.OrdinalIgnoreCase);
             bool renamedLastSelected = (_jsonSetting.GetLastSelectedPresetNameByGameMode() ?? string.Empty)
                 .Equals(originalPresetName, StringComparison.OrdinalIgnoreCase);
+            bool renamedAppliedPreset = (_mainVm.SelectedPreset?.Name ?? string.Empty)
+                .Equals(originalPresetName, StringComparison.OrdinalIgnoreCase);
+            
 
             if (renamedLastSelected)
             {
@@ -477,9 +461,9 @@ namespace ServerPickerX.ViewModels
             }
         }
 
-        private static ServerPresetModel ClonePreset(ServerPresetModel preset)
+        private static PresetModel ClonePreset(PresetModel preset)
         {
-            return new ServerPresetModel
+            return new PresetModel
             {
                 Name = preset.Name,
                 GameMode = preset.GameMode,
