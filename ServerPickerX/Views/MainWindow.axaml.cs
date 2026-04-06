@@ -165,6 +165,7 @@ namespace ServerPickerX.Views
 
             await presetManagementWindow.ShowDialog(this);
 
+            // Reload presets after closing preset manager window
             vm.LoadPresetPickerItems();
             SyncPresetSelection(vm.SelectedPreset);
             RefreshClusterButtonContent();

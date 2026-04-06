@@ -77,7 +77,6 @@ namespace ServerPickerX.ViewModels
         private readonly IServerDataService _serverDataService;
         private readonly ISystemFirewallService _systemFirewallService;
         private readonly JsonSetting _jsonSetting;
-        private readonly HashSet<string> _blockedServerKeys = new(StringComparer.OrdinalIgnoreCase);
 
         // Parameterless constructor, allows design previewer to instantiate this class since it doesn't support DI
         public MainWindowViewModel()
@@ -114,7 +113,7 @@ namespace ServerPickerX.ViewModels
 
             if (!ServersLoaded) return;
 
-            await SetClusterStateAsync(_jsonSetting.is_clustered, false, false);
+            await SetClusterStateAsync(_jsonSetting.is_clustered, false);
 
             ServerModelsInitialized = true;
         }
@@ -122,10 +121,10 @@ namespace ServerPickerX.ViewModels
         [RelayCommand]
         public async Task ClusterUnclusterServersAsync()
         {
-            await SetClusterStateAsync(!_jsonSetting.is_clustered, true, true);
+            await SetClusterStateAsync(!_jsonSetting.is_clustered, true);
         }
 
-        public async Task SetClusterStateAsync(bool isClustered, bool shouldUnblockCurrentServers, bool shouldUpdatePresetSelection)
+        public async Task SetClusterStateAsync(bool isClustered, bool shouldUnblockCurrentServers)
         {
             if (!ServersLoaded)
             {
@@ -138,11 +137,7 @@ namespace ServerPickerX.ViewModels
             // so clustered/unclustered transitions do not carry stale rules forward
             if (shouldUnblockCurrentServers && ServerModelsInitialized && ServerModels.Count > 0)
             {
-                bool unblocked = await PerformOperationAsync(
-                    false,
-                    new ObservableCollection<ServerModel>(ServerModels),
-                    false
-                    );
+                bool unblocked = await PerformOperationAsync(false, ServerModels, false);
 
                 if (!unblocked)
                 {
@@ -155,6 +150,8 @@ namespace ServerPickerX.ViewModels
                 _jsonSetting.is_clustered = isClustered;
 
                 await _jsonSetting.SaveSettingsAsync();
+
+                await MarkPresetSelectionDirtyAsync();
             }
 
             ServerData serverData = _serverDataService.GetServerData();
@@ -166,19 +163,6 @@ namespace ServerPickerX.ViewModels
             ServerModels.AddRange(serverModels);
 
             PingServers(serverModels);
-
-            if (shouldUpdatePresetSelection)
-            {
-                if (clusterStateChanged)
-                {
-                    await MarkPresetSelectionDirtyAsync();
-                }
-            }
-        }
-
-        public List<PresetModel> GetCurrentGamePresets()
-        {
-            return _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode);
         }
 
         public PresetModel? GetCurrentGamePreset(string presetName)
@@ -189,7 +173,7 @@ namespace ServerPickerX.ViewModels
         public void LoadPresetPickerItems()
         {
             string? selectedPresetName = SelectedPreset?.Name;
-            List<PresetModel> presetItems = GetCurrentGamePresets();
+            List<PresetModel> presetItems = _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode);
 
             PresetItems.Clear();
 
@@ -267,9 +251,9 @@ namespace ServerPickerX.ViewModels
                 return false;
             }
 
-            ReplaceBlockedServerKeysFromPreset(preset);
-            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(preset.Name);
             SelectPresetByName(preset.Name);
+
+            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(preset.Name);
 
             return true;
         }
@@ -410,8 +394,6 @@ namespace ServerPickerX.ViewModels
                     await _loggerService.LogInfoAsync("Servers unblocked successfully");
                 }
 
-                TrackBlockedServerKeys(serverModels, shouldBlock);
-
                 if (shouldUpdatePresetSelection)
                 {
                     await MarkPresetSelectionDirtyAsync();
@@ -513,23 +495,6 @@ namespace ServerPickerX.ViewModels
             return presetsPruned;
         }
 
-        private void TrackBlockedServerKeys(IEnumerable<ServerModel> serverModels, bool shouldBlock)
-        {
-            foreach (ServerModel serverModel in serverModels)
-            {
-                string serverKey = GetServerKey(serverModel);
-
-                if (shouldBlock)
-                {
-                    _blockedServerKeys.Add(serverKey);
-                }
-                else
-                {
-                    _blockedServerKeys.Remove(serverKey);
-                }
-            }
-        }
-
         public string GetServerKey(ServerModel serverModel, bool isClustered)
         {
             return isClustered
@@ -560,7 +525,7 @@ namespace ServerPickerX.ViewModels
                 return;
             }
 
-            PresetModel? lastSelectedPreset = GetCurrentGamePreset(lastSelectedPresetName);
+            PresetModel? lastSelectedPreset = _jsonSetting.GetPresetByGameMode(_jsonSetting.game_mode, lastSelectedPresetName);
 
             if (lastSelectedPreset == null)
             {
@@ -581,11 +546,7 @@ namespace ServerPickerX.ViewModels
         {
             if (ServerModels.Count > 0)
             {
-                bool unblocked = await PerformOperationAsync(
-                    false,
-                    new ObservableCollection<ServerModel>(ServerModels),
-                    false
-                    );
+                bool unblocked = await PerformOperationAsync(false, ServerModels, false);
 
                 if (!unblocked)
                 {
@@ -593,7 +554,7 @@ namespace ServerPickerX.ViewModels
                 }
             }
 
-            await SetClusterStateAsync(serverPreset.IsClustered, false, false);
+            await SetClusterStateAsync(serverPreset.IsClustered, false);
 
             ObservableCollection<ServerModel> matchingServerModels = GetMatchingServerModels(serverPreset);
 
@@ -614,23 +575,6 @@ namespace ServerPickerX.ViewModels
                 );
         }
 
-        private void ReplaceBlockedServerKeysFromPreset(PresetModel serverPreset)
-        {
-            ObservableCollection<ServerModel> matchingServerModels = GetMatchingServerModels(serverPreset);
-
-            _blockedServerKeys.Clear();
-
-            foreach (string blockedServerKey in matchingServerModels.Select(GetServerKey))
-            {
-                _blockedServerKeys.Add(blockedServerKey);
-            }
-        }
-
-        private void ClearSelectedPreset()
-        {
-            SelectedPreset = null;
-        }
-
         private async Task MarkPresetSelectionDirtyAsync()
         {
             await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
@@ -638,5 +582,9 @@ namespace ServerPickerX.ViewModels
             ClearSelectedPreset();
         }
 
+        private void ClearSelectedPreset()
+        {
+            SelectedPreset = null;
+        }
     }
 }
