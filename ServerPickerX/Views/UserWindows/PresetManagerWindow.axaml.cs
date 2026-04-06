@@ -19,7 +19,6 @@ namespace ServerPickerX.Views
 {
     public partial class PresetManagerWindow : Window
     {
-        private bool _allowPresetNameEdit;
         private bool _committingPresetName;
         private bool _isEditingPresetName;
         private string? _editingPresetOriginalName;
