@@ -1,0 +1,262 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:userControls="using:ServerPickerX"
+        xmlns:viewmodels="using:ServerPickerX.ViewModels"
+        xmlns:converters="clr-namespace:ServerPickerX.Converters"
+        mc:Ignorable="d"
+
+        Width="996"
+        MinWidth="996"
+        MaxWidth="1280"
+        Height="610"
+        MinHeight="500"
+        MaxHeight="960"
+        x:Class="ServerPickerX.Views.PresetManagerWindow"
+        x:DataType="viewmodels:PresetManagerWindowViewModel"
+        SystemDecorations="BorderOnly"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent">
+
+    <Window.Resources>
+        <converters:ImageConverter x:Key="ImageConverter" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="DataGrid.preset-grid">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="CanUserResizeColumns" Value="False" />
+            <Setter Property="CanUserReorderColumns" Value="False" />
+            <Setter Property="CanUserSortColumns" Value="False" />
+            <Setter Property="GridLinesVisibility" Value="All" />
+            <Setter Property="HeadersVisibility" Value="Column" />
+        </Style>
+        <Style Selector="DataGrid.preset-grid DataGridColumnHeader">
+            <Setter Property="Background" Value="#1A1D40" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="DataGrid.preset-grid DataGridCell">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="DataGrid.preset-grid TextBox">
+            <Setter Property="Background" Value="#1A1D40" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="#00d9ff" />
+            <Setter Property="CaretBrush" Value="White" />
+            <Setter Property="SelectionBrush" Value="#575cd4" />
+        </Style>
+        <Style Selector="CheckBox.preset-toggle">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+
+    <Border
+        Background="#373B78"
+        BorderBrush="#575cd4"
+        BorderThickness="1.35">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Grid x:Name="TitleBar"
+                  Background="#373B78"
+                  PointerPressed="TitleBar_PointerPressed">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Margin="10,0,0,0"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    FontSize="14"
+                    Text="{Binding WindowTitle}" />
+                <userControls:TitleBarButtons />
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="8,8,8,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="330" MinWidth="260" MaxWidth="400"/>
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.Column="0"
+                    BorderBrush="#575cd4"
+                    BorderThickness="1"
+                    Background="#4a4e8a"
+                    Opacity="0.95">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Grid ColumnDefinitions="*,2,*,2,*">
+                            <Button
+                                Grid.Column="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Classes="main-btn"
+                                Content="{DynamicResource AddPreset}"
+                                ToolTip.Tip="{DynamicResource AddPresetToolTip}"
+                                Click="AddBtn_Click"
+                                Foreground="White" />
+                            <Button
+                                Grid.Column="2"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Classes="main-btn"
+                                Content="{DynamicResource DeletePreset}"
+                                ToolTip.Tip="{DynamicResource DeletePresetToolTip}"
+                                IsEnabled="{Binding CanDelete}"
+                                Click="DeleteBtn_Click"
+                                Foreground="White" />
+                            <Button
+                                Grid.Column="4"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Classes="main-btn"
+                                Content="{DynamicResource ApplyPreset}"
+                                ToolTip.Tip="{DynamicResource ApplyPresetToolTip}"
+                                IsEnabled="{Binding CanApply}"
+                                Click="ApplyBtn_Click"
+                                Foreground="White" />
+                        </Grid>
+
+                        <DataGrid
+                            Grid.Row="1"
+                            x:Name="PresetListGrid"
+                            Classes="preset-grid"
+                            AutoGenerateColumns="False"
+                            ItemsSource="{Binding Presets}"
+                            SelectedItem="{Binding SelectedPresetItem}"
+                            IsReadOnly="True"
+                            CanUserSortColumns="True"
+                            SelectionMode="Extended"
+                            Margin="0,10,0,0"
+                            SelectionChanged="PresetListGrid_SelectionChanged"
+                            Sorting="PresetListGrid_Sorting"
+                            BeginningEdit="PresetListGrid_BeginningEdit"
+                            RowEditEnded="PresetListGrid_RowEditEnded"
+                            DoubleTapped="PresetListGrid_DoubleTapped"
+                            KeyDown="PresetListGrid_KeyDown">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Header="{DynamicResource PresetListHeader}"
+                                    SortMemberPath="Name"
+                                    Binding="{Binding Name}"
+                                    Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+
+                <GridSplitter
+                    Grid.Column="1"
+                    ResizeDirection="Columns"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="Transparent">
+                    <GridSplitter.Template>
+                        <ControlTemplate>
+                            <Grid Background="Transparent">
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Spacing="4">
+                                    <Ellipse Width="2" Height="2" Fill="White" />
+                                    <Ellipse Width="2" Height="2" Fill="White" />
+                                    <Ellipse Width="2" Height="2" Fill="White" />
+                                </StackPanel>
+                            </Grid>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
+
+                <Border
+                    Grid.Column="2"
+                    BorderBrush="#575cd4"
+                    BorderThickness="1"
+                    Background="#4a4e8a"
+                    Opacity="0.95">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock
+                                Foreground="White"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center"
+                                Text="{DynamicResource PresetServersHeader}" />
+                            <Button
+                                Grid.Column="1"
+                                Classes="main-btn"
+                                Content="{Binding ClusterToggleText}"
+                                ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
+                                IsEnabled="{Binding CanToggleClusterMode}"
+                                Click="ClusterToggleBtn_Click"
+                                HorizontalAlignment="Right"
+                                Foreground="White" />
+                        </Grid>
+
+                        <DataGrid
+                            Grid.Row="1"
+                            x:Name="ServerItemsGrid"
+                            Classes="preset-grid"
+                            AutoGenerateColumns="False"
+                            ItemsSource="{Binding PresetServers}"
+                            IsReadOnly="False"
+                            IsEnabled="{Binding CanEditPreset}"
+                            CanUserSortColumns="True"
+                            Margin="0,10,0,0"
+                            SelectionMode="Extended"
+                            Sorting="ServerItemsGrid_Sorting"
+                            KeyDown="ServerItemsGrid_KeyDown">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="108" Header="{DynamicResource BlockedColumnHeader}" SortMemberPath="IsBlocked">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <CheckBox
+                                                    Classes="preset-toggle"
+                                                    IsChecked="{Binding IsBlocked}"
+                                                    Click="BlockedCheckBox_Click" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Width="Auto" Header="Flag" SortMemberPath="FlagSortKey">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}"
+                                                   Width="50"
+                                                   Height="50"
+                                                   Stretch="Uniform"
+                                                   VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Width="105" Header="Server ID" SortMemberPath="Name" Binding="{Binding Name}" />
+                                <DataGridTextColumn Width="*" Header="Server Name" SortMemberPath="Description" Binding="{Binding Description}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

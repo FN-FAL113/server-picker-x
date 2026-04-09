@@ -1,13 +1,15 @@
-﻿
 using ServerPickerX.Constants;
 using ServerPickerX.Helpers;
+using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Settings;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -40,6 +42,10 @@ namespace ServerPickerX.Settings
         public virtual bool is_clustered { get; set; } = false;
 
         public virtual bool version_check_on_startup { get; set; } = true;
+
+        public virtual List<PresetModel> server_presets { get; set; } = [];
+
+        public virtual Dictionary<string, string> last_selected_preset_names { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         [JsonIgnore]
         public readonly string jsonFilePath = "./settings.json";
@@ -96,6 +102,10 @@ namespace ServerPickerX.Settings
                 marathon_server_revision = localSettings.marathon_server_revision;
                 is_clustered = localSettings.is_clustered;
                 version_check_on_startup = localSettings.version_check_on_startup;
+                server_presets = localSettings.server_presets ?? [];
+                last_selected_preset_names = localSettings.last_selected_preset_names != null
+                    ? new Dictionary<string, string>(localSettings.last_selected_preset_names, StringComparer.OrdinalIgnoreCase)
+                    : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
             catch (Exception ex)
             {
@@ -192,5 +202,166 @@ namespace ServerPickerX.Settings
 
             await this.SaveSettingsAsync();
         }
+
+        public string GetLastSelectedPresetNameByGameMode()
+        {
+            if (string.IsNullOrWhiteSpace(game_mode))
+            {
+                return string.Empty;
+            }
+
+            return last_selected_preset_names.TryGetValue(game_mode, out string? presetName)
+                ? presetName
+                : string.Empty;
+        }
+
+        public async Task SetLastSelectedPresetNameByGameModeAsync(string presetName)
+        {
+            if (string.IsNullOrWhiteSpace(game_mode))
+            {
+                return;
+            }
+
+            last_selected_preset_names[game_mode] = presetName;
+
+            await SaveSettingsAsync();
+        }
+
+        public async Task ClearLastSelectedPresetNameByGameModeAsync()
+        {
+            if (string.IsNullOrWhiteSpace(game_mode))
+            {
+                return;
+            }
+
+            last_selected_preset_names.Remove(game_mode);
+
+            await SaveSettingsAsync();
+        }
+
+        public List<PresetModel> GetPresetsByGameMode(string gameMode)
+        {
+            string normalizedGameMode = gameMode ?? string.Empty;
+
+            return (server_presets ?? [])
+                .Where(preset => (preset.GameMode ?? string.Empty).Equals(normalizedGameMode, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public PresetModel? GetPresetByGameMode(string gameMode, string presetName)
+        {
+            string normalizedGameMode = gameMode ?? string.Empty;
+            string normalizedPresetName = presetName ?? string.Empty;
+
+            return (server_presets ?? []).FirstOrDefault(preset =>
+                (preset.GameMode ?? string.Empty).Equals(normalizedGameMode, StringComparison.OrdinalIgnoreCase) &&
+                (preset.Name ?? string.Empty).Equals(normalizedPresetName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool HasDuplicatePresetNameByCurrentGameMode(string presetName)
+        {
+            string normalizedPresetName = presetName ?? string.Empty;
+
+            return (server_presets ?? [])
+                .Count(preset =>
+                    (preset.GameMode ?? string.Empty).Equals(this.game_mode, StringComparison.OrdinalIgnoreCase) &&
+                    (preset.Name ?? string.Empty).Equals(normalizedPresetName, StringComparison.OrdinalIgnoreCase)
+                ) > 1;
+        }
+
+        public async Task AddOrUpdatePresetAsync(PresetModel preset)
+        {
+            server_presets ??= [];
+
+            PresetModel? existingPreset = GetPresetByGameMode(preset.GameMode, preset.Name);
+
+            List<string> blockedServerKeys = preset.BlockedServerKeys
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(key => key, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (existingPreset == null)
+            {
+                server_presets.Add(new PresetModel
+                {
+                    Name = preset.Name,
+                    GameMode = preset.GameMode,
+                    IsClustered = preset.IsClustered,
+                    BlockedServerKeys = blockedServerKeys,
+                });
+            }
+            else
+            {
+                existingPreset.IsClustered = preset.IsClustered;
+                existingPreset.BlockedServerKeys = blockedServerKeys;
+            }
+
+            await SaveSettingsAsync();
+        }
+
+        public async Task RemovePresetAsync(string gameMode, string presetName)
+        {
+            server_presets ??= [];
+            server_presets.RemoveAll(preset =>
+                preset.GameMode.Equals(gameMode, StringComparison.OrdinalIgnoreCase) &&
+                preset.Name.Equals(presetName, StringComparison.OrdinalIgnoreCase));
+
+            await SaveSettingsAsync();
+        }
+
+        public async Task<bool> PrunePresetEntriesByGameModeAsync(
+            string gameMode,
+            HashSet<string> clusteredServerKeys,
+            HashSet<string> unclusteredServerKeys
+            )
+        {
+            if (string.IsNullOrWhiteSpace(gameMode))
+            {
+                return false;
+            }
+
+            server_presets ??= [];
+
+            bool presetsChanged = false;
+
+            foreach (PresetModel preset in server_presets.Where(preset =>
+                         (preset.GameMode ?? string.Empty).Equals(gameMode, StringComparison.OrdinalIgnoreCase)))
+            {
+                HashSet<string> validServerKeys = preset.IsClustered
+                    ? clusteredServerKeys
+                    : unclusteredServerKeys;
+
+                List<string> prunedServerKeys = (preset.BlockedServerKeys ?? [])
+                    .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey) && validServerKeys.Contains(serverKey))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                List<string> currentServerKeys = (preset.BlockedServerKeys ?? [])
+                    .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (currentServerKeys.SequenceEqual(prunedServerKeys, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                preset.BlockedServerKeys = prunedServerKeys;
+                presetsChanged = true;
+            }
+
+            if (!presetsChanged)
+            {
+                return false;
+            }
+
+            await SaveSettingsAsync();
+
+            return true;
+        }
+
+
     }
 }

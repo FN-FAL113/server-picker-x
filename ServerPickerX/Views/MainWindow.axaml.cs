@@ -1,10 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 using ServerPickerX.Comparers;
 using ServerPickerX.Constants;
+using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
@@ -14,9 +13,7 @@ using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ServerPickerX.Views
 {
@@ -38,6 +35,8 @@ namespace ServerPickerX.Views
         }
 
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
+        private bool _suppressPresetSelectionChanged;
+        private PresetModel? _previousPreset;
 
         private readonly ILoggerService _loggerService;
         private readonly JsonSetting _jsonSetting;
@@ -87,11 +86,37 @@ namespace ServerPickerX.Views
             await HandleGameModeChangeAsync();
         }
 
+        private async void PresetComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            PresetModel? previousPreset = e.RemovedItems.Count > 0
+                ? e.RemovedItems[0] as PresetModel
+                : _previousPreset;
+
+            if (_suppressPresetSelectionChanged)
+            {
+                return;
+            }
+
+            if (PresetComboBox?.SelectedItem is not PresetModel selectedPreset)
+            {
+                _previousPreset = null;
+                return;
+            }
+
+            if (!PresetComboBox.IsDropDownOpen)
+            {
+                _previousPreset = selectedPreset;
+                return;
+            }
+
+            await HandlePresetChangeAsync(selectedPreset, previousPreset);
+        }
+
         private async void DataGrid_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
             var source = e.Source;
 
-            if (source is  Border or TextBlock or Image)
+            if (source is Border or TextBlock or Image)
             {
                 var vm = DataContext as MainWindowViewModel;
                 vm?.PingSelectedServer();
@@ -116,19 +141,34 @@ namespace ServerPickerX.Views
 
         private async void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var vm = DataContext as MainWindowViewModel;
-
-            // Check if servers are loaded and initialized
-            if (!vm?.ServerModelsInitialized ?? false)
+            if (DataContext is not MainWindowViewModel vm || !vm.ServerModelsInitialized)
             {
                 return;
             }
 
-            // Update button DynamicResource binding base on language setting
-            ClusterUnclusterBtn.Bind(
-                Button.ContentProperty,
-                new DynamicResourceExtension(_jsonSetting.is_clustered ? "ClusterServers" : "UnclusterServers")
-            );
+            await vm.ClusterUnclusterServersAsync();
+            SyncPresetSelection(vm.SelectedPreset);
+            RefreshClusterButtonContent();
+        }
+
+        private async void PresetsBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel vm)
+            {
+                return;
+            }
+
+            PresetManagerWindow presetManagementWindow = new(vm)
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            await presetManagementWindow.ShowDialog(this);
+
+            // Reload presets after closing preset manager window
+            vm.LoadPresetPickerItems();
+            SyncPresetSelection(vm.SelectedPreset);
+            RefreshClusterButtonContent();
         }
 
         public async Task InitializeApp()
@@ -144,11 +184,16 @@ namespace ServerPickerX.Views
             await vm.LoadServersAsync();
 
             DataContext = vm;
-           
+
             if (vm.ServersLoaded)
             {
                 await SyncServersAsync(vm);
+                vm.LoadPresetPickerItems();
+                await vm.RestoreLastSelectedPresetAsync();
             }
+
+            ConfigurePresetControls(vm);
+            RefreshClusterButtonContent();
 
             await _versionService.CheckVersionAsync();
         }
@@ -187,19 +232,33 @@ namespace ServerPickerX.Views
                 throw;
             }
 
-            // Update button content property DynamicResource binding based on json setting
-            ClusterUnclusterBtn.Bind(
-                Button.ContentProperty,
-                new DynamicResourceExtension(_jsonSetting.is_clustered ? "UnclusterServers" : "ClusterServers")
-                );
+            RefreshClusterButtonContent();
+        }
+
+        private void ConfigurePresetControls(MainWindowViewModel vm)
+        {
+            SyncPresetSelection(vm.SelectedPreset);
         }
 
         private async Task SyncServersAsync(MainWindowViewModel vm)
         {
-            // If Steam SDR API data got updated, sync the changes
             var localRevision = await _jsonSetting.GetRevisionByGameModeAsync();
 
             var fetchedRevision = vm.GetServerDataService().GetFetchedRevision();
+
+            bool isCounterStrikeFamilyGame = _jsonSetting.game_mode is
+                GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld;
+            bool hasAffectedPresets = isCounterStrikeFamilyGame
+                ? _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2).Count > 0 ||
+                  _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2PerfectWorld).Count > 0
+                : _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode).Count > 0;
+
+            // Store the initial revision without a reset when this game has no saved presets yet.
+            if (localRevision == "-1" && !hasAffectedPresets)
+            {
+                await _jsonSetting.SetRevisionByGameModeAsync(fetchedRevision);
+                return;
+            }
 
             // Skip server unblocking and revision sync if local revision is equal to fetched revision
             if (localRevision == fetchedRevision)
@@ -207,13 +266,29 @@ namespace ServerPickerX.Views
                 return;
             }
 
+            // This only happens on successful load and sync on startup or game switch
             await _messageBoxService.ShowMessageBoxAsync(
                     _localizationService.GetLocaleValue("MessageBoxInfoTitle"),
                     _localizationService.GetLocaleValue("SyncServersUnblockAllDialogue"),
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
-            await vm.UnblockAllAsync();
+            bool unblocked = await vm.UnblockCurrentGameServersAsync();
+
+            if (!unblocked)
+            {
+                return;
+            }
+
+            await vm.PruneCurrentGamePresetEntriesAsync();
+
+            if (isCounterStrikeFamilyGame)
+            {
+                if (!await vm.PruneCounterStrikeFamilyPresetEntriesAsync())
+                {
+                    return;
+                }
+            }
 
             await _jsonSetting.SetRevisionByGameModeAsync(fetchedRevision);
         }
@@ -241,13 +316,65 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            // Unblock all servers first before changing game mode
-            await vm.UnblockAllAsync();
+            // Clear the currently loaded game's rules before changing game mode
+            await vm.UnblockCurrentGameServersAsync();
 
             // Update json setting game mode and serialize it
             await _jsonSetting.SetGameModeAsync((string)GameModeComboBox.SelectedItem);
 
             await InitializeApp();
+        }
+
+        private async Task HandlePresetChangeAsync(
+            PresetModel selectedPreset,
+            PresetModel? previousPreset
+            )
+        {
+            if (DataContext is not MainWindowViewModel vm)
+            {
+                return;
+            }
+
+            if (AreSamePresetSelection(selectedPreset, previousPreset))
+            {
+                return;
+            }
+
+            bool presetApplied = await vm.ApplyPresetAsync(selectedPreset);
+
+            if (!presetApplied)
+            {
+                SyncPresetSelection(previousPreset);
+                return;
+            }
+
+            SyncPresetSelection(vm.SelectedPreset);
+            RefreshClusterButtonContent();
+        }
+
+        private void SyncPresetSelection(PresetModel? preset)
+        {
+            _suppressPresetSelectionChanged = true;
+            PresetComboBox.SelectedItem = preset;
+            _suppressPresetSelectionChanged = false;
+            _previousPreset = preset;
+        }
+
+        private static bool AreSamePresetSelection(PresetModel? left, PresetModel? right)
+        {
+            if (left == null || right == null)
+            {
+                return left == null && right == null;
+            }
+
+            return left.Equals(right);
+        }
+
+        private void RefreshClusterButtonContent()
+        {
+            ClusterUnclusterBtn.Content = _localizationService.GetLocaleValue(
+                _jsonSetting.is_clustered ? "UnclusterServers" : "ClusterServers"
+                );
         }
     }
 }

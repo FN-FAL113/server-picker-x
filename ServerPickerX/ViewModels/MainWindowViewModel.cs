@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia.Enums;
+using ServerPickerX.Constants;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
@@ -32,6 +33,8 @@ namespace ServerPickerX.ViewModels
                     s.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
                 ));
 
+        public ObservableCollectionExtended<PresetModel> PresetItems { get; set; } = [];
+
         public ServerModel? SelectedDataGridServerModel { get; set; }
 
         // Mvvm tool kit will auto generate source code to make this property observable
@@ -48,14 +51,25 @@ namespace ServerPickerX.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
+        [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
         public bool serverModelsInitialized = false;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsOperationAllowed))]
+        [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
         public bool pendingOperation = false;
+
+        [ObservableProperty]
+        public PresetModel? selectedPreset;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
+        public bool hasPresets = false;
 
         // Dependent/Computed prop for main UI buttons `IsEnabled` state
         public bool IsOperationAllowed => !PendingOperation && ServerModelsInitialized;
+
+        public bool CanSelectPresets => IsOperationAllowed && HasPresets;
 
         private readonly ILoggerService _loggerService;
         private readonly IMessageBoxService _messageBoxService;
@@ -99,7 +113,7 @@ namespace ServerPickerX.ViewModels
 
             if (!ServersLoaded) return;
 
-            await ClusterUnclusterServersAsync();
+            await SetClusterStateAsync(_jsonSetting.is_clustered, false);
 
             ServerModelsInitialized = true;
         }
@@ -107,28 +121,141 @@ namespace ServerPickerX.ViewModels
         [RelayCommand]
         public async Task ClusterUnclusterServersAsync()
         {
-            if (!ServersLoaded) return;
+            await SetClusterStateAsync(!_jsonSetting.is_clustered, true);
+        }
 
-            // Update json settings and unblock all servers only after servers are initialized on first load
-            if (ServerModelsInitialized)
+        public async Task SetClusterStateAsync(bool isClustered, bool shouldUnblockCurrentServers)
+        {
+            if (!ServersLoaded)
             {
-                _jsonSetting.is_clustered = !_jsonSetting.is_clustered;
+                return;
+            }
+
+            bool clusterStateChanged = _jsonSetting.is_clustered != isClustered;
+
+            // After initial load, clear the full current view before switching representations
+            // so clustered/unclustered transitions do not carry stale rules forward
+            if (shouldUnblockCurrentServers && ServerModelsInitialized && ServerModels.Count > 0)
+            {
+                bool unblocked = await PerformOperationAsync(false, ServerModels, false);
+
+                if (!unblocked)
+                {
+                    return;
+                }
+            }
+
+            if (clusterStateChanged)
+            {
+                _jsonSetting.is_clustered = isClustered;
 
                 await _jsonSetting.SaveSettingsAsync();
 
-                await UnblockAllAsync();
+                await MarkPresetSelectionDirtyAsync();
             }
 
             ServerData serverData = _serverDataService.GetServerData();
-
-            List<ServerModel> serverModels = _jsonSetting.is_clustered ?
-                serverData.ClusteredServers : serverData.UnclusteredServers;
+            List<ServerModel> serverModels = _jsonSetting.is_clustered
+                ? serverData.ClusteredServers
+                : serverData.UnclusteredServers;
 
             ServerModels.Clear();
-
             ServerModels.AddRange(serverModels);
 
             PingServers(serverModels);
+        }
+
+        public PresetModel? GetCurrentGamePreset(string presetName)
+        {
+            return _jsonSetting.GetPresetByGameMode(_jsonSetting.game_mode, presetName);
+        }
+
+        public void LoadPresetPickerItems()
+        {
+            string? selectedPresetName = SelectedPreset?.Name;
+            List<PresetModel> presetItems = _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode);
+
+            PresetItems.Clear();
+
+            if (presetItems.Count == 0)
+            {
+                HasPresets = false;
+                ClearSelectedPreset();
+                return;
+            }
+
+            HasPresets = true;
+            PresetItems.AddRange(presetItems);
+
+            if (!string.IsNullOrWhiteSpace(selectedPresetName))
+            {
+                SelectPresetByName(selectedPresetName);
+                return;
+            }
+
+            ClearSelectedPreset();
+        }
+
+        public void SelectPresetByName(string presetName)
+        {
+            SelectedPreset = PresetItems.FirstOrDefault(preset =>
+                preset.Name.Equals(presetName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public string GetCurrentGameMode() => _jsonSetting.game_mode;
+
+        public IReadOnlyList<ServerModel> GetCurrentGameServerModels(bool isClustered)
+        {
+            ServerData serverData = _serverDataService.GetServerData();
+
+            return isClustered
+                ? serverData.ClusteredServers
+                : serverData.UnclusteredServers;
+        }
+
+        public async Task DeletePresetAsync(PresetModel preset)
+        {
+            string deletedPresetName = preset.Name;
+
+            await _jsonSetting.RemovePresetAsync(_jsonSetting.game_mode, deletedPresetName);
+
+            if (_jsonSetting.GetLastSelectedPresetNameByGameMode().Equals(deletedPresetName, StringComparison.OrdinalIgnoreCase))
+            {
+                await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
+            }
+
+            LoadPresetPickerItems();
+
+            if (SelectedPreset?.Equals(preset) == true)
+            {
+                ClearSelectedPreset();
+            }
+        }
+
+        public async Task<bool> ApplyPresetAsync(PresetModel preset)
+        {
+            if (!ServersLoaded)
+            {
+                return false;
+            }
+
+            if (!preset.GameMode.Equals(_jsonSetting.game_mode, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            bool presetApplied = await ApplyPresetWithResetAsync(preset);
+
+            if (!presetApplied)
+            {
+                return false;
+            }
+
+            SelectPresetByName(preset.Name);
+
+            await _jsonSetting.SetLastSelectedPresetNameByGameModeAsync(preset.Name);
+
+            return true;
         }
 
         [RelayCommand]
@@ -202,6 +329,15 @@ namespace ServerPickerX.ViewModels
             return await PerformOperationAsync(false, FilteredServerModels);
         }
 
+        public async Task<bool> UnblockCurrentGameServersAsync()
+        {
+            if (ServerModels.Count == 0)
+            {
+                return true;
+            }
+
+            return await PerformOperationAsync(false, new ObservableCollection<ServerModel>(ServerModels), false);
+        }
 
         [RelayCommand]
         public async Task<bool> UnblockSelectedAsync(IList selectedServers)
@@ -221,7 +357,11 @@ namespace ServerPickerX.ViewModels
             return await PerformOperationAsync(false, serverModels);
         }
 
-        public async Task<bool> PerformOperationAsync(bool shouldBlock, ObservableCollection<ServerModel> serverModels)
+        public async Task<bool> PerformOperationAsync(
+            bool shouldBlock,
+            ObservableCollection<ServerModel> serverModels,
+            bool shouldUpdatePresetSelection = true
+            )
         {
             if (PendingOperation)
             {
@@ -254,8 +394,15 @@ namespace ServerPickerX.ViewModels
                     await _loggerService.LogInfoAsync("Servers unblocked successfully");
                 }
 
+                if (shouldUpdatePresetSelection)
+                {
+                    await MarkPresetSelectionDirtyAsync();
+                }
+
                 // Ping servers (parallel operation)
                 PingServers(serverModels);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -268,11 +415,11 @@ namespace ServerPickerX.ViewModels
 
                 return false;
             }
-
-            PendingOperation = false;
-            ShowProgressBar = false;
-
-            return true;
+            finally
+            {
+                PendingOperation = false;
+                ShowProgressBar = false;
+            }
         }
 
         public IServerDataService GetServerDataService()
@@ -280,5 +427,164 @@ namespace ServerPickerX.ViewModels
             return _serverDataService;
         }
 
+        public async Task<bool> PruneCurrentGamePresetEntriesAsync()
+        {
+            if (!ServersLoaded)
+            {
+                return false;
+            }
+
+            return await PrunePresetEntriesAsync(_jsonSetting.game_mode, _serverDataService.GetServerData());
+        }
+
+        public async Task<bool> PruneCounterStrikeFamilyPresetEntriesAsync()
+        {
+            // CS2 and Perfect World share one revision bucket, but their filtered server sets differ.
+            // When either mode syncs, prune the sibling mode too before marking the shared revision current.
+            if (_jsonSetting.game_mode == GameModes.CounterStrike2)
+            {
+                CS2PerfectWorldServerDataService perfectWorldServerDataService =
+                    ServiceLocator.GetRequiredService<CS2PerfectWorldServerDataService>();
+
+                if (!await perfectWorldServerDataService.LoadServersAsync())
+                {
+                    return false;
+                }
+
+                await PrunePresetEntriesAsync(
+                    GameModes.CounterStrike2PerfectWorld,
+                    perfectWorldServerDataService.GetServerData()
+                    );
+
+                return true;
+            }
+
+            CS2ServerDataService counterStrikeServerDataService =
+                ServiceLocator.GetRequiredService<CS2ServerDataService>();
+
+            if (!await counterStrikeServerDataService.LoadServersAsync())
+            {
+                return false;
+            }
+
+            await PrunePresetEntriesAsync(
+                GameModes.CounterStrike2,
+                counterStrikeServerDataService.GetServerData()
+                );
+
+            return true;
+        }
+
+        public async Task<bool> PrunePresetEntriesAsync(string gameMode, ServerData serverData)
+        {
+            HashSet<string> clusteredServerKeys = serverData.ClusteredServers
+                .Select(serverModel => serverModel.Description)
+                .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> unclusteredServerKeys = serverData.UnclusteredServers
+                .Select(serverModel => serverModel.Name)
+                .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            bool presetsPruned = await _jsonSetting.PrunePresetEntriesByGameModeAsync(
+                gameMode,
+                clusteredServerKeys,
+                unclusteredServerKeys
+                );
+
+            return presetsPruned;
+        }
+
+        public string GetServerKey(ServerModel serverModel, bool isClustered)
+        {
+            return isClustered
+                ? serverModel.Description
+                : serverModel.Name;
+        }
+
+        private string GetServerKey(ServerModel serverModel)
+        {
+            return GetServerKey(serverModel, _jsonSetting.is_clustered);
+        }
+
+        public async Task RestoreLastSelectedPresetAsync()
+        {
+            if (!HasPresets)
+            {
+                await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
+
+                ClearSelectedPreset();
+                return;
+            }
+
+            string lastSelectedPresetName = _jsonSetting.GetLastSelectedPresetNameByGameMode();
+
+            if (string.IsNullOrWhiteSpace(lastSelectedPresetName))
+            {
+                ClearSelectedPreset();
+                return;
+            }
+
+            PresetModel? lastSelectedPreset = _jsonSetting.GetPresetByGameMode(_jsonSetting.game_mode, lastSelectedPresetName);
+
+            if (lastSelectedPreset == null)
+            {
+                await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
+                ClearSelectedPreset();
+                return;
+            }
+
+            bool restored = await ApplyPresetAsync(lastSelectedPreset);
+
+            if (!restored)
+            {
+                ClearSelectedPreset();
+            }
+        }
+
+        private async Task<bool> ApplyPresetWithResetAsync(PresetModel serverPreset)
+        {
+            if (ServerModels.Count > 0)
+            {
+                bool unblocked = await PerformOperationAsync(false, ServerModels, false);
+
+                if (!unblocked)
+                {
+                    return false;
+                }
+            }
+
+            await SetClusterStateAsync(serverPreset.IsClustered, false);
+
+            ObservableCollection<ServerModel> matchingServerModels = GetMatchingServerModels(serverPreset);
+
+            if (matchingServerModels.Count == 0)
+            {
+                return true;
+            }
+
+            return await PerformOperationAsync(true, matchingServerModels, false);
+        }
+
+        private ObservableCollection<ServerModel> GetMatchingServerModels(PresetModel serverPreset)
+        {
+            return new ObservableCollection<ServerModel>(
+                ServerModels.Where(serverModel =>
+                    serverPreset.BlockedServerKeys
+                        .Contains(GetServerKey(serverModel), StringComparer.OrdinalIgnoreCase))
+                );
+        }
+
+        private async Task MarkPresetSelectionDirtyAsync()
+        {
+            await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
+
+            ClearSelectedPreset();
+        }
+
+        private void ClearSelectedPreset()
+        {
+            SelectedPreset = null;
+        }
     }
 }

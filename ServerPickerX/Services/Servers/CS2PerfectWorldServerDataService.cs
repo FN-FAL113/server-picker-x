@@ -1,4 +1,3 @@
-using ServerPickerX.Settings;
 using ServerPickerX.Models;
 using System;
 using System.Collections.Generic;
@@ -14,8 +13,7 @@ namespace ServerPickerX.Services.Servers
     public class CS2PerfectWorldServerDataService(
         ILoggerService _logger,
         IMessageBoxService _messageBoxService,
-        HttpClient _httpClient,
-        JsonSetting _jsonSettings
+        HttpClient _httpClient
         ) : IServerDataService
     {
         private ServerData _serverData = new();
@@ -46,14 +44,6 @@ namespace ServerPickerX.Services.Servers
                 string revision = mainJson["revision"]!.ToString();
 
                 _serverData.Revision = revision;
-
-                // Update settings if app is initialized for the first time
-                if (_jsonSettings.cs2_server_revision == "-1")
-                {
-                    _jsonSettings.cs2_server_revision = revision;
-
-                    await _jsonSettings.SaveSettingsAsync();
-                }
 
                 ProcessServers(mainJson, _serverData);
             }
