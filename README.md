@@ -14,7 +14,7 @@ Lightweight server picker for CS2 and Deadlock with cross-platform support for *
 ### [Releases](https://github.com/FN-FAL113/server-picker-x/releases)
 
 ## 📷 Screenshot
-![ServerPickerX](https://github.com/user-attachments/assets/195b9553-4ca3-48b4-9d21-1aca8990d623)
+![ServerPickerX](https://github.com/user-attachments/assets/6feac783-5d18-4900-bf6a-0a07b9d665a9)
 <details>
   <summary>Windows Short Demo</summary>
   
