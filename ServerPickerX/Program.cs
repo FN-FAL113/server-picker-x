@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 using System;
@@ -22,6 +22,10 @@ namespace ServerPickerX
 
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
+                .With(new Win32PlatformOptions
+                {
+                    RenderingMode = [Win32RenderingMode.Software],
+                })
                 .WithInterFont()
                 .LogToTrace();
         }
