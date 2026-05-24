@@ -10,19 +10,35 @@ using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
-    public class MarathonServerDataService(
-        ILoggerService _logger,
-        IMessageBoxService _messageBoxService,
-        HttpClient _httpClient
-        ) : IServerDataService
+    public abstract class GenericService : IServerDataService
     {
+        private readonly ILoggerService _logger;
+        private readonly IMessageBoxService _messageBoxService;
+        private readonly HttpClient _httpClient;
         private ServerData _serverData = new();
+
+        protected GenericService(
+            ILoggerService logger,
+            IMessageBoxService messageBoxService,
+            HttpClient httpClient
+        )
+        {
+            _logger = logger;
+            _messageBoxService = messageBoxService;
+            _httpClient = httpClient;
+        }
+
+        protected abstract string ResponseUrl { get; }
+
+        protected abstract string ServiceDisplayName { get; }
+
+        protected abstract bool IsServerAccepted(string serverDescription);
 
         public async Task<bool> LoadServersAsync()
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=3065800");
+                var response = await _httpClient.GetAsync(ResponseUrl);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -42,15 +58,13 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string revision = mainJson["revision"]!.ToString();
-
                 _serverData.Revision = revision;
 
                 ProcessServers(mainJson, _serverData);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("Failed to load marathon servers", ex.Message);
-
+                await _logger.LogErrorAsync($"Failed to load {ServiceDisplayName} servers", ex.Message);
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
                 return false;
@@ -72,6 +86,11 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string serverDescription = server.Value["desc"]!.ToString();
+
+                if (!IsServerAccepted(serverDescription))
+                {
+                    continue;
+                }
 
                 var serverModel = new ServerModel
                 {
@@ -97,7 +116,6 @@ namespace ServerPickerX.Services.Servers
 
                     clusteredServer.RelayModels.AddRange(serverModel.RelayModels);
 
-                    // Initialize a server cluster where relay addresses will be appended
                     if (string.IsNullOrEmpty(clusteredServer.Description))
                     {
                         clusteredServer.Flag = serverModel.Flag;
@@ -127,12 +145,6 @@ namespace ServerPickerX.Services.Servers
             return _serverData;
         }
 
-        public List<string> GetClusterKeywords()
-        {
-            return
-            [
-                "Hong Kong", "Sweden", "India", "Netherlands"
-            ];
-        }
+        public abstract List<string> GetClusterKeywords();
     }
 }

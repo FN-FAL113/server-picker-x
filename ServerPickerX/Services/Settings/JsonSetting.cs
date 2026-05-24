@@ -1,16 +1,13 @@
-using ServerPickerX.Constants;
-using ServerPickerX.Helpers;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
+using ServerPickerX.Services.Servers;
 using ServerPickerX.Services.Settings;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -33,11 +30,7 @@ namespace ServerPickerX.Settings
 
         public virtual string language { set; get; } = "English | en-us";
 
-        public virtual string cs2_server_revision { get; set; } = "-1";
-
-        public virtual string deadlock_server_revision { get; set; } = "-1";
-
-        public virtual string marathon_server_revision { get; set; } = "-1";
+        public virtual Dictionary<string, string> server_revisions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         public virtual bool is_clustered { get; set; } = false;
 
@@ -97,9 +90,9 @@ namespace ServerPickerX.Settings
 
                 game_mode = localSettings.game_mode;
                 language = localSettings.language;
-                cs2_server_revision = localSettings.cs2_server_revision;
-                deadlock_server_revision = localSettings.deadlock_server_revision;
-                marathon_server_revision = localSettings.marathon_server_revision;
+                server_revisions = localSettings.server_revisions != null
+                    ? new Dictionary<string, string>(localSettings.server_revisions, StringComparer.OrdinalIgnoreCase)
+                    : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 is_clustered = localSettings.is_clustered;
                 version_check_on_startup = localSettings.version_check_on_startup;
                 server_presets = localSettings.server_presets ?? [];
@@ -146,14 +139,12 @@ namespace ServerPickerX.Settings
         {
             try
             {
-                return this.game_mode switch
-                {
-                    GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld => this.cs2_server_revision,
-                    GameModes.Deadlock => this.deadlock_server_revision,
-                    GameModes.Marathon => this.marathon_server_revision,
-                    _ => throw new NotSupportedException($"Unsupported game mode: {this.game_mode}"),
-                };
-            } catch (NotSupportedException ex) {
+                string revisionKey = GetCurrentRevisionKey();
+
+                return server_revisions.TryGetValue(revisionKey, out string? revision)
+                    ? revision
+                    : "-1";
+            } catch (InvalidOperationException ex) {
                 await _loggerService.LogErrorAsync("An error has occured while getting server revision by current game mode", ex.Message);
 
                 throw;
@@ -164,29 +155,25 @@ namespace ServerPickerX.Settings
         {
             try
             {
-                switch (this.game_mode)
-                {
-                    case GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld:
-                        this.cs2_server_revision = revision;
-                        break;
-                    case GameModes.Deadlock:
-                        this.deadlock_server_revision = revision;
-                        break;
-                    case GameModes.Marathon:
-                        this.marathon_server_revision = revision;
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported game mode: {this.game_mode}");
-                };
+                string revisionKey = GetCurrentRevisionKey();
+                server_revisions[revisionKey] = revision;
 
                 await this.SaveSettingsAsync();
             }
-            catch (NotSupportedException ex)
+            catch (InvalidOperationException ex)
             {
                 await _loggerService.LogErrorAsync("An error has occured while setting server revision by current game mode", ex.Message);
 
                 throw;
             }
+        }
+
+        private string GetCurrentRevisionKey()
+        {
+            ServerDefinitionProvider serverDefinitionProvider =
+                ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
+
+            return serverDefinitionProvider.GetRevisionKeyByGameMode(this.game_mode);
         }
 
         public async Task SetGameModeAsync(string gameMode)

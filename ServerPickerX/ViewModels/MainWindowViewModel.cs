@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia.Enums;
-using ServerPickerX.Constants;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
@@ -16,6 +15,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.ViewModels
@@ -437,42 +437,48 @@ namespace ServerPickerX.ViewModels
             return await PrunePresetEntriesAsync(_jsonSetting.game_mode, _serverDataService.GetServerData());
         }
 
-        public async Task<bool> PruneCounterStrikeFamilyPresetEntriesAsync()
+        public async Task<bool> PruneRelatedGamePresetEntriesAsync()
         {
-            // CS2 and Perfect World share one revision bucket, but their filtered server sets differ.
-            // When either mode syncs, prune the sibling mode too before marking the shared revision current.
-            if (_jsonSetting.game_mode == GameModes.CounterStrike2)
-            {
-                CS2PerfectWorldServerDataService perfectWorldServerDataService =
-                    ServiceLocator.GetRequiredService<CS2PerfectWorldServerDataService>();
+            ServerDefinitionProvider serverDefinitionProvider =
+                ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
+            string revisionKey = serverDefinitionProvider.GetRevisionKeyByGameMode(_jsonSetting.game_mode);
+            IReadOnlyList<string> relatedGameModes = serverDefinitionProvider.GetGameModesByRevisionKey(revisionKey);
 
-                if (!await perfectWorldServerDataService.LoadServersAsync())
+            foreach (string relatedGameMode in relatedGameModes.Where(gameMode =>
+                         !gameMode.Equals(_jsonSetting.game_mode, StringComparison.OrdinalIgnoreCase)))
+            {
+                IServerDataService relatedServerDataService = CreateConfiguredServerDataService(relatedGameMode);
+
+                if (!await relatedServerDataService.LoadServersAsync())
                 {
                     return false;
                 }
 
-                await PrunePresetEntriesAsync(
-                    GameModes.CounterStrike2PerfectWorld,
-                    perfectWorldServerDataService.GetServerData()
-                    );
-
-                return true;
+                await PrunePresetEntriesAsync(relatedGameMode, relatedServerDataService.GetServerData());
             }
-
-            CS2ServerDataService counterStrikeServerDataService =
-                ServiceLocator.GetRequiredService<CS2ServerDataService>();
-
-            if (!await counterStrikeServerDataService.LoadServersAsync())
-            {
-                return false;
-            }
-
-            await PrunePresetEntriesAsync(
-                GameModes.CounterStrike2,
-                counterStrikeServerDataService.GetServerData()
-                );
 
             return true;
+        }
+
+        private IServerDataService CreateConfiguredServerDataService(string gameMode)
+        {
+            ServerDefinitionProvider serverDefinitionProvider =
+                ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
+            ServerDefinition? serverDefinition = serverDefinitionProvider.GetDefinitionByGameMode(gameMode);
+
+            if (serverDefinition == null)
+            {
+                throw new InvalidOperationException($"Unsupported game mode: {gameMode}");
+            }
+
+            HttpClient httpClient = ServiceLocator.GetRequiredService<HttpClient>();
+
+            return new ConfiguredServerDataService(
+                serverDefinition,
+                _loggerService,
+                _messageBoxService,
+                httpClient
+                );
         }
 
         public async Task<bool> PrunePresetEntriesAsync(string gameMode, ServerData serverData)

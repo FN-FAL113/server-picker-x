@@ -2,17 +2,19 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ServerPickerX.Comparers;
-using ServerPickerX.Constants;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
+using ServerPickerX.Services.Servers;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.Views
@@ -43,6 +45,7 @@ namespace ServerPickerX.Views
         private readonly IMessageBoxService _messageBoxService;
         private readonly IVersionService _versionService;
         private readonly ILocalizationService _localizationService;
+        private readonly ServerDefinitionProvider _serverDefinitionProvider;
 
         // Parameterless constructor, allows design previewer to create its own instance since it doesn't support DI
         public MainWindow()
@@ -55,6 +58,7 @@ namespace ServerPickerX.Views
             _messageBoxService = ServiceLocator.GetRequiredService<IMessageBoxService>();
             _versionService = ServiceLocator.GetRequiredService<IVersionService>();
             _localizationService = ServiceLocator.GetRequiredService<ILocalizationService>();
+            _serverDefinitionProvider = ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
         }
 
         // DI constructor, allows inversion of control and unit tests mocking
@@ -74,6 +78,7 @@ namespace ServerPickerX.Views
             _versionService = versionService;
             _jsonSetting = jsonSetting;
             _localizationService = localizationService;
+            _serverDefinitionProvider = ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
         }
 
         private async void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -210,22 +215,24 @@ namespace ServerPickerX.Views
         {
             try
             {
-                switch (_jsonSetting.game_mode)
+                IReadOnlyList<string> gameModes = _serverDefinitionProvider.GetGameModes();
+
+                if (gameModes.Count == 0)
                 {
-                    case GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld:
-                        GameModeComboBox.SelectedIndex = !_jsonSetting.game_mode.Contains("Perfect") ? 0 : 1;
-                        break;
-                    case GameModes.Deadlock:
-                        GameModeComboBox.SelectedIndex = 2;
-                        break;
-                    case GameModes.Marathon:
-                        GameModeComboBox.SelectedIndex = 3;
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported game mode: {_jsonSetting.game_mode}");
-                };
+                    throw new InvalidOperationException("No server definitions were found.");
+                }
+
+                if (!gameModes.Contains(_jsonSetting.game_mode, StringComparer.OrdinalIgnoreCase))
+                {
+                    await _jsonSetting.SetGameModeAsync(gameModes[0]);
+                }
+
+                GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
+                GameModeComboBox.ItemsSource = gameModes;
+                GameModeComboBox.SelectedItem = _jsonSetting.game_mode;
+                GameModeComboBox.SelectionChanged += GameModeComboBox_SelectionChanged;
             }
-            catch (NotSupportedException ex)
+            catch (InvalidOperationException ex)
             {
                 await _loggerService.LogErrorAsync("An error has occured while setting game mode combo box", ex.Message);
 
@@ -246,12 +253,10 @@ namespace ServerPickerX.Views
 
             var fetchedRevision = vm.GetServerDataService().GetFetchedRevision();
 
-            bool isCounterStrikeFamilyGame = _jsonSetting.game_mode is
-                GameModes.CounterStrike2 or GameModes.CounterStrike2PerfectWorld;
-            bool hasAffectedPresets = isCounterStrikeFamilyGame
-                ? _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2).Count > 0 ||
-                  _jsonSetting.GetPresetsByGameMode(GameModes.CounterStrike2PerfectWorld).Count > 0
-                : _jsonSetting.GetPresetsByGameMode(_jsonSetting.game_mode).Count > 0;
+            string revisionKey = _serverDefinitionProvider.GetRevisionKeyByGameMode(_jsonSetting.game_mode);
+            IReadOnlyList<string> affectedGameModes = _serverDefinitionProvider.GetGameModesByRevisionKey(revisionKey);
+            bool hasAffectedPresets = affectedGameModes.Any(gameMode =>
+                _jsonSetting.GetPresetsByGameMode(gameMode).Count > 0);
 
             // Store the initial revision without a reset when this game has no saved presets yet.
             if (localRevision == "-1" && !hasAffectedPresets)
@@ -282,9 +287,9 @@ namespace ServerPickerX.Views
 
             await vm.PruneCurrentGamePresetEntriesAsync();
 
-            if (isCounterStrikeFamilyGame)
+            if (affectedGameModes.Count > 1)
             {
-                if (!await vm.PruneCounterStrikeFamilyPresetEntriesAsync())
+                if (!await vm.PruneRelatedGamePresetEntriesAsync())
                 {
                     return;
                 }
