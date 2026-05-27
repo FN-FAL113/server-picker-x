@@ -6,7 +6,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using ServerPickerX.Constants;
 using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
@@ -44,34 +43,38 @@ namespace ServerPickerX
             serviceCollection.AddSingleton<JsonSetting>();
             serviceCollection.AddSingleton<HttpClient>();
 
-            // Register concrete services and contionally provide these services through parent interface service resolver
-            serviceCollection.AddTransient<CS2ServerDataService>();
-            serviceCollection.AddTransient<CS2PerfectWorldServerDataService>();
-            serviceCollection.AddTransient<DeadLockServerDataService>();
-            serviceCollection.AddTransient<MarathonServerDataService>();
+            // Register a provider that loads definitions once and expose it as a singleton
+            serviceCollection.AddSingleton<ServerDefinitionProvider>();
+
+            // Register a factory for IServerDataService using JSON server definitions
             serviceCollection.AddTransient<IServerDataService>(serviceProvider =>
             {
-                JsonSetting jsonSetting = serviceProvider.GetRequiredService<JsonSetting>();
                 ILoggerService loggerService = serviceProvider.GetRequiredService<ILoggerService>();
+                JsonSetting jsonSetting = serviceProvider.GetRequiredService<JsonSetting>();
 
                 try
                 {
-                    // Factory method may be suitable if more entries are added in the future
-                    return jsonSetting.game_mode switch
+                    // Get server definition by current game mode that contains app related metadata
+                    var serverDefinitionProvider = serviceProvider.GetRequiredService<ServerDefinitionProvider>();
+                    var serverDefinition = serverDefinitionProvider.GetServerDefinitionByGameMode(jsonSetting.game_mode);
+
+                    if (serverDefinition != null)
                     {
-                        GameModes.CounterStrike2 => serviceProvider.GetRequiredService<CS2ServerDataService>(),
-                        GameModes.CounterStrike2PerfectWorld => serviceProvider.GetRequiredService<CS2PerfectWorldServerDataService>(),
-                        GameModes.Deadlock => serviceProvider.GetRequiredService<DeadLockServerDataService>(),
-                        GameModes.Marathon => serviceProvider.GetRequiredService<MarathonServerDataService>(),
-                        _ => throw new NotSupportedException($"Unsupported game mode: {jsonSetting.game_mode}")
-                    };
-                } catch (NotSupportedException ex)
+                        // ActivatorUtilities will instantiate a given type and injects dependencies from existing DI container
+                        // while missing dependencies are supplied as manual argument (serverDefinition)
+                        IServerDataService? obj = ActivatorUtilities.CreateInstance<ConfiguredServerDataService>(serviceProvider, serverDefinition);
+
+                        if (obj != null) return obj;
+                    }
+
+                    throw new InvalidOperationException("Failed to register service [IServerDataService]");
+                }
+                catch (InvalidOperationException ex) 
                 {
                     loggerService.LogErrorAsync(ex.Message);
 
                     throw;
                 }
-                
             });
             serviceCollection.AddTransient<WindowsFirewallService>();
             serviceCollection.AddTransient<LinuxFirewallService>();

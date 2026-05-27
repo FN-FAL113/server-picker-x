@@ -1,16 +1,17 @@
 using ServerPickerX.Models;
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using ServerPickerX.Services.Loggers;
-using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
-    public class MarathonServerDataService(
+    public class ConfiguredServerDataService(
+        ServerDefinition _serverDefinition,
         ILoggerService _logger,
         IMessageBoxService _messageBoxService,
         HttpClient _httpClient
@@ -22,7 +23,7 @@ namespace ServerPickerX.Services.Servers
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=3065800");
+                var response = await _httpClient.GetAsync(string.Format(_serverDefinition.ResponseUrlTemplate, _serverDefinition.AppId));
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -42,15 +43,14 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string revision = mainJson["revision"]!.ToString();
-
+                
                 _serverData.Revision = revision;
 
                 ProcessServers(mainJson, _serverData);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync("Failed to load marathon servers", ex.Message);
-
+                await _logger.LogErrorAsync($"Failed to load {_serverDefinition.DisplayName ?? _serverDefinition.Id} servers", ex.Message);
                 await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
 
                 return false;
@@ -72,6 +72,11 @@ namespace ServerPickerX.Services.Servers
                 }
 
                 string serverDescription = server.Value["desc"]!.ToString();
+
+                if (!IsServerAccepted(serverDescription))
+                {
+                    continue;
+                }
 
                 var serverModel = new ServerModel
                 {
@@ -97,7 +102,6 @@ namespace ServerPickerX.Services.Servers
 
                     clusteredServer.RelayModels.AddRange(serverModel.RelayModels);
 
-                    // Initialize a server cluster where relay addresses will be appended
                     if (string.IsNullOrEmpty(clusteredServer.Description))
                     {
                         clusteredServer.Flag = serverModel.Flag;
@@ -127,12 +131,24 @@ namespace ServerPickerX.Services.Servers
             return _serverData;
         }
 
+        public bool IsServerAccepted(string serverDescription)
+        {
+            if (_serverDefinition.KeywordFilterMode?.ToLower() == "include")
+            {
+                return _serverDefinition.Keywords.Any(k => serverDescription.Contains(k));
+            }
+
+            if (_serverDefinition.KeywordFilterMode?.ToLower() == "exclude")
+            {
+                return !_serverDefinition.Keywords.Any(k => serverDescription.Contains(k));
+            }
+
+            return true;
+        }
+
         public List<string> GetClusterKeywords()
         {
-            return
-            [
-                "Hong Kong", "Sweden", "India", "Netherlands"
-            ];
+            return _serverDefinition.ClusterKeywords ?? [];
         }
     }
 }

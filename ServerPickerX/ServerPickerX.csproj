@@ -31,7 +31,6 @@
         <AvaloniaResource Include="Styles\**" />
 	    <AvaloniaResource Include="Locales\**" />
     </ItemGroup>
-	
     <ItemGroup>
 		<Reference Include="Interop.NetFwTypeLib">
 			<HintPath>libs\Interop.NetFwTypeLib.dll</HintPath>
