@@ -1,49 +1,47 @@
-{
-  "servers": [
-    {
-      "gameMode": "Counter Strike 2",
-      "id": "cs2",
-      "displayName": "CS2",
-      "appId": 730,
-      "keywordFilterMode": "exclude",
-      "keywords": ["China"],
-      "clusterKeywords": ["Hong Kong", "Sweden", "India", "Netherlands"]
-    },
-    {
-      "gameMode": "Counter Strike 2 (Perfect World)",
-      "id": "cs2_perfect_world",
-      "displayName": "CS2 Perfect World",
-      "appId": 730,
-      "keywordFilterMode": "include",
-      "keywords": ["China"],
-      "clusterKeywords": ["Tencent", "Alibaba", "Perfect World"]
-    },
-    {
-      "gameMode": "Deadlock",
-      "id": "deadlock",
-      "displayName": "Deadlock",
-      "appId": 1422450,
-      "keywordFilterMode": "none",
-      "keywords": [],
-      "clusterKeywords": ["China", "Hong Kong", "Sweden", "India", "Netherlands"]
-    },
-    {
-      "gameMode": "Marathon",
-      "id": "marathon",
-      "displayName": "Marathon",
-      "appId": 3065800,
-      "keywordFilterMode": "none",
-      "keywords": [],
-      "clusterKeywords": ["Hong Kong", "Sweden", "India", "Netherlands"]
-    },
-    {
-      "gameMode": "THE FINALS",
-      "id": "the_finals",
-      "displayName": "THE FINALS",
-      "appId": 2073850,
-      "keywordFilterMode": "none",
-      "keywords": [],
-      "clusterKeywords": ["Sweden", "India", "Washington"]
-    }
-  ]
-}
+[
+  {
+    "gameMode": "Counter Strike 2",
+    "id": "cs2",
+    "displayName": "CS2",
+    "appId": 730,
+    "keywordFilterMode": "exclude",
+    "keywords": [ "China" ],
+    "clusterKeywords": [ "Hong Kong", "Sweden", "India", "Netherlands" ]
+  },
+  {
+    "gameMode": "Counter Strike 2 (Perfect World)",
+    "id": "cs2_perfect_world",
+    "displayName": "CS2 Perfect World",
+    "appId": 730,
+    "keywordFilterMode": "include",
+    "keywords": [ "China" ],
+    "clusterKeywords": [ "Tencent", "Alibaba", "Perfect World" ]
+  },
+  {
+    "gameMode": "Deadlock",
+    "id": "deadlock",
+    "displayName": "Deadlock",
+    "appId": 1422450,
+    "keywordFilterMode": "none",
+    "keywords": [],
+    "clusterKeywords": [ "China", "Hong Kong", "Sweden", "India", "Netherlands" ]
+  },
+  {
+    "gameMode": "Marathon",
+    "id": "marathon",
+    "displayName": "Marathon",
+    "appId": 3065800,
+    "keywordFilterMode": "none",
+    "keywords": [],
+    "clusterKeywords": [ "Hong Kong", "Sweden", "India", "Netherlands" ]
+  },
+  {
+    "gameMode": "THE FINALS",
+    "id": "the_finals",
+    "displayName": "THE FINALS",
+    "appId": 2073850,
+    "keywordFilterMode": "none",
+    "keywords": [],
+    "clusterKeywords": [ "Sweden", "India", "Washington" ]
+  }
+]

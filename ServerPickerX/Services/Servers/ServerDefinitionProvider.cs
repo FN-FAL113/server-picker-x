@@ -1,5 +1,8 @@
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -8,42 +11,70 @@ namespace ServerPickerX.Services.Servers
 {
     public class ServerDefinitionProvider
     {
-        private const string DefinitionsFileName = "ServerDefinitions.json";
-        private readonly ServerDefinitionsFile _definitions;
-        public ServerDefinitionProvider()
+        private readonly List<ServerDefinition> _serverDefinitions = [];
+        private readonly JsonSerializerOptions _jsonDeserializerOptions = new()
         {
-            string path = Path.Combine(Environment.CurrentDirectory, DefinitionsFileName);
-            EnsureDefinitionsFileExists(path);
-            string json = File.ReadAllText(path);
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+        };
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+        {
+            WriteIndented = true,
+            AllowTrailingCommas = true,
+        };
 
-            ServerDefinitionsFile? doc = JsonSerializer.Deserialize<ServerDefinitionsFile>(json, new JsonSerializerOptions
+        [RequiresUnreferencedCode(message: "Deserialization involves reflection which may be trimmed away.")]
+        public ServerDefinitionProvider(ILoggerService _loggerService)
+        {
+            var path = "";
+            try
             {
-                PropertyNameCaseInsensitive = true
-            });
+                path = Path.Combine(AppContext.BaseDirectory, "ServerDefinitions.json");
 
-            _definitions = doc ?? new ServerDefinitionsFile();
+                if (!File.Exists(path)) 
+                {
+                    var defaults = CreateDefaultServerDefinitions();
+                    string serializedJson = JsonSerializer.Serialize(defaults, _jsonSerializerOptions);
+
+                    File.WriteAllText(path, serializedJson);
+                }
+            }
+            catch (Exception ex)
+            {
+                _loggerService.LogErrorAsync(ex.Message);
+
+                throw;
+            }
+
+            var json = File.ReadAllText(path);
+
+            var serverDefinitions = JsonSerializer.Deserialize<List<ServerDefinition>>(json, _jsonDeserializerOptions);
+
+            _serverDefinitions = serverDefinitions ?? [];
         }
 
-        public IReadOnlyList<ServerDefinition> GetDefinitions() => _definitions.Servers.AsReadOnly();
+        public IReadOnlyList<ServerDefinition> GetDefinitions() => _serverDefinitions.AsReadOnly();
 
         public IReadOnlyList<string> GetGameModes()
         {
-            return _definitions.Servers
+            return _serverDefinitions
                 .Select(definition => definition.GameMode)
                 .Where(gameMode => !string.IsNullOrWhiteSpace(gameMode))
                 .ToList()
                 .AsReadOnly();
         }
 
-        public ServerDefinition? GetDefinitionByGameMode(string gameMode)
+        public ServerDefinition? GetServerDefinitionByGameMode(string gameMode)
         {
-            return _definitions.Servers.FirstOrDefault(definition =>
-                definition.GameMode.Equals(gameMode, StringComparison.OrdinalIgnoreCase));
+            return _serverDefinitions
+                .FirstOrDefault(
+                    definition => definition.GameMode.Equals(gameMode, StringComparison.OrdinalIgnoreCase)
+                );
         }
 
-        public string GetRevisionKeyByGameMode(string gameMode)
+        public string GetAppIdByGameMode(string gameMode)
         {
-            ServerDefinition? definition = GetDefinitionByGameMode(gameMode);
+            ServerDefinition? definition = GetServerDefinitionByGameMode(gameMode);
 
             if (definition == null)
             {
@@ -53,37 +84,19 @@ namespace ServerPickerX.Services.Servers
             return definition.AppId.ToString();
         }
 
-        public IReadOnlyList<string> GetGameModesByRevisionKey(string revisionKey)
+        public IReadOnlyList<string> GetGameModesByAppId(string appId)
         {
-            return _definitions.Servers
-                .Where(definition => definition.AppId.ToString() == revisionKey)
+            return _serverDefinitions
+                .Where(definition => definition.AppId.ToString() == appId)
                 .Select(definition => definition.GameMode)
                 .Where(gameMode => !string.IsNullOrWhiteSpace(gameMode))
                 .ToList()
                 .AsReadOnly();
         }
-        
-        private static void EnsureDefinitionsFileExists(string path)
+
+        private List<ServerDefinition> CreateDefaultServerDefinitions()
         {
-            if (File.Exists(path))
-            {
-                return;
-            }
-
-            ServerDefinitionsFile defaults = CreateDefaultDefinitions();
-            string json = JsonSerializer.Serialize(defaults, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            File.WriteAllText(path, json);
-        }
-
-        private static ServerDefinitionsFile CreateDefaultDefinitions()
-        {
-            return new ServerDefinitionsFile
-            {
-                Servers =
+            return
                 [
                     new ServerDefinition
                     {
@@ -125,13 +138,7 @@ namespace ServerPickerX.Services.Servers
                         Keywords = [],
                         ClusterKeywords = ["Hong Kong", "Sweden", "India", "Netherlands"]
                     }
-                ]
-            };
-        }
-
-        private class ServerDefinitionsFile
-        {
-            public List<ServerDefinition> Servers { get; set; } = new();
+                ];
         }
     }
 }

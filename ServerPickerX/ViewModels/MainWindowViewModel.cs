@@ -441,8 +441,10 @@ namespace ServerPickerX.ViewModels
         {
             ServerDefinitionProvider serverDefinitionProvider =
                 ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
-            string revisionKey = serverDefinitionProvider.GetRevisionKeyByGameMode(_jsonSetting.game_mode);
-            IReadOnlyList<string> relatedGameModes = serverDefinitionProvider.GetGameModesByRevisionKey(revisionKey);
+
+            string appId = serverDefinitionProvider.GetAppIdByGameMode(_jsonSetting.game_mode);
+
+            IReadOnlyList<string> relatedGameModes = serverDefinitionProvider.GetGameModesByAppId(appId);
 
             foreach (string relatedGameMode in relatedGameModes.Where(gameMode =>
                          !gameMode.Equals(_jsonSetting.game_mode, StringComparison.OrdinalIgnoreCase)))
@@ -464,7 +466,7 @@ namespace ServerPickerX.ViewModels
         {
             ServerDefinitionProvider serverDefinitionProvider =
                 ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
-            ServerDefinition? serverDefinition = serverDefinitionProvider.GetDefinitionByGameMode(gameMode);
+            ServerDefinition? serverDefinition = serverDefinitionProvider.GetServerDefinitionByGameMode(gameMode);
 
             if (serverDefinition == null)
             {

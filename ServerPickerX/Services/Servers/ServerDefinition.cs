@@ -10,8 +10,8 @@ namespace ServerPickerX.Services.Servers
         public string DisplayName { get; set; } = "";
         public int AppId { get; set; }
         public string KeywordFilterMode { get; set; } = "none";
-        public List<string> Keywords { get; set; } = new();
-        public List<string> ClusterKeywords { get; set; } = new();
+        public List<string> Keywords { get; set; } = [];
+        public List<string> ClusterKeywords { get; set; } = [];
         public string ResponseUrlTemplate { get; set; } = "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid={0}";
     }
     public class ServerData

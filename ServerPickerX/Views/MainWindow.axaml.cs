@@ -253,10 +253,13 @@ namespace ServerPickerX.Views
 
             var fetchedRevision = vm.GetServerDataService().GetFetchedRevision();
 
-            string revisionKey = _serverDefinitionProvider.GetRevisionKeyByGameMode(_jsonSetting.game_mode);
-            IReadOnlyList<string> affectedGameModes = _serverDefinitionProvider.GetGameModesByRevisionKey(revisionKey);
-            bool hasAffectedPresets = affectedGameModes.Any(gameMode =>
-                _jsonSetting.GetPresetsByGameMode(gameMode).Count > 0);
+            string appId = _serverDefinitionProvider.GetAppIdByGameMode(_jsonSetting.game_mode);
+            
+            IReadOnlyList<string> affectedGameModes = _serverDefinitionProvider.GetGameModesByAppId(appId);
+            
+            bool hasAffectedPresets = affectedGameModes.Any(
+                    gameMode => _jsonSetting.GetPresetsByGameMode(gameMode).Count > 0
+                );
 
             // Store the initial revision without a reset when this game has no saved presets yet.
             if (localRevision == "-1" && !hasAffectedPresets)

@@ -14,9 +14,8 @@ using System.Threading.Tasks;
 
 namespace ServerPickerX.Settings
 {
-    // Publishing an app with trimmed assemblies or using AOT compilation for reduced
-    // build size can limit the serialization functionality since it requires reflection 
-    // to determine dynamic types on runtime which is not possible with trimmed or AOT apps.
+    // Publishing an app with trimmed assemblies or using AOT compilation for reduced build size
+    // can break serialization due to limitations when using Reflection which analyzes dynamic types on runtime.
     // JsonSerializerContext preserves the types and provides serialization metadata on compile-time.
     [JsonSerializable(typeof(JsonSetting))]
     internal partial class SourceGenerationContext : JsonSerializerContext { }
@@ -139,9 +138,9 @@ namespace ServerPickerX.Settings
         {
             try
             {
-                string revisionKey = GetCurrentRevisionKey();
+                string appId = GetCurrentAppId();
 
-                return server_revisions.TryGetValue(revisionKey, out string? revision)
+                return server_revisions.TryGetValue(appId, out string? revision)
                     ? revision
                     : "-1";
             } catch (InvalidOperationException ex) {
@@ -155,8 +154,8 @@ namespace ServerPickerX.Settings
         {
             try
             {
-                string revisionKey = GetCurrentRevisionKey();
-                server_revisions[revisionKey] = revision;
+                string appId = GetCurrentAppId();
+                server_revisions[appId] = revision;
 
                 await this.SaveSettingsAsync();
             }
@@ -168,12 +167,12 @@ namespace ServerPickerX.Settings
             }
         }
 
-        private string GetCurrentRevisionKey()
+        private string GetCurrentAppId()
         {
             ServerDefinitionProvider serverDefinitionProvider =
                 ServiceLocator.GetRequiredService<ServerDefinitionProvider>();
 
-            return serverDefinitionProvider.GetRevisionKeyByGameMode(this.game_mode);
+            return serverDefinitionProvider.GetAppIdByGameMode(this.game_mode);
         }
 
         public async Task SetGameModeAsync(string gameMode)

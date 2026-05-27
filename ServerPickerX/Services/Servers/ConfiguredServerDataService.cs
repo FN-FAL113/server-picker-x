@@ -1,49 +1,154 @@
 using ServerPickerX.Models;
+using ServerPickerX.Services.Loggers;
+using ServerPickerX.Services.MessageBoxes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using ServerPickerX.Services.Loggers;
-using ServerPickerX.Services.MessageBoxes;
 
 namespace ServerPickerX.Services.Servers
 {
-    public class ConfiguredServerDataService : GenericService
+    public class ConfiguredServerDataService(
+        ServerDefinition _serverDefinition,
+        ILoggerService _logger,
+        IMessageBoxService _messageBoxService,
+        HttpClient _httpClient
+        ) : IServerDataService
     {
-        private readonly ServerDefinition _definition;
+        private ServerData _serverData = new();
 
-        public ConfiguredServerDataService(
-            ServerDefinition definition,
-            ILoggerService logger,
-            IMessageBoxService messageBoxService,
-            HttpClient httpClient
-        ) : base(logger, messageBoxService, httpClient)
+        public async Task<bool> LoadServersAsync()
         {
-            _definition = definition;
-        }
-
-        protected override string ResponseUrl => string.Format(_definition.ResponseUrlTemplate, _definition.AppId);
-
-        protected override string ServiceDisplayName => _definition.DisplayName ?? _definition.Id;
-
-        protected override bool IsServerAccepted(string serverDescription)
-        {
-            if (_definition.KeywordFilterMode?.ToLower() == "include")
+            try
             {
-                return _definition.Keywords.Any(k => serverDescription.Contains(k));
+                var response = await _httpClient.GetAsync(string.Format(_serverDefinition.ResponseUrlTemplate, _serverDefinition.AppId));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        "Failed to load servers!" + Environment.NewLine + Environment.NewLine +
+                        "- Verify your internet connection or firewall are working and enabled" + Environment.NewLine +
+                        "- Make sure to run the app as admin or with sudo level execution"
+                    );
+                }
+
+                using var stream = await response.Content.ReadAsStreamAsync();
+                var mainJson = await JsonNode.ParseAsync(stream) as JsonObject;
+
+                if (mainJson?["revision"] == null || mainJson?["pops"] == null)
+                {
+                    throw new Exception("Server relay data unavailable. Please try again later.");
+                }
+
+                string revision = mainJson["revision"]!.ToString();
+                
+                _serverData.Revision = revision;
+
+                ProcessServers(mainJson, _serverData);
             }
-
-            if (_definition.KeywordFilterMode?.ToLower() == "exclude")
+            catch (Exception ex)
             {
-                return !_definition.Keywords.Any(k => serverDescription.Contains(k));
+                await _logger.LogErrorAsync($"Failed to load {_serverDefinition.DisplayName ?? _serverDefinition.Id} servers", ex.Message);
+                await _messageBoxService.ShowMessageBoxAsync("Error", ex.Message);
+
+                return false;
             }
 
             return true;
         }
 
-        public override List<string> GetClusterKeywords()
+        private void ProcessServers(JsonObject mainJson, ServerData serverData)
         {
-            return _definition.ClusterKeywords ?? new List<string>();
+            var unclusteredServers = new List<ServerModel>();
+            var clusteredServers = new List<ServerModel>();
+
+            foreach (KeyValuePair<string, JsonNode?> server in (JsonObject)mainJson["pops"]!)
+            {
+                if (server.Value?["relays"] == null)
+                {
+                    continue;
+                }
+
+                string serverDescription = server.Value["desc"]!.ToString();
+
+                if (!IsServerAccepted(serverDescription))
+                {
+                    continue;
+                }
+
+                var serverModel = new ServerModel
+                {
+                    Flag = "/Assets/flags/" + serverDescription + $" ({server.Key}).png",
+                    Name = server.Key,
+                    Description = serverDescription,
+                };
+
+                foreach (JsonObject? relay in (JsonArray)server.Value["relays"]!)
+                {
+                    serverModel.RelayModels.Add(new RelayModel
+                    {
+                        IPv4 = relay!["ipv4"]?.ToString() ?? ""
+                    });
+                }
+
+                unclusteredServers.Add(serverModel);
+
+                string clusterName = GetClusterKeywords().FirstOrDefault(keyword => serverDescription.Contains(keyword), "");
+                if (!string.IsNullOrEmpty(clusterName))
+                {
+                    var clusteredServer = clusteredServers.FirstOrDefault(s => s.Description == clusterName, new ServerModel());
+
+                    clusteredServer.RelayModels.AddRange(serverModel.RelayModels);
+
+                    if (string.IsNullOrEmpty(clusteredServer.Description))
+                    {
+                        clusteredServer.Flag = serverModel.Flag;
+                        clusteredServer.Name = "cluster";
+                        clusteredServer.Description = clusterName;
+
+                        clusteredServers.Add(clusteredServer);
+                    }
+                }
+                else
+                {
+                    clusteredServers.Add(serverModel);
+                }
+            }
+
+            serverData.UnclusteredServers = unclusteredServers;
+            serverData.ClusteredServers = clusteredServers;
+        }
+
+        public string GetFetchedRevision()
+        {
+            return _serverData.Revision;
+        }
+
+        public ServerData GetServerData()
+        {
+            return _serverData;
+        }
+
+        public bool IsServerAccepted(string serverDescription)
+        {
+            if (_serverDefinition.KeywordFilterMode?.ToLower() == "include")
+            {
+                return _serverDefinition.Keywords.Any(k => serverDescription.Contains(k));
+            }
+
+            if (_serverDefinition.KeywordFilterMode?.ToLower() == "exclude")
+            {
+                return !_serverDefinition.Keywords.Any(k => serverDescription.Contains(k));
+            }
+
+            return true;
+        }
+
+        public List<string> GetClusterKeywords()
+        {
+            return _serverDefinition.ClusterKeywords ?? [];
         }
     }
 }

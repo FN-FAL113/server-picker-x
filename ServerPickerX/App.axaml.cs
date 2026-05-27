@@ -49,18 +49,32 @@ namespace ServerPickerX
             // Register a factory for IServerDataService using JSON server definitions
             serviceCollection.AddTransient<IServerDataService>(serviceProvider =>
             {
+                ILoggerService loggerService = serviceProvider.GetRequiredService<ILoggerService>();
                 JsonSetting jsonSetting = serviceProvider.GetRequiredService<JsonSetting>();
 
-                var provider = serviceProvider.GetRequiredService<ServerDefinitionProvider>();
-                var match = provider.GetDefinitionByGameMode(jsonSetting.game_mode);
+                try
+                {
+                    // Get server definition by current game mode that contains app related metadata
+                    var serverDefinitionProvider = serviceProvider.GetRequiredService<ServerDefinitionProvider>();
+                    var serverDefinition = serverDefinitionProvider.GetServerDefinitionByGameMode(jsonSetting.game_mode);
 
-                if (match != null)
+                    if (serverDefinition != null)
                     {
-                        var obj = ActivatorUtilities.CreateInstance(serviceProvider, typeof(ConfiguredServerDataService), match) as IServerDataService;
+                        // ActivatorUtilities will instantiate a given type and injects dependencies from existing DI container
+                        // while missing dependencies are supplied as manual argument (serverDefinition)
+                        IServerDataService? obj = ActivatorUtilities.CreateInstance<ConfiguredServerDataService>(serviceProvider, serverDefinition);
+
                         if (obj != null) return obj;
                     }
 
-                throw new InvalidOperationException("Failed to create configured server");
+                    throw new InvalidOperationException("Failed to register service [IServerDataService]");
+                }
+                catch (InvalidOperationException ex) 
+                {
+                    loggerService.LogErrorAsync(ex.Message);
+
+                    throw;
+                }
             });
             serviceCollection.AddTransient<WindowsFirewallService>();
             serviceCollection.AddTransient<LinuxFirewallService>();
