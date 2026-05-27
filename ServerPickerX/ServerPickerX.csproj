@@ -31,12 +31,6 @@
         <AvaloniaResource Include="Styles\**" />
 	    <AvaloniaResource Include="Locales\**" />
     </ItemGroup>
-	<ItemGroup>
-        <Content Include="Services\Servers\ServerDefinitions.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-    </ItemGroup>
     <ItemGroup>
 		<Reference Include="Interop.NetFwTypeLib">
 			<HintPath>libs\Interop.NetFwTypeLib.dll</HintPath>
