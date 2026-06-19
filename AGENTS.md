@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## App Overview
-The app is a Windows/Linux desktop application designed to manage access to global CS2 and Deadlock servers by blocking
+A Windows/Linux desktop application designed to manage access to global CS2, Deadlock and other configured game servers by blocking
 or unblocking specific servers based on their geographic location. The primary function of this tool is server filtering for distributed gaming networks.
 
 ## Repository Overview
@@ -30,7 +30,7 @@ The output binary is located under `ServerPickerX/bin/Release/net10.0/<win-x64|l
 ## Linting & Formatting Guidelines
 ```bash
 # Check formatting without making changes
-# Requires dotnet-format to be installed (dotnet tool install -g dotnet-format)
+# Requires dotnet-format (dotnet tool install -g dotnet-format)
 dotnet format ServerPickerX.slnx --verify-no-changes
 
 # Apply formatting automatically, ask for permission first before executing this command
@@ -39,8 +39,7 @@ dotnet format ServerPickerX.slnx
 ```
 
 ## Testing Guidelines
-> **Note**: The repository currently contains no automated tests. When adding
-> tests, follow these guidelines:
+> **Note**: When adding tests, follow these guidelines:
 >
 > * Place test projects in a sibling folder named `Tests`.
 > * Target the same framework (`net10.0`).
@@ -69,7 +68,7 @@ dotnet test --filter "FullyQualifiedName=ServerPickerX.Models.ServerModelTests.P
 ## Code Style Guidelines
 | Area | Guideline |
 |------|-----------|
-| **Imports** | System namespaces first, then project namespaces. Keep `using` statements sorted alphabetically and grouped by scope. Remove unused usings with the built‑in IDE refactor.
+| **Imports** | System namespaces first, then project namespaces. Keep `using` statements sorted alphabetically and grouped by scope.
 | **Formatting** | 4 spaces per indentation level; no tabs. End each file with a single newline. Do not leave trailing whitespace on any line.
 | **Naming** |
 | &nbsp;&nbsp;*Public members (classes, methods, properties)* | PascalCase (e.g., `LoadServers`, `ClusterUnclusterServers`).
@@ -81,7 +80,7 @@ dotnet test --filter "FullyQualifiedName=ServerPickerX.Models.ServerModelTests.P
 • Log errors with `FileLoggerService` and use `MessageBoxService` to display errors inside a catch block.
 | **MVVM Conventions** |
 | &nbsp;&nbsp;*ViewModels* | Inherit from `ObservableObject` (CommunityToolkit.Mvvm). Use `[ObservableProperty]` for properties that should notify UI changes. Keep commands as `ICommand` or `RelayCommand`.
-| &nbsp;&nbsp;*Views* | Prefer code‑behind only for view logic that cannot be expressed in XAML, such as dynamic tooltips. Keep view models free of UI references.
+| &nbsp;&nbsp;*Views* | Prefer code‑behind only for view logic that cannot be expressed in XAML, such as dynamic tooltips. Keep view models free of UI references except for displaying errors using messageboxes.
 | **Resources** |
 | &nbsp;&nbsp;*Images* | Store in `Assets/` and reference via pack URIs (`/Assets/...`).
 | &nbsp;&nbsp;*Styles* | Define reusable styles in `Styles/*.axaml`. Register new style files by appending inside App.axaml inside `<Application.Styles></Application.Styles>`.
@@ -89,7 +88,7 @@ dotnet test --filter "FullyQualifiedName=ServerPickerX.Models.ServerModelTests.P
 ## Build & CI Checklist
 - [ ] All tests pass (`dotnet test ServerPickerX.Tests.slnx`).
 - [ ] Code passes linting (`dotnet format ServerPickerX.slnx --verify-no-changes`).
-- [ ] Publish output contains a single executable without unnecessary dependencies except for files `libHarfBuzzSharp.so` and `libSkiaSharp.so`.
+- [ ] Publish output contains an executable and other dependencies.
 
 ## Other Instructions
 - If you are unsure how to do something, use `gh_grep` tools to search code examples from GitHub or use `context7` tools to search for project/code documentations
