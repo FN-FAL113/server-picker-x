@@ -24,18 +24,5 @@
     <Style Selector="Button.close-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         
     </Style>  
-    <Style Selector="Button.minimize-btn">
-        <Setter Property="Padding" Value="0,0,0,12"/>
-        <Setter Property="Content" Value="_"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style> 
-    <Style Selector="Button.maximize-btn">
-        <Setter Property="Padding" Value="0,0,0,5.5"/>
-        <Setter Property="Content" Value="🗖"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style> 
-    <Style Selector="Button.close-btn">
-        <Setter Property="Content" Value="X"/>
-        <Setter Property="Foreground" Value="White"/>
-    </Style> 
+
 </Styles>
