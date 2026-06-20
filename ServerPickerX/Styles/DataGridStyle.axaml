@@ -1,0 +1,39 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <!-- Add Controls for Previewer Here -->
+    </Border>
+  </Design.PreviewWith>
+
+    <Style Selector="DataGrid.preset-grid">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="CanUserResizeColumns" Value="False" />
+        <Setter Property="CanUserReorderColumns" Value="False" />
+        <Setter Property="CanUserSortColumns" Value="False" />
+        <Setter Property="GridLinesVisibility" Value="All" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+    </Style>
+    <Style Selector="DataGrid.preset-grid DataGridColumnHeader">
+        <Setter Property="Background" Value="#1A1D40" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="DataGrid.preset-grid DataGridCell">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="DataGrid.preset-grid TextBox">
+        <Setter Property="Background" Value="#1A1D40" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="#00d9ff" />
+        <Setter Property="CaretBrush" Value="White" />
+        <Setter Property="SelectionBrush" Value="#575cd4" />
+    </Style>
+    <Style Selector="CheckBox.preset-toggle">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Styles>

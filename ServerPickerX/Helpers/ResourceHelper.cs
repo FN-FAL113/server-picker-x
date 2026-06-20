@@ -18,7 +18,7 @@ namespace ServerPickerX.Helpers
             var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
             // Use actual assembly name for designer previewer since it loads in a different context
-            if (assemblyName == "Avalonia.Designer.HostApp")
+            if (assemblyName is "Avalonia.Designer.HostApp" or "AvaloniaUI.Previewer.HostApp")
             {
                 assemblyName = "ServerPickerX";
             }

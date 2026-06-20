@@ -151,7 +151,7 @@ namespace ServerPickerX.ViewModels
 
                 await _jsonSetting.SaveSettingsAsync();
 
-                await MarkPresetSelectionDirtyAsync();
+                await ClearLastSelectedPresetByGameModeAsync();
             }
 
             ServerData serverData = _serverDataService.GetServerData();
@@ -275,7 +275,7 @@ namespace ServerPickerX.ViewModels
             }
             catch (InvalidOperationException)
             {
-                // when user suddenly tries to cluster or uncluster the servers while ServerModels is being iterated
+                // when user suddenly tries to cluster or uncluster the servers while server models are being iterated
             }
         }
 
@@ -319,24 +319,14 @@ namespace ServerPickerX.ViewModels
         }
 
         [RelayCommand]
-        public async Task<bool> UnblockAllAsync()
+        public async Task<bool> UnblockAllAsync(bool? shouldClearLastSelectedPreset = true)
         {
             if (ServerModels == null || ServerModels.Count == 0)
             {
                 return false;
             }
 
-            return await PerformOperationAsync(false, FilteredServerModels);
-        }
-
-        public async Task<bool> UnblockCurrentGameServersAsync()
-        {
-            if (ServerModels.Count == 0)
-            {
-                return true;
-            }
-
-            return await PerformOperationAsync(false, new ObservableCollection<ServerModel>(ServerModels), false);
+            return await PerformOperationAsync(false, ServerModels, shouldClearLastSelectedPreset ?? true);
         }
 
         [RelayCommand]
@@ -360,7 +350,7 @@ namespace ServerPickerX.ViewModels
         public async Task<bool> PerformOperationAsync(
             bool shouldBlock,
             ObservableCollection<ServerModel> serverModels,
-            bool shouldUpdatePresetSelection = true
+            bool shouldClearLastSelectedPreset = true
             )
         {
             if (PendingOperation)
@@ -394,12 +384,12 @@ namespace ServerPickerX.ViewModels
                     await _loggerService.LogInfoAsync("Servers unblocked successfully");
                 }
 
-                if (shouldUpdatePresetSelection)
+                if (shouldClearLastSelectedPreset)
                 {
-                    await MarkPresetSelectionDirtyAsync();
+                    await ClearLastSelectedPresetByGameModeAsync();
                 }
 
-                // Ping servers (parallel operation)
+                // Ping servers (parallel/fire-forget operation)
                 PingServers(serverModels);
 
                 return true;
@@ -583,7 +573,7 @@ namespace ServerPickerX.ViewModels
                 );
         }
 
-        private async Task MarkPresetSelectionDirtyAsync()
+        private async Task ClearLastSelectedPresetByGameModeAsync()
         {
             await _jsonSetting.ClearLastSelectedPresetNameByGameModeAsync();
 

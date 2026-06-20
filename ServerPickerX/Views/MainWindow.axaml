@@ -9,36 +9,25 @@
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        Title="Server Picker X"
+        FontWeight="SemiBold"
         Width="920"
-        MinWidth="920"
-        MaxWidth="1280"
         Height="640"
-        MinHeight="500"
-        MaxHeight="960"
         Icon="/Assets/favicon.ico"
-        Title="ServerPickerX"
-        SystemDecorations="BorderOnly"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
-
-
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
     <Window.Resources>
         <converters:ImageConverter x:Key="ImageConverter" />
+        <converters:PacketLossColorConverter x:Key="PacketLossColorConverter" />
+        <converters:PingColorConverter x:Key="PingColorConverter" />
     </Window.Resources>
 
     <Border
         Background="#373B78"
         BorderBrush="#575cd4"
-        BorderThickness="1.35">
+        BorderThickness="1.0">
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <!-- Title Bar -->
@@ -50,14 +39,11 @@
             <!-- Title Bar -->
             <Grid Grid.Row="0" x:Name="TitleBar" Background="#373B78" PointerPressed="TitleBar_PointerPressed" >
                 <ProgressBar 
-                    Margin="0,-24,0,0" 
-                    Height="4"
+                    Margin="0,-28,0,0" 
+                    Height="6"
+                    Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Width}"
                     IsIndeterminate="True"
                     IsVisible="{Binding ShowProgressBar}"/>
-                <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White" FontWeight="Bold" FontSize="14">
-                    Server Picker X
-                </TextBlock>
-                <userControls:TitleBarButtons/>
             </Grid>
 
             <!-- Main Content -->
@@ -214,9 +200,31 @@
                             </DataGridTemplateColumn>
 							<DataGridTextColumn Width="105" Header="Server ID" Binding="{Binding Name}" />
 							<DataGridTextColumn Width="*" Header="Server Name" Binding="{Binding Description}" />
-							<DataGridTextColumn Width="128" Header="Ping" Binding="{Binding Ping}" HeaderPointerPressed="DataGridTextColumn_HeaderPointerPressed" />
+							<DataGridTemplateColumn Header="Ping" SortMemberPath="Ping" Width="128" HeaderPointerPressed="DataGridPingColumn_HeaderPointerPressed">
+                                <DataGridTemplateColumn.CellTemplate>
+							        <DataTemplate>
+							            <TextBlock 
+                                            Text="{Binding Ping}"
+                                            Foreground="{Binding Ping, Converter={StaticResource PingColorConverter}}"
+                                            VerticalAlignment="Center"
+                                            Padding="12,0,0,0"/>
+							        </DataTemplate>
+							    </DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
+                             <DataGridTemplateColumn Header="Packet Loss" SortMemberPath="PacketLoss" Width="120" HeaderPointerPressed="DataGridPacketLossColumn_HeaderPointerPressed">
+							    <DataGridTemplateColumn.CellTemplate>
+							        <DataTemplate>
+							            <TextBlock 
+                                            Text="{Binding PacketLoss}"
+                                            Foreground="{Binding PacketLoss, Converter={StaticResource PacketLossColorConverter}}"
+                                            VerticalAlignment="Center"
+                                            Padding="12,0,0,0"/>
+							        </DataTemplate>
+							    </DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
 							<DataGridTextColumn Width="100" Header="Status" Binding="{Binding Status}" />
-                        </DataGrid.Columns>
+						</DataGrid.Columns>
+
 						<DataGrid.Styles>
                             <Style Selector="DataGridColumnHeader">
                                 <Setter Property="FontWeight" Value="Bold"/>
@@ -236,8 +244,8 @@
                           Margin="8,0,0,0">
                           <Button x:Name="BlockAllBtn"
                               Classes="main-btn"
-                              Command="{Binding BlockAllAsync}"
                               IsEnabled="{Binding IsOperationAllowed}"
+                              Command="{Binding BlockAllAsync}"
                               VerticalAlignment="Center"
                               MaxWidth="200"
                               ToolTip.Tip="{DynamicResource BlockAll}"
@@ -250,8 +258,8 @@
                           <Button 
                               x:Name="BlockSelectedBtn" 
                               Classes="main-btn" 
-                              Command="{Binding BlockSelectedAsync}"
                               IsEnabled="{Binding IsOperationAllowed}"
+                              Command="{Binding BlockSelectedAsync}"
                               CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
                               VerticalAlignment="Center"
                               MaxWidth="200"
@@ -271,9 +279,9 @@
                           Margin="0,0,8,0">
                           <Button 
                               x:Name="UnlockAllBtn" 
-                              Classes="main-btn" 
-                              Command="{Binding UnblockAllAsync}"
+                              Classes="main-btn"
                               IsEnabled="{Binding IsOperationAllowed}"
+                              Command="{Binding UnblockAllAsync}"
                               VerticalAlignment="Center"
                               MinWidth="100"
                               MaxWidth="200"
@@ -286,9 +294,9 @@
                           </Button>
                           <Button 
                               x:Name="UnblockSelectedBtn" 
-                              Classes="main-btn" 
-                              Command="{Binding UnblockSelectedAsync}"
+                              Classes="main-btn"
                               IsEnabled="{Binding IsOperationAllowed}"
+                              Command="{Binding UnblockSelectedAsync}"
                               CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
                               VerticalAlignment="Center"
                               MinWidth="100"

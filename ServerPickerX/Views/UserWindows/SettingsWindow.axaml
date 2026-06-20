@@ -10,9 +10,9 @@
     Height="250"
     x:Class="ServerPickerX.SettingsWindow"
     x:DataType="viewmodels:SettingsWindowViewModel"
-    SystemDecorations="BorderOnly"
+    Title="Settings"
+    FontWeight="SemiBold"
     ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
     ExtendClientAreaTitleBarHeightHint="-1"
     WindowStartupLocation="CenterOwner"
     CanResize="False"
@@ -38,7 +38,7 @@
         Classes="wBorder" 
         Background="#373B78"
         BorderBrush="#575cd4"
-        BorderThickness="1.35">
+        BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <!-- Title Bar -->
@@ -51,15 +51,6 @@
             <Grid x:Name="TitleBar" 
                   Background="#373B78" 
                   PointerPressed="TitleBar_PointerPressed">
-                <TextBlock 
-                    VerticalAlignment="Center" 
-                    Margin="10,0,0,0" 
-                    Foreground="White" 
-                    FontWeight="Bold" 
-                    FontSize="14">
-                    Settings
-                </TextBlock>
-                <userControls:TitleBarButtons/>
             </Grid>
 
             <!-- Main Content -->
