@@ -1,10 +1,14 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20">
+       
           <!-- Add Controls for Previewer Here -->
-            <Button Classes="close-btn" Padding="20"></Button>
-        </Border>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button Classes="minimize-btn" Padding="20"></Button>
+                <Button Classes="maximize-btn" Padding="20"></Button>
+                <Button Classes="close-btn" Padding="20"></Button>
+            </StackPanel>
+        
     </Design.PreviewWith>
     
     <!-- Styles doesn't work in a Resource Dictionary unlike in WPF -->   
@@ -21,11 +25,17 @@
         
     </Style>  
     <Style Selector="Button.minimize-btn">
+        <Setter Property="Padding" Value="0,0,0,12"/>
         <Setter Property="Content" Value="_"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style> 
+    <Style Selector="Button.maximize-btn">
+        <Setter Property="Padding" Value="0,0,0,5.5"/>
+        <Setter Property="Content" Value="🗖"/>
         <Setter Property="Foreground" Value="White"/>
     </Style> 
     <Style Selector="Button.close-btn">
         <Setter Property="Content" Value="X"/>
-        <Setter Property="Foreground" Value="PaleVioletRed"/>
+        <Setter Property="Foreground" Value="White"/>
     </Style> 
 </Styles>

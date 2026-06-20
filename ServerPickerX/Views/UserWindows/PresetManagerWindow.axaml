@@ -6,12 +6,12 @@
         xmlns:viewmodels="using:ServerPickerX.ViewModels"
         xmlns:converters="clr-namespace:ServerPickerX.Converters"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}"
+        x:Class="ServerPickerX.Views.PresetManagerWindow"
+        x:DataType="viewmodels:PresetManagerWindowViewModel"
         FontWeight="SemiBold"
         Width="996"
         Height="610"
-        x:Class="ServerPickerX.Views.PresetManagerWindow"
-        x:DataType="viewmodels:PresetManagerWindowViewModel"
+        WindowDecorations="BorderOnly"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         WindowStartupLocation="CenterOwner"
@@ -34,6 +34,14 @@
             <Grid x:Name="TitleBar"
                   Background="#373B78"
                   PointerPressed="TitleBar_PointerPressed">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Margin="10,0,0,0"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    FontSize="14"
+                    Text="{Binding WindowTitle}" />
+                <userControls:TitleBarButtons />
             </Grid>
 
             <Grid Grid.Row="1" Margin="8,8,8,8">

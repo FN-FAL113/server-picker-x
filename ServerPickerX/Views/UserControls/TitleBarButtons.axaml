@@ -12,8 +12,13 @@
             Classes="titlebar-btn minimize-btn"
             Width="32"
             Height="32"
-            BorderThickness="0"
             Click="MinimizeBtn_Click" />
+        <Button
+            Name="MaximizeBtn"
+            Classes="titlebar-btn maximize-btn"
+            Width="32"
+            Height="32"
+            Click="MaximizeBtn_Click" />
         <Button
             Name="CloseBtn"
             Classes="titlebar-btn close-btn"

@@ -14,6 +14,7 @@
         Width="920"
         Height="640"
         Icon="/Assets/favicon.ico"
+        WindowDecorations="BorderOnly"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
         WindowStartupLocation="CenterScreen"
@@ -44,6 +45,10 @@
                     Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Width}"
                     IsIndeterminate="True"
                     IsVisible="{Binding ShowProgressBar}"/>
+                <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White" FontWeight="Bold" FontSize="14">
+                    Server Picker X
+                </TextBlock>
+                <userControls:TitleBarButtons/>
             </Grid>
 
             <!-- Main Content -->
