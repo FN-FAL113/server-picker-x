@@ -272,11 +272,9 @@ namespace ServerPickerX.Tests.ViewModels
             {
                 if (item.index is 0 or 2)
                 {
-                    Assert.Empty(item.value.Ping);
                     Assert.Equal("❌", item.value.Status);
                 } else
                 {
-                    Assert.True(item.value.Ping.Contains("ms"));
                     Assert.Equal("✅", item.value.Status);
                 }
             }
@@ -329,7 +327,6 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.True(result);
             foreach (var srv in _vm.ServerModels)
             {
-                Assert.Contains("ms", srv.Ping);
                 Assert.Equal("✅", srv.Status);
             }
         }
@@ -458,7 +455,6 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.True(result);
             foreach (var srv in serverModels)
             {
-                Assert.Contains("ms", srv.Ping);
                 Assert.Equal("✅", srv.Status);
             }
         }

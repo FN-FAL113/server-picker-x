@@ -7,7 +7,7 @@ namespace ServerPickerX.Converters
 {
     public class PacketLossColorConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             string str = value as string ?? "0%";
             if (double.TryParse(str.Replace("%", ""), NumberStyles.Any, culture, out double val))
