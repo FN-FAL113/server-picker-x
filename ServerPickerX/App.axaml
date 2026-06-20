@@ -31,5 +31,6 @@
         <StyleInclude Source="/Styles/MainButtonStyle.axaml" />
         <StyleInclude Source="/Styles/TextBoxStyle.axaml" />
         <StyleInclude Source="/Styles/ComboBoxStyle.axaml" />
+        <StyleInclude Source="/Styles/DataGridStyle.axaml" />
     </Application.Styles>
 </Application>

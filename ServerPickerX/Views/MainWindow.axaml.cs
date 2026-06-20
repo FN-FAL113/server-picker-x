@@ -37,6 +37,7 @@ namespace ServerPickerX.Views
         }
 
         private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
+        private ListSortDirection packetLossSortDirection = ListSortDirection.Ascending;
         private bool _suppressPresetSelectionChanged;
         private PresetModel? _previousPreset;
 
@@ -133,15 +134,6 @@ namespace ServerPickerX.Views
             e.Handled = true;
             var parentWindow = TopLevel.GetTopLevel(this) as Window;
             parentWindow?.BeginMoveDrag(e);
-        }
-
-        private void DataGridTextColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            pingSortDirection = pingSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-            ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
         }
 
         private async void ClusterUnclusterBtn_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -281,7 +273,8 @@ namespace ServerPickerX.Views
                     MsBox.Avalonia.Enums.Icon.Setting
                     );
 
-            bool unblocked = await vm.UnblockCurrentGameServersAsync();
+            // Unblock current game rules while preserving last selected preset
+            bool unblocked = await vm.UnblockAllAsync(shouldClearLastSelectedPreset: false);
 
             if (!unblocked)
             {
@@ -324,8 +317,8 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            // Clear the currently loaded game's rules before changing game mode
-            await vm.UnblockCurrentGameServersAsync();
+            // Clear the currently loaded game rules before changing game mode while preserving last selected preset
+            await vm.UnblockAllAsync(shouldClearLastSelectedPreset: false);
 
             // Update json setting game mode and serialize it
             await _jsonSetting.SetGameModeAsync((string)GameModeComboBox.SelectedItem);
@@ -383,6 +376,24 @@ namespace ServerPickerX.Views
             ClusterUnclusterBtn.Content = _localizationService.GetLocaleValue(
                 _jsonSetting.is_clustered ? "UnclusterServers" : "ClusterServers"
                 );
+        }
+
+        private void DataGridPingColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            pingSortDirection = pingSortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+
+            ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
+        }
+
+        private void DataGridPacketLossColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            packetLossSortDirection = packetLossSortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+
+            ServerList.Columns[4].CustomSortComparer = new PacketLossComparer(packetLossSortDirection);
         }
     }
 }

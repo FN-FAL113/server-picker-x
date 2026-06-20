@@ -1,7 +1,8 @@
 using Avalonia;
-using Projektanker.Icons.Avalonia;
-using Projektanker.Icons.Avalonia.FontAwesome;
 using System;
+using Optris.Icons.Avalonia;
+using Optris.Icons.Avalonia.FontAwesome;
+using Optris.Icons.Avalonia.MaterialDesign;
 
 namespace ServerPickerX
 {
@@ -18,14 +19,14 @@ namespace ServerPickerX
         public static AppBuilder BuildAvaloniaApp()
         {
             IconProvider.Current
-            .Register<FontAwesomeIconProvider>();
+            .Register<FontAwesomeIconProvider>()
+            .Register<MaterialDesignIconProvider>();
 
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .With(new Win32PlatformOptions
-                {
-                    RenderingMode = [Win32RenderingMode.Software],
-                })
+#if DEBUG
+                .WithDeveloperTools()
+#endif
                 .WithInterFont()
                 .LogToTrace();
         }

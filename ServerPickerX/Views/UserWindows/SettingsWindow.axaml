@@ -6,13 +6,15 @@
     xmlns:constants="clr-namespace:ServerPickerX.Constants"
     xmlns:viewmodels="using:ServerPickerX.ViewModels"
     mc:Ignorable="d"
-    Width="400"
-    Height="250"
     x:Class="ServerPickerX.SettingsWindow"
     x:DataType="viewmodels:SettingsWindowViewModel"
-    SystemDecorations="BorderOnly"
+    x:Name="Settings"
+    Width="400"
+    Height="250"
+    Title="Settings"
+    FontWeight="SemiBold"
+    WindowDecorations="BorderOnly"
     ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
     ExtendClientAreaTitleBarHeightHint="-1"
     WindowStartupLocation="CenterOwner"
     CanResize="False"
@@ -38,7 +40,7 @@
         Classes="wBorder" 
         Background="#373B78"
         BorderBrush="#575cd4"
-        BorderThickness="1.35">
+        BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <!-- Title Bar -->
