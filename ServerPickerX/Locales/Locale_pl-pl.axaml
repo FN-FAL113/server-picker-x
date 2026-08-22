@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">pl-pl</x:String>
   <x:String x:Key="ClusterServers">Serwery klastrowe</x:String>
@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Zastosuj</x:String>
   <x:String x:Key="ApplyPresetToolTip">Zastosuj wybrany preset</x:String>
   <x:String x:Key="PresetsWindowTitle">Presety</x:String>
-  <x:String x:Key="PresetServersHeader">Zablokowane serwery</x:String>
-  <x:String x:Key="BlockedColumnHeader">Zablokowany</x:String>
+  <x:String x:Key="PresetServersHeader">Dozwolone serwery</x:String>
   <x:String x:Key="PresetListHeader">Preset</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">Usunąć preset '{0}'?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Usunąć {0} wybranych presetów?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">Preset o nazwie '{0}' już istnieje dla tej gry. Nadpisać?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Przełączenie między widokiem grupowanym i niegrupowanym wyczyści zablokowane wpisy tego presetu. Kontynuować?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Nazwa presetu nie może być pusta.</x:String>
+  <x:String x:Key="AllowedColumnHeader">Dozwolony</x:String>
+  <x:String x:Key="PresetAllowAll">Wszystkie</x:String>
+  <x:String x:Key="PresetAllowNone">Żadne</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Zezwól na wszystkie serwery w tym zestawie</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Zablokuj wszystkie serwery w tym zestawie</x:String>
 </ResourceDictionary>

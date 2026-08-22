@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">tr-TR</x:String>
   <x:String x:Key="ClusterServers">Sunucuları kümele</x:String>
@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Uygula</x:String>
   <x:String x:Key="ApplyPresetToolTip">Seçili ön ayarı uygula</x:String>
   <x:String x:Key="PresetsWindowTitle">Ön Ayarlar</x:String>
-  <x:String x:Key="PresetServersHeader">Engellenen sunucular</x:String>
-  <x:String x:Key="BlockedColumnHeader">Engelli</x:String>
+  <x:String x:Key="PresetServersHeader">İzin verilen sunucular</x:String>
   <x:String x:Key="PresetListHeader">Ön Ayar</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">'{0}' ön ayarı silinsin mi?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Seçili {0} ön ayar silinsin mi?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">Bu oyun için '{0}' adında bir ön ayar zaten var. Üzerine yazılsın mı?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Kümelenmiş ve kümelenmemiş görünüm arasında geçiş yapmak bu ön ayarın engellenen girdilerini temizleyecek. Devam edilsin mi?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Ön ayar adı boş olamaz.</x:String>
+  <x:String x:Key="AllowedColumnHeader">İzinli</x:String>
+  <x:String x:Key="PresetAllowAll">Tümü</x:String>
+  <x:String x:Key="PresetAllowNone">Hiçbiri</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Bu ön ayardaki tüm sunuculara izin ver</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Bu ön ayardaki tüm sunucuları engelle</x:String>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">sv-se</x:String>
   <x:String x:Key="ClusterServers">Gruppera servrar</x:String>
@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Verkställ</x:String>
   <x:String x:Key="ApplyPresetToolTip">Verkställ vald förinställning</x:String>
   <x:String x:Key="PresetsWindowTitle">Förinställningar</x:String>
-  <x:String x:Key="PresetServersHeader">Blockerade servrar</x:String>
-  <x:String x:Key="BlockedColumnHeader">Blockerad</x:String>
+  <x:String x:Key="PresetServersHeader">Tillåtna servrar</x:String>
   <x:String x:Key="PresetListHeader">Förinställning</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">Ta bort förinställningen '{0}'?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Ta bort de {0} valda förinställningarna?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">En förinställning med namnet '{0}' finns redan för det här spelet. Skriva över den?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Att växla mellan grupperad och ogrupperad vy kommer att rensa det här förinställets blockerade poster. Fortsätta?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Namnet på förinställningen får inte vara tomt.</x:String>
+  <x:String x:Key="AllowedColumnHeader">Tillåten</x:String>
+  <x:String x:Key="PresetAllowAll">Alla</x:String>
+  <x:String x:Key="PresetAllowNone">Inga</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Tillåt alla servrar i denna förinställning</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Blockera alla servrar i denna förinställning</x:String>
 </ResourceDictionary>

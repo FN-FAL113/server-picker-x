@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Anwenden</x:String>
   <x:String x:Key="ApplyPresetToolTip">Ausgewähltes Preset anwenden</x:String>
   <x:String x:Key="PresetsWindowTitle">Voreinstellungen</x:String>
-  <x:String x:Key="PresetServersHeader">Blockierte Server</x:String>
-  <x:String x:Key="BlockedColumnHeader">Blockiert</x:String>
+  <x:String x:Key="PresetServersHeader">Erlaubte Server</x:String>
   <x:String x:Key="PresetListHeader">Voreinstellung</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">Preset '{0}' löschen?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Die {0} ausgewählten Presets löschen?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ein Preset mit dem Namen '{0}' existiert für dieses Spiel bereits. Überschreiben?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Das Wechseln zwischen gruppierter und entgruppierter Ansicht löscht die blockierten Einträge dieses Presets. Fortfahren?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Der Preset-Name darf nicht leer sein.</x:String>
+  <x:String x:Key="AllowedColumnHeader">Erlaubt</x:String>
+  <x:String x:Key="PresetAllowAll">Alle</x:String>
+  <x:String x:Key="PresetAllowNone">Keine</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Alle Server dieser Voreinstellung erlauben</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Alle Server dieser Voreinstellung blockieren</x:String>
 </ResourceDictionary>
