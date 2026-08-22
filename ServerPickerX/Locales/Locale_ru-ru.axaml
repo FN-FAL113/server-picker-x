@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">ru-ru</x:String>
   <x:String x:Key="ClusterServers">Сгруппировать серверы</x:String>
@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Применить</x:String>
   <x:String x:Key="ApplyPresetToolTip">Применить выбранный пресет</x:String>
   <x:String x:Key="PresetsWindowTitle">Пресеты</x:String>
-  <x:String x:Key="PresetServersHeader">Заблокированные серверы</x:String>
-  <x:String x:Key="BlockedColumnHeader">Блок</x:String>
+  <x:String x:Key="PresetServersHeader">Разрешённые серверы</x:String>
   <x:String x:Key="PresetListHeader">Пресет</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">Удалить пресет '{0}'?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">Удалить {0} выбранных пресетов?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">Пресет с именем '{0}' уже существует для этой игры. Перезаписать его?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Переключение между сгруппированным и несгруппированным видом очистит заблокированные записи этого пресета. Продолжить?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Имя пресета не может быть пустым.</x:String>
+  <x:String x:Key="AllowedColumnHeader">Разрешён</x:String>
+  <x:String x:Key="PresetAllowAll">Все</x:String>
+  <x:String x:Key="PresetAllowNone">Ничего</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Разрешить все серверы в этом пресете</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Заблокировать все серверы в этом пресете</x:String>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:String x:Key="LanguageCode">zh-cn</x:String>
   <x:String x:Key="ClusterServers">集群服务器</x:String>
@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">应用</x:String>
   <x:String x:Key="ApplyPresetToolTip">应用所选预设</x:String>
   <x:String x:Key="PresetsWindowTitle">预设</x:String>
-  <x:String x:Key="PresetServersHeader">已屏蔽服务器</x:String>
-  <x:String x:Key="BlockedColumnHeader">已屏蔽</x:String>
+  <x:String x:Key="PresetServersHeader">允许的服务器</x:String>
   <x:String x:Key="PresetListHeader">预设</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">要删除预设“{0}”吗？</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">要删除这 {0} 个选中的预设吗？</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">此游戏已存在名为“{0}”的预设。要覆盖吗？</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">在集群视图和非集群视图之间切换将清除此预设中已阻止的条目。是否继续？</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">预设名称不能为空。</x:String>
+  <x:String x:Key="AllowedColumnHeader">允许</x:String>
+  <x:String x:Key="PresetAllowAll">全选</x:String>
+  <x:String x:Key="PresetAllowNone">全不选</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">允许此预设中的所有服务器</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">屏蔽此预设中的所有服务器</x:String>
 </ResourceDictionary>

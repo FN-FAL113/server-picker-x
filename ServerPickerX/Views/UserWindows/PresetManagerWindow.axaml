@@ -164,15 +164,33 @@
                                 FontWeight="SemiBold"
                                 VerticalAlignment="Center"
                                 Text="{DynamicResource PresetServersHeader}" />
-                            <Button
+                            <StackPanel
                                 Grid.Column="1"
-                                Classes="main-btn"
-                                Content="{Binding ClusterToggleText}"
-                                ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
-                                IsEnabled="{Binding CanToggleClusterMode}"
-                                Click="ClusterToggleBtn_Click"
-                                HorizontalAlignment="Right"
-                                Foreground="White" />
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                HorizontalAlignment="Right">
+                                <Button
+                                    Classes="main-btn"
+                                    Content="{DynamicResource PresetAllowAll}"
+                                    ToolTip.Tip="{DynamicResource PresetAllowAllToolTip}"
+                                    IsEnabled="{Binding CanEditPreset}"
+                                    Click="AllowAllBtn_Click"
+                                    Foreground="White" />
+                                <Button
+                                    Classes="main-btn"
+                                    Content="{DynamicResource PresetAllowNone}"
+                                    ToolTip.Tip="{DynamicResource PresetAllowNoneToolTip}"
+                                    IsEnabled="{Binding CanEditPreset}"
+                                    Click="AllowNoneBtn_Click"
+                                    Foreground="White" />
+                                <Button
+                                    Classes="main-btn"
+                                    Content="{Binding ClusterToggleText}"
+                                    ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
+                                    IsEnabled="{Binding CanToggleClusterMode}"
+                                    Click="ClusterToggleBtn_Click"
+                                    Foreground="White" />
+                            </StackPanel>
                         </Grid>
 
                         <DataGrid
@@ -189,14 +207,14 @@
                             Sorting="ServerItemsGrid_Sorting"
                             KeyDown="ServerItemsGrid_KeyDown">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Width="108" Header="{DynamicResource BlockedColumnHeader}" SortMemberPath="IsBlocked">
+                                <DataGridTemplateColumn Width="108" Header="{DynamicResource AllowedColumnHeader}" SortMemberPath="IsAllowed">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid>
                                                 <CheckBox
                                                     Classes="preset-toggle"
-                                                    IsChecked="{Binding IsBlocked}"
-                                                    Click="BlockedCheckBox_Click" />
+                                                    IsChecked="{Binding IsAllowed}"
+                                                    Click="AllowedCheckBox_Click" />
                                             </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

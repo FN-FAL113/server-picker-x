@@ -258,6 +258,21 @@ namespace ServerPickerX.ViewModels
             await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Name);
         }
 
+        public async Task SetAllPresetServersAllowedAsync(bool isAllowed)
+        {
+            if (SelectedPresetItem == null || PresetServers.Count == 0)
+            {
+                return;
+            }
+
+            foreach (PresetServerModel serverItem in PresetServers)
+            {
+                serverItem.IsAllowed = isAllowed;
+            }
+
+            await PersistSelectedPresetServerKeysAsync();
+        }
+
         public async Task ToggleSelectedPresetClusterModeAsync()
         {
             if (SelectedPresetItem == null)
@@ -316,9 +331,9 @@ namespace ServerPickerX.ViewModels
         {
             List<PresetServerModel> sortedItems = sortKey switch
             {
-                "Blocked" => (direction == ListSortDirection.Ascending
-                    ? PresetServers.OrderBy(serverItem => serverItem.IsBlocked)
-                    : PresetServers.OrderByDescending(serverItem => serverItem.IsBlocked)).ToList(),
+                "Allowed" => (direction == ListSortDirection.Ascending
+                    ? PresetServers.OrderBy(serverItem => serverItem.IsAllowed)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.IsAllowed)).ToList(),
                 "Flag" => (direction == ListSortDirection.Ascending
                     ? PresetServers.OrderBy(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)

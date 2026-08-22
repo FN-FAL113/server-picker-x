@@ -39,12 +39,16 @@
   <x:String x:Key="ApplyPreset">Aplicar</x:String>
   <x:String x:Key="ApplyPresetToolTip">Aplicar el preajuste seleccionado</x:String>
   <x:String x:Key="PresetsWindowTitle">Preajustes</x:String>
-  <x:String x:Key="PresetServersHeader">Servidores bloqueados</x:String>
-  <x:String x:Key="BlockedColumnHeader">Bloqueado</x:String>
+  <x:String x:Key="PresetServersHeader">Servidores permitidos</x:String>
   <x:String x:Key="PresetListHeader">Preajuste</x:String>
   <x:String x:Key="PresetDeleteConfirmDialogue">¿Eliminar el preset '{0}'?</x:String>
   <x:String x:Key="PresetDeleteSelectedConfirmDialogue">¿Eliminar los {0} preajustes seleccionados?</x:String>
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ya existe un preset llamado '{0}' para este juego. ¿Sobrescribirlo?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Cambiar entre la vista agrupada y no agrupada borrará las entradas bloqueadas de este preajuste. ¿Continuar?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">El nombre del preset no puede estar vacío.</x:String>
+  <x:String x:Key="AllowedColumnHeader">Permitido</x:String>
+  <x:String x:Key="PresetAllowAll">Todos</x:String>
+  <x:String x:Key="PresetAllowNone">Ninguno</x:String>
+  <x:String x:Key="PresetAllowAllToolTip">Permitir todos los servidores de este preajuste</x:String>
+  <x:String x:Key="PresetAllowNoneToolTip">Bloquear todos los servidores de este preajuste</x:String>
 </ResourceDictionary>
