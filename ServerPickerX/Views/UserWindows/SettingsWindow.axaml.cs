@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml.Styling;
 using ServerPickerX.Helpers;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
+using ServerPickerX.Services.Themes;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
@@ -51,6 +52,38 @@ public partial class SettingsWindow : Window
         LanguageComboBox.SelectionChanged -= LanguageComboBox_SelectionChanged;
         LanguageComboBox.SelectedValue = _jsonSetting.language;
         LanguageComboBox.SelectionChanged += LanguageComboBox_SelectionChanged;
+
+        ThemeComboBox.SelectionChanged -= ThemeComboBox_SelectionChanged;
+        ThemeComboBox.SelectedIndex = GetThemeIndex(_jsonSetting.theme);
+        ThemeComboBox.SelectionChanged += ThemeComboBox_SelectionChanged;
+    }
+
+    private async void ThemeComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (ThemeComboBox is null) return;
+
+        // Items are ordered System, Light, Dark so the labels stay translatable
+        string selectedTheme = ThemeComboBox.SelectedIndex switch
+        {
+            1 => ThemeService.LightTheme,
+            2 => ThemeService.DarkTheme,
+            _ => ThemeService.SystemTheme,
+        };
+
+        ThemeService.Apply(selectedTheme);
+
+        FooterButtons.Instance?.RefreshThemeButton(selectedTheme);
+
+        await _jsonSetting.SetThemeAsync(selectedTheme);
+    }
+
+    private static int GetThemeIndex(string? theme)
+    {
+        if (ThemeService.LightTheme.Equals(theme, StringComparison.OrdinalIgnoreCase)) return 1;
+
+        if (ThemeService.DarkTheme.Equals(theme, StringComparison.OrdinalIgnoreCase)) return 2;
+
+        return 0;
     }
 
     private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)

@@ -4,46 +4,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:i="https://github.com/projektanker/icons.avalonia"
              mc:Ignorable="d"
+             x:CompileBindings="False"
              x:Class="ServerPickerX.FooterButtons">
-    <UserControl.Styles>
-		<Style Selector="Button">
-			 <Setter Property="Background">
-                <Setter.Value>
-				    <SolidColorBrush Color="White" Opacity="0.25" />
-                </Setter.Value>
-            </Setter> 
-
-             <Style Selector="^:pointerover /template/ ContentPresenter">
-			    <Setter Property="Foreground" Value="White"/>
-                <Setter Property="Background">
-                    <Setter.Value>
-				        <SolidColorBrush Color="White" Opacity="0.12" />
-                    </Setter.Value>
-                </Setter> 
-            </Style>
-        </Style>
-    </UserControl.Styles>
-
     <StackPanel
         VerticalAlignment="Center"
         HorizontalAlignment="Right"
         Orientation="Horizontal"
-        Spacing="6">
+        Margin="0,0,10,0"
+        Spacing="2">
+        <Button x:Name="ThemeBtn"
+                Classes="icon-btn"
+                i:Attached.Icon="{Binding ThemeIcon, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Click="ThemeBtn_Click" />
         <Button x:Name="PaypalBtn"
-                Foreground="White" 
-                i:Attached.Icon="fa-paypal" 
-                FontSize="20"
+                Classes="icon-btn"
+                i:Attached.Icon="fa-paypal"
                 Click="PaypalBtn_Click" />
         <Button x:Name="GithubBtn"
-                Foreground="White"
-                i:Attached.Icon="fa-github" 
-                FontSize="20" 
+                Classes="icon-btn"
+                i:Attached.Icon="fa-github"
                 Click="GithubBtn_Click" />
         <Button x:Name="SettingsBtn"
-                Foreground="White"
-                i:Attached.Icon="fa-gear" 
-                FontSize="20"
-                Margin="0,0,10,0" 
+                Classes="icon-btn"
+                i:Attached.Icon="fa-gear"
                 Click="SettingsBtn_Click" />
     </StackPanel>
 </UserControl>

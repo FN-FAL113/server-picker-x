@@ -1,28 +1,44 @@
-﻿<Styles xmlns="https://github.com/avaloniaui"
-                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-       
-          <!-- Add Controls for Previewer Here -->
-            <StackPanel Orientation="Horizontal" Spacing="4">
-                <Button Classes="minimize-btn" Padding="20"></Button>
-                <Button Classes="maximize-btn" Padding="20"></Button>
-                <Button Classes="close-btn" Padding="20"></Button>
+        <Border Padding="0" Background="#0F0F11">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="titlebar-btn minimize-btn" Width="40" Height="30" />
+                <Button Classes="titlebar-btn maximize-btn" Width="40" Height="30" />
+                <Button Classes="titlebar-btn close-btn" Width="40" Height="30" />
             </StackPanel>
-        
+        </Border>
     </Design.PreviewWith>
-    
-    <!-- Styles doesn't work in a Resource Dictionary unlike in WPF -->   
-    <!-- Style files must be included in App.axaml to access styles globally -->   
-	<Style Selector="Button.titlebar-btn">
-		<Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="FontSize" Value="14"/>
-    </Style>
-    <Style Selector="Button.close-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        
-    </Style>  
 
+    <!-- Styles doesn't work in a Resource Dictionary unlike in WPF -->
+    <!-- Style files must be included in App.axaml to access styles globally -->
+    <Style Selector="Button.titlebar-btn">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlHoverBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlPressedBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        </Style>
+    </Style>
+
+    <Style Selector="Button.close-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SpxBadBrush}" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="Button.close-btn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SpxBadBrush}" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
 </Styles>

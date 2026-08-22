@@ -1,0 +1,53 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="16" Background="#09090B">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Frankfurt (Germany)" />
+                <TextBlock Classes="muted" Text="fra" />
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Window">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.faint">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextFaintBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.window-title">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.rule-bottom">
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+    </Style>
+
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="{DynamicResource SpxSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+</Styles>

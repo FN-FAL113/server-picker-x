@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ein Preset mit dem Namen '{0}' existiert für dieses Spiel bereits. Überschreiben?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Das Wechseln zwischen gruppierter und entgruppierter Ansicht löscht die blockierten Einträge dieses Presets. Fortfahren?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Der Preset-Name darf nicht leer sein.</x:String>
+  <x:String x:Key="ThemeLabel">Design</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">App-Design auswählen</x:String>
+  <x:String x:Key="ThemeSystem">System</x:String>
+  <x:String x:Key="ThemeLight">Hell</x:String>
+  <x:String x:Key="ThemeDark">Dunkel</x:String>
 </ResourceDictionary>

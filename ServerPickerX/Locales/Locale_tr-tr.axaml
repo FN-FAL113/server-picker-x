@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Bu oyun için '{0}' adında bir ön ayar zaten var. Üzerine yazılsın mı?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Kümelenmiş ve kümelenmemiş görünüm arasında geçiş yapmak bu ön ayarın engellenen girdilerini temizleyecek. Devam edilsin mi?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Ön ayar adı boş olamaz.</x:String>
+  <x:String x:Key="ThemeLabel">Tema</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">Uygulama temasını seç</x:String>
+  <x:String x:Key="ThemeSystem">Sistem</x:String>
+  <x:String x:Key="ThemeLight">Açık</x:String>
+  <x:String x:Key="ThemeDark">Koyu</x:String>
 </ResourceDictionary>
