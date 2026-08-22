@@ -8,7 +8,6 @@
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.PresetManagerWindow"
         x:DataType="viewmodels:PresetManagerWindowViewModel"
-        FontWeight="SemiBold"
         Width="996"
         Height="610"
         WindowDecorations="BorderOnly"
@@ -27,19 +26,20 @@
         BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
+                <RowDefinition Height="32" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Grid x:Name="TitleBar"
-                  Background="{DynamicResource SpxChromeBrush}"
-                  PointerPressed="TitleBar_PointerPressed">
-                <TextBlock
-                    Classes="window-title"
-                    Margin="10,0,0,0"
-                    Text="{Binding WindowTitle}" />
-                <userControls:TitleBarButtons />
-            </Grid>
+            <Border Classes="rule-bottom" Background="{DynamicResource SpxChromeBrush}">
+                <Grid x:Name="TitleBar"
+                      Background="Transparent"
+                      PointerPressed="TitleBar_PointerPressed">
+                    <TextBlock Classes="window-title"
+                               Margin="12,0,0,0"
+                               Text="{Binding WindowTitle}" />
+                    <userControls:TitleBarButtons />
+                </Grid>
+            </Border>
 
             <Grid Grid.Row="1" Margin="8,8,8,8">
                 <Grid.ColumnDefinitions>
@@ -52,15 +52,15 @@
                     Grid.Column="0"
                     BorderBrush="{DynamicResource SpxBorderBrush}"
                     BorderThickness="1"
-                    Background="{DynamicResource SpxSurfaceBrush}"
-                    CornerRadius="8">
+                    CornerRadius="2"
+                    Background="{DynamicResource SpxChromeBrush}">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <Grid ColumnDefinitions="*,2,*,2,*">
+                        <Grid ColumnDefinitions="*,6,*,6,*">
                             <Button
                                 Grid.Column="0"
                                 HorizontalAlignment="Stretch"
@@ -126,14 +126,12 @@
                     <GridSplitter.Template>
                         <ControlTemplate>
                             <Grid Background="Transparent">
-                                <StackPanel
-                                    VerticalAlignment="Center"
+                                <Border
+                                    Width="1"
+                                    Margin="0,8"
+                                    VerticalAlignment="Stretch"
                                     HorizontalAlignment="Center"
-                                    Spacing="4">
-                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
-                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
-                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
-                                </StackPanel>
+                                    Background="{DynamicResource SpxBorderBrush}" />
                             </Grid>
                         </ControlTemplate>
                     </GridSplitter.Template>
@@ -143,8 +141,8 @@
                     Grid.Column="2"
                     BorderBrush="{DynamicResource SpxBorderBrush}"
                     BorderThickness="1"
-                    Background="{DynamicResource SpxSurfaceBrush}"
-                    CornerRadius="8">
+                    CornerRadius="2"
+                    Background="{DynamicResource SpxChromeBrush}">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -153,19 +151,35 @@
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock
-                                Foreground="{DynamicResource SpxTextBrush}"
-                                FontSize="14"
+                                Classes="muted"
+                                FontSize="12"
                                 FontWeight="SemiBold"
                                 VerticalAlignment="Center"
                                 Text="{DynamicResource PresetServersHeader}" />
-                            <Button
+                            <StackPanel
                                 Grid.Column="1"
-                                Classes="main-btn"
-                                Content="{Binding ClusterToggleText}"
-                                ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
-                                IsEnabled="{Binding CanToggleClusterMode}"
-                                Click="ClusterToggleBtn_Click"
-                                HorizontalAlignment="Right" />
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                HorizontalAlignment="Right">
+                                <Button
+                                    Classes="chip"
+                                    Content="{DynamicResource PresetAllowAll}"
+                                    ToolTip.Tip="{DynamicResource PresetAllowAllToolTip}"
+                                    IsEnabled="{Binding CanEditPreset}"
+                                    Click="AllowAllBtn_Click" />
+                                <Button
+                                    Classes="chip"
+                                    Content="{DynamicResource PresetAllowNone}"
+                                    ToolTip.Tip="{DynamicResource PresetAllowNoneToolTip}"
+                                    IsEnabled="{Binding CanEditPreset}"
+                                    Click="AllowNoneBtn_Click" />
+                                <Button
+                                    Classes="main-btn"
+                                    Content="{Binding ClusterToggleText}"
+                                    ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
+                                    IsEnabled="{Binding CanToggleClusterMode}"
+                                    Click="ClusterToggleBtn_Click" />
+                            </StackPanel>
                         </Grid>
 
                         <DataGrid
@@ -182,31 +196,36 @@
                             Sorting="ServerItemsGrid_Sorting"
                             KeyDown="ServerItemsGrid_KeyDown">
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Width="108" Header="{DynamicResource BlockedColumnHeader}" SortMemberPath="IsBlocked">
+                                <DataGridTemplateColumn Width="100" Header="{DynamicResource AllowedColumnHeader}" SortMemberPath="IsAllowed">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid>
                                                 <CheckBox
                                                     Classes="preset-toggle"
-                                                    IsChecked="{Binding IsBlocked}"
-                                                    Click="BlockedCheckBox_Click" />
+                                                    IsChecked="{Binding IsAllowed}"
+                                                    Click="AllowedCheckBox_Click" />
                                             </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Width="Auto" Header="Flag" SortMemberPath="FlagSortKey">
+                                <DataGridTemplateColumn Width="56" Header="" SortMemberPath="FlagSortKey">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}"
-                                                   Width="50"
-                                                   Height="50"
-                                                   Stretch="Uniform"
-                                                   VerticalAlignment="Center" />
+                                            <Border Width="26"
+                                                    Height="17"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    BorderBrush="{DynamicResource SpxBorderBrush}"
+                                                    BorderThickness="1"
+                                                    ClipToBounds="True">
+                                                <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}"
+                                                       Stretch="UniformToFill" />
+                                            </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Width="105" Header="Server ID" SortMemberPath="Name" Binding="{Binding Name}" />
-                                <DataGridTextColumn Width="*" Header="Server Name" SortMemberPath="Description" Binding="{Binding Description}" />
+                                <DataGridTextColumn Width="96" Header="ID" SortMemberPath="Name" Binding="{Binding Name}" />
+                                <DataGridTextColumn Width="*" Header="Location" SortMemberPath="Description" Binding="{Binding Description}" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

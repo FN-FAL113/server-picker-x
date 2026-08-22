@@ -89,12 +89,22 @@ namespace ServerPickerX.ViewModels
         public async Task AddPresetAsync()
         {
             string presetName = GetNextPresetName();
+
+            // Seed the new preset from what is allowed in the main window right
+            // now, so a selection made there carries into the editor
+            bool isClustered = _jsonSetting.is_clustered;
+
             PresetModel newPreset = new()
             {
                 Name = presetName,
                 GameMode = _mainVm.GetCurrentGameMode(),
-                IsClustered = false,
-                BlockedServerKeys = [],
+                IsClustered = isClustered,
+                BlockedServerKeys = _mainVm.ServerModels
+                    .Where(serverModel => serverModel.IsBlocked)
+                    .Select(serverModel => _mainVm.GetServerKey(serverModel, isClustered))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                    .ToList(),
             };
 
             await _jsonSetting.AddOrUpdatePresetAsync(ClonePreset(newPreset));
@@ -258,6 +268,21 @@ namespace ServerPickerX.ViewModels
             await ClearAppliedPresetReferenceIfNeededAsync(SelectedPresetItem.Name);
         }
 
+        public async Task SetAllPresetServersAllowedAsync(bool isAllowed)
+        {
+            if (SelectedPresetItem == null || PresetServers.Count == 0)
+            {
+                return;
+            }
+
+            foreach (PresetServerModel serverItem in PresetServers)
+            {
+                serverItem.IsAllowed = isAllowed;
+            }
+
+            await PersistSelectedPresetServerKeysAsync();
+        }
+
         public async Task ToggleSelectedPresetClusterModeAsync()
         {
             if (SelectedPresetItem == null)
@@ -316,9 +341,9 @@ namespace ServerPickerX.ViewModels
         {
             List<PresetServerModel> sortedItems = sortKey switch
             {
-                "Blocked" => (direction == ListSortDirection.Ascending
-                    ? PresetServers.OrderBy(serverItem => serverItem.IsBlocked)
-                    : PresetServers.OrderByDescending(serverItem => serverItem.IsBlocked)).ToList(),
+                "Allowed" => (direction == ListSortDirection.Ascending
+                    ? PresetServers.OrderBy(serverItem => serverItem.IsAllowed)
+                    : PresetServers.OrderByDescending(serverItem => serverItem.IsAllowed)).ToList(),
                 "Flag" => (direction == ListSortDirection.Ascending
                     ? PresetServers.OrderBy(serverItem => serverItem.FlagSortKey, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(serverItem => serverItem.Description, StringComparer.OrdinalIgnoreCase)

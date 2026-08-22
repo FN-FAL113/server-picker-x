@@ -7,27 +7,28 @@
              x:Class="ServerPickerX.TitleBarButtons">
     <StackPanel
         HorizontalAlignment="Right"
+        VerticalAlignment="Stretch"
         Orientation="Horizontal">
         <Button
             Name="MinimizeBtn"
             Classes="titlebar-btn minimize-btn"
             i:Attached.Icon="mdi-window-minimize" 
-            Width="32"
+            Width="42"
             Height="32"
             Click="MinimizeBtn_Click" />
         <Button
             Name="MaximizeBtn"
             Classes="titlebar-btn maximize-btn"
             i:Attached.Icon="mdi-window-maximize" 
-            Width="32"
+            Width="42"
             Height="32"
             Click="MaximizeBtn_Click" />
         <Button
             Name="CloseBtn"
             Classes="titlebar-btn close-btn"
             i:Attached.Icon="mdi-window-close" 
-            FontSize="18"
-            Width="32"
+            FontSize="15"
+            Width="42"
             Height="32"
             Click="CloseBtn_Click" />
     </StackPanel>

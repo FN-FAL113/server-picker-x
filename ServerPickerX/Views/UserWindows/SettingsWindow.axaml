@@ -9,10 +9,9 @@
     x:Class="ServerPickerX.SettingsWindow"
     x:DataType="viewmodels:SettingsWindowViewModel"
     x:Name="Settings"
-    Width="400"
-    Height="250"
+    Width="420"
+    Height="300"
     Title="Settings"
-    FontWeight="SemiBold"
     WindowDecorations="BorderOnly"
     ExtendClientAreaToDecorationsHint="True"
     ExtendClientAreaTitleBarHeightHint="-1"
@@ -21,131 +20,91 @@
     CanMaximize="False"
     Background="Transparent"
     Loaded="Window_Loaded">
-    <Window.Styles>
-        <Style Selector="Border.wBorder">
-            <Style.Animations>
-                <Animation Duration="0:0:0.3" Easing="QuadraticEaseIn">
-                    <KeyFrame Cue="0%">
-                        <Setter Property="Opacity" Value="0"/>
-                    </KeyFrame>
-                    <KeyFrame Cue="100%">
-                        <Setter Property="Opacity" Value="1.0"/>
-                    </KeyFrame>
-                </Animation>
-            </Style.Animations>
-        </Style>
-    </Window.Styles>
 
-    <Border 
-        Classes="wBorder" 
-        Background="{DynamicResource SpxWindowBrush}"
-        BorderBrush="{DynamicResource SpxBorderBrush}"
-        BorderThickness="1">
+    <Border Background="{DynamicResource SpxWindowBrush}"
+            BorderBrush="{DynamicResource SpxBorderBrush}"
+            BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <!-- Title Bar -->
-                <RowDefinition Height="30" />
-                <!-- Main Content -->
-                <RowDefinition />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="26" />
             </Grid.RowDefinitions>
 
-            <!-- Title Bar -->
-            <Grid x:Name="TitleBar" 
-                  Background="{DynamicResource SpxChromeBrush}" 
-                  PointerPressed="TitleBar_PointerPressed">
-                <TextBlock 
-                    Classes="window-title"
-                    Margin="10,0,0,0">
-                    Settings
-                </TextBlock>
-                <userControls:TitleBarButtons/>
-            </Grid>
+            <!-- Title bar -->
+            <Border Grid.Row="0"
+                    Classes="rule-bottom"
+                    Background="{DynamicResource SpxChromeBrush}">
+                <Grid x:Name="TitleBar"
+                      Background="Transparent"
+                      PointerPressed="TitleBar_PointerPressed">
+                    <TextBlock Classes="window-title" Margin="12,0,0,0" Text="Settings" />
+                    <userControls:TitleBarButtons />
+                </Grid>
+            </Border>
 
-            <!-- Main Content -->
-            <Grid Grid.Row="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition Height="72" />
-                </Grid.RowDefinitions>
+            <!-- Settings -->
+            <StackPanel Grid.Row="1" Margin="16,14,16,14" Spacing="12">
+                <CheckBox x:Name="VersionCheckerSetting"
+                          IsChecked="{Binding VersionCheckOnStartup}"
+                          Command="{Binding VersionCheckerToggleCommand}"
+                          Content="{DynamicResource CheckForNewVersion}" />
 
-                <!-- Main settings -->
-                <Grid>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
-                        <CheckBox 
-                            x:Name="VersionCheckerSetting"
-                            IsChecked="{Binding VersionCheckOnStartup}"
-                            Command="{Binding VersionCheckerToggleCommand}"
-                            Content="{DynamicResource CheckForNewVersion}"/>
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock 
-                                Classes="muted"
-                                VerticalAlignment="Center"
-                                Text="{DynamicResource ThemeLabel}"/>
-                            <ComboBox 
-                                x:Name="ThemeComboBox"
-                                Classes="game-combobox"
-                                Width="120"
-                                Height="32"
-                                SelectedIndex="0"
-                                SelectionChanged="ThemeComboBox_SelectionChanged"
-                                ToolTip.Tip="{DynamicResource ThemeComboBoxToolTip}"
-                                ToolTip.ShowDelay="20">
-                                <ComboBoxItem Content="{DynamicResource ThemeSystem}"/>
-                                <ComboBoxItem Content="{DynamicResource ThemeLight}"/>
-                                <ComboBoxItem Content="{DynamicResource ThemeDark}"/>
-                            </ComboBox>
-                        </StackPanel>
-                    </StackPanel>
+                <Grid ColumnDefinitions="110,*" VerticalAlignment="Center">
+                    <TextBlock Classes="muted"
+                               VerticalAlignment="Center"
+                               Text="{DynamicResource LanguageLabel}" />
+                    <ComboBox x:Name="LanguageComboBox"
+                              Grid.Column="1"
+                              Classes="game-combobox"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Source={x:Static constants:Locales.All}}"
+                              SelectedIndex="0"
+                              SelectionChanged="LanguageComboBox_SelectionChanged"
+                              ToolTip.Tip="{DynamicResource LanguageComboBoxToolTip}"
+                              ToolTip.ShowDelay="300" />
                 </Grid>
 
-                <!-- Bottom settings -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
+                <Grid ColumnDefinitions="110,*" VerticalAlignment="Center">
+                    <TextBlock Classes="muted"
+                               VerticalAlignment="Center"
+                               Text="{DynamicResource ThemeLabel}" />
+                    <ComboBox x:Name="ThemeComboBox"
+                              Grid.Column="1"
+                              Classes="game-combobox"
+                              HorizontalAlignment="Stretch"
+                              SelectedIndex="0"
+                              SelectionChanged="ThemeComboBox_SelectionChanged"
+                              ToolTip.Tip="{DynamicResource ThemeComboBoxToolTip}"
+                              ToolTip.ShowDelay="300">
+                        <ComboBoxItem Content="{DynamicResource ThemeSystem}" />
+                        <ComboBoxItem Content="{DynamicResource ThemeLight}" />
+                        <ComboBoxItem Content="{DynamicResource ThemeDark}" />
+                    </ComboBox>
+                </Grid>
 
-                    <Grid Grid.Column="0">
-                        <ComboBox 
-                            x:Name="LanguageComboBox"
-                            Classes="game-combobox"
-                            Width="154" 
-                            Height="34"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            MinWidth="100"
-                            MaxWidth="200"
-                            ItemsSource="{Binding Source={x:Static constants:Locales.All}}"
-                            SelectedIndex="0"
-                            SelectionChanged="LanguageComboBox_SelectionChanged"
-                            ToolTip.Tip="{DynamicResource LanguageComboBoxToolTip}"
-                            ToolTip.ShowDelay="20">
-                        </ComboBox>
-                    </Grid>
-                    <Grid Grid.Column="1">
-                        <Button 
-                            Classes="main-btn" 
-                            HorizontalAlignment="Center"
-                            MinWidth="100"
-                            MaxWidth="200"
+                <Grid ColumnDefinitions="110,*" VerticalAlignment="Center">
+                    <Button Grid.Column="1"
+                            Classes="main-btn"
+                            HorizontalAlignment="Left"
                             Command="{Binding ResetFirewallCommand}"
                             Content="{DynamicResource ResetFirewall}"
                             ToolTip.Tip="{DynamicResource ResetFirewallToolTip}"
-                            ToolTip.ShowDelay="20"/>
-                    </Grid>
+                            ToolTip.ShowDelay="300" />
                 </Grid>
-            </Grid>
+            </StackPanel>
 
-            <Canvas>
-                <TextBlock 
-                    x:Name="VersionTextBlock"
-                    Canvas.Top="234"
-                    Canvas.Right="2"
-                    ZIndex="-2"
-                    Text="Version: " 
-                    Foreground="{DynamicResource SpxTextFaintBrush}"
-                    FontSize="10"/>
-            </Canvas>
+            <!-- Version -->
+            <Border Grid.Row="2"
+                    Classes="rule-top"
+                    Background="{DynamicResource SpxChromeBrush}">
+                <TextBlock x:Name="VersionTextBlock"
+                           Classes="faint"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"
+                           FontSize="11"
+                           Text="Version: " />
+            </Border>
         </Grid>
     </Border>
 </Window>

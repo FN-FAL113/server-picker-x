@@ -23,7 +23,16 @@ namespace ServerPickerX.Models
         public string Description => ServerModel.Description;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsAllowed))]
         private bool isBlocked;
+
+        // The preset editor asks which servers you want to play on, the stored
+        // preset still lists the blocked ones
+        public bool IsAllowed
+        {
+            get => !IsBlocked;
+            set => IsBlocked = !value;
+        }
 
         public PresetServerModel(ServerModel serverModel, string key, bool isBlocked)
         {

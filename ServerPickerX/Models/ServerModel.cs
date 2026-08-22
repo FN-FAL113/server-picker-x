@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -11,6 +11,14 @@ namespace ServerPickerX.Models
     // generate boiler plate code for common MVVM implementations
     public partial class ServerModel : ObservableObject
     {
+        // State token rendered as a coloured dot, not display text
+        public const string StatusUp = "up";
+
+        public const string StatusDown = "down";
+
+        // Placeholder shown while a probe is in flight
+        public const string PendingReading = "\u2026";
+
         public string Flag { get; set; } = "";
 
         public string Name { get; set; } = "";
@@ -25,6 +33,10 @@ namespace ServerPickerX.Models
          
         [ObservableProperty]
         public string? packetLoss;
+
+        // True while a firewall rule exists for this server
+        [ObservableProperty]
+        public bool isBlocked;
 
         public List<RelayModel> RelayModels { get; set; } = [];
 
@@ -42,7 +54,7 @@ namespace ServerPickerX.Models
 
             using var ping = new Ping();
 
-            Ping = "Pinging server";
+            Ping = PendingReading;
 
             RelayModel? bestRelay = null;
             long bestRtt = long.MaxValue;
@@ -70,7 +82,7 @@ namespace ServerPickerX.Models
 
             if (bestRelay != null)
             {
-                PacketLoss = "Probing";
+                PacketLoss = PendingReading;
 
                 // Phase 2, Probe the best relay 4 times
                 int successCount = 0;
@@ -97,15 +109,16 @@ namespace ServerPickerX.Models
                     catch (Exception ex) when (ex is OperationCanceledException) { }
                 }
 
-                double lossPercent = (1 - (successCount / probeCount)) * 100;
+                // Cast before dividing, integer division here only yields 0 or 1
+                double lossPercent = (1 - ((double)successCount / probeCount)) * 100;
                 Ping = successCount > 0 ? finalBestRtt + "ms" : "";
-                Status = successCount > 0 ? "✅" : "❌";
+                Status = successCount > 0 ? StatusUp : StatusDown;
                 PacketLoss = $"{lossPercent:F0}%";
-            } else if (Ping == "Pinging server")
+            } else if (Ping == PendingReading)
             {
                 Ping = "";
                 PacketLoss = "";
-                Status = "❌";
+                Status = StatusDown;
             }
         }
     }

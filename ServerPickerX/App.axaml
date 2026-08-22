@@ -1,4 +1,4 @@
-<Application xmlns="https://github.com/avaloniaui"
+﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="ServerPickerX.App"
              xmlns:local="using:ServerPickerX"
@@ -35,5 +35,7 @@
         <StyleInclude Source="/Styles/TextBoxStyle.axaml" />
         <StyleInclude Source="/Styles/ComboBoxStyle.axaml" />
         <StyleInclude Source="/Styles/DataGridStyle.axaml" />
+        <!-- Must stay after BaseStyle so blocked card setters win over metric tiers -->
+        <StyleInclude Source="/Styles/ServerCardStyle.axaml" />
     </Application.Styles>
 </Application>

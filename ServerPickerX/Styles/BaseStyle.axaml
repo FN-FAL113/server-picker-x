@@ -3,13 +3,17 @@
     <Design.PreviewWith>
         <Border Padding="16" Background="#09090B">
             <StackPanel Spacing="8">
-                <TextBlock Text="Frankfurt (Germany)" />
-                <TextBlock Classes="muted" Text="fra" />
+                <TextBlock Classes="card-title" Text="Frankfurt (Germany)" />
+                <TextBlock Classes="mono muted" Text="fra" />
+                <TextBlock Classes="mono metric good" Text="18ms" />
+                <TextBlock Classes="mono metric bad" Text="232ms" />
             </StackPanel>
         </Border>
     </Design.PreviewWith>
 
     <Style Selector="Window">
+        <Setter Property="FontFamily" Value="{StaticResource SpxUiFont}" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
     </Style>
 
@@ -20,21 +24,86 @@
     <Style Selector="TextBlock.muted">
         <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
     </Style>
-
     <Style Selector="TextBlock.faint">
         <Setter Property="Foreground" Value="{DynamicResource SpxTextFaintBrush}" />
     </Style>
 
     <Style Selector="TextBlock.window-title">
         <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="TextBlock.card-title">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.mono">
+        <Setter Property="FontFamily" Value="{StaticResource SpxMonoFont}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- Tier classes are bound through MetricTierConverter -->
+    <Style Selector="TextBlock.metric">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.25" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.metric.good">
+        <Setter Property="Foreground" Value="{DynamicResource SpxGoodBrush}" />
+    </Style>
+    <Style Selector="TextBlock.metric.warn">
+        <Setter Property="Foreground" Value="{DynamicResource SpxWarnBrush}" />
+    </Style>
+    <Style Selector="TextBlock.metric.bad">
+        <Setter Property="Foreground" Value="{DynamicResource SpxBadBrush}" />
+    </Style>
+    <Style Selector="TextBlock.metric.pending">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextFaintBrush}" />
+    </Style>
+
+    <Style Selector="Border.status-dot">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.25" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+        <Setter Property="Width" Value="6" />
+        <Setter Property="Height" Value="6" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource SpxTextFaintBrush}" />
+    </Style>
+    <Style Selector="Border.status-dot.up">
+        <Setter Property="Background" Value="{DynamicResource SpxGoodBrush}" />
+    </Style>
+    <Style Selector="Border.status-dot.down">
+        <Setter Property="Background" Value="{DynamicResource SpxBadBrush}" />
+    </Style>
+
+    <Style Selector="Border.rule-top">
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
     <Style Selector="Border.rule-bottom">
         <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="ProgressBar.activity">
+        <Setter Property="Height" Value="2" />
+        <Setter Property="MinHeight" Value="2" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="0" />
     </Style>
 
     <Style Selector="CheckBox">
@@ -42,12 +111,16 @@
     </Style>
 
     <Style Selector="ToolTip">
-        <Setter Property="Background" Value="{DynamicResource SpxSurfaceBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SpxCardBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+
+    <Style Selector="ScrollViewer">
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 </Styles>

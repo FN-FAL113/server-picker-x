@@ -15,7 +15,9 @@
         <Setter Property="CaretBrush" Value="{DynamicResource SpxTextBrush}" />
         <Setter Property="SelectionBrush" Value="{DynamicResource SpxControlPressedBrush}" />
         <Setter Property="SelectionForegroundBrush" Value="{DynamicResource SpxTextBrush}" />
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
         <Setter Property="Padding" Value="10,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
 

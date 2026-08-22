@@ -4,15 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:ServerPickerX.Converters"
+        xmlns:models="using:ServerPickerX.Models"
         xmlns:userControls="using:ServerPickerX"
-        xmlns:i="https://github.com/projektanker/icons.avalonia"
         mc:Ignorable="d"
         x:Class="ServerPickerX.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Server Picker X"
-        FontWeight="SemiBold"
-        Width="920"
-        Height="640"
+        Width="1000"
+        Height="680"
+        MinWidth="700"
+        MinHeight="460"
         Icon="/Assets/favicon.ico"
         WindowDecorations="BorderOnly"
         ExtendClientAreaToDecorationsHint="True"
@@ -21,306 +22,304 @@
         Loaded="Window_Loaded">
     <Window.Resources>
         <converters:ImageConverter x:Key="ImageConverter" />
-        <converters:PacketLossColorConverter x:Key="PacketLossColorConverter" />
-        <converters:PingColorConverter x:Key="PingColorConverter" />
+        <converters:MetricTierConverter x:Key="PingTier" Kind="Ping" />
+        <converters:MetricTierConverter x:Key="LossTier" Kind="PacketLoss" />
+        <converters:StatusTierConverter x:Key="StatusTier" />
+        <converters:CollectionEmptyConverter x:Key="IsEmpty" />
     </Window.Resources>
 
-    <Border
-        Background="{DynamicResource SpxWindowBrush}"
-        BorderBrush="{DynamicResource SpxBorderBrush}"
-        BorderThickness="1.0">
-        <Grid Grid.Column="1">
+    <Border Background="{DynamicResource SpxWindowBrush}"
+            BorderBrush="{DynamicResource SpxBorderBrush}"
+            BorderThickness="1">
+        <Grid>
             <Grid.RowDefinitions>
-                <!-- Title Bar -->
-                <RowDefinition Height="30" />
-                <!-- Main Content -->
-                <RowDefinition />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="2" />
+                <RowDefinition Height="52" />
+                <RowDefinition Height="38" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="56" />
+                <RowDefinition Height="28" />
             </Grid.RowDefinitions>
 
             <!-- Title Bar -->
-            <Grid Grid.Row="0" x:Name="TitleBar" Background="{DynamicResource SpxChromeBrush}" PointerPressed="TitleBar_PointerPressed" >
-                <ProgressBar 
-                    Margin="0,-28,0,0" 
-                    Height="6"
-                    Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Width}"
-                    IsIndeterminate="True"
-                    IsVisible="{Binding ShowProgressBar}"/>
-                <TextBlock Classes="window-title" Margin="10,0,0,0">
-                    Server Picker X
-                </TextBlock>
-                <userControls:TitleBarButtons/>
-            </Grid>
+            <Border Grid.Row="0"
+                    Classes="rule-bottom"
+                    Background="{DynamicResource SpxChromeBrush}">
+                <Grid x:Name="TitleBar" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
+                    <TextBlock Classes="window-title" Margin="14,0,0,0" Text="Server Picker X" />
+                    <userControls:TitleBarButtons />
+                </Grid>
+            </Border>
 
-            <!-- Main Content -->
-            <Grid Grid.Row="1">
-				<Grid.RowDefinitions>
-                    <!-- Top Buttons -->
-					<RowDefinition Height="48"></RowDefinition>
-                    <!-- Server DataGrid -->
-					<RowDefinition></RowDefinition>
-                    <!-- Main Buttons -->
-                    <RowDefinition Height="48"></RowDefinition>
-                    <!-- Footer -->
-					<RowDefinition Height="48"></RowDefinition>
-                </Grid.RowDefinitions>
+            <ProgressBar Grid.Row="1"
+                         Classes="activity"
+                         IsIndeterminate="True"
+                         IsVisible="{Binding ShowProgressBar}" />
 
-                <Grid Grid.Row="0">
+            <!-- Search and filters -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource SpxChromeBrush}"
+                    Padding="14,0">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
-                        <TextBox
-                            Classes="search-textbox"
-                            Text="{Binding SearchText}"
-                            IsEnabled="{Binding IsOperationAllowed}"
-                            Watermark="{DynamicResource SearchForServers}"
-                            FontSize="12"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            Width="144"
-                            Margin="8,0,0,0"
-                            BorderThickness="1"/>
-                        <ComboBox 
-                            x:Name="GameModeComboBox" 
-                            Classes="game-combobox"
-                            SelectionChanged="GameModeComboBox_SelectionChanged"
-                            IsEnabled="{Binding IsOperationAllowed}"
-                            ToolTip.Tip="{DynamicResource GameModeToolTip}"
-                            ToolTip.ShowDelay="20"
-                            FontSize="12"
-                            VerticalAlignment="Center"
-                            Width="158"
-                            Margin="8,0,0,0"
-                            BorderThickness="1">
-                        </ComboBox>
-                        <Grid MinWidth="146" Margin="8,0,20,0">
-                            <ComboBox
-                                x:Name="PresetComboBox"
-                                Classes="game-combobox"
-                                ItemsSource="{Binding PresetItems}"
-                                SelectedItem="{Binding SelectedPreset}"
-                                SelectionChanged="PresetComboBox_SelectionChanged"
-                                IsVisible="{Binding HasPresets}"
-                                IsEnabled="{Binding CanSelectPresets}"
-                                ToolTip.Tip="{DynamicResource PresetToolTip}"
-                                ToolTip.ShowDelay="20"
-                                FontSize="12"
-                                Width="146"
-                                MinWidth="146"
-                                Height="32"
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
                                 VerticalAlignment="Center"
-                                BorderThickness="1">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                            <Border
-                                IsVisible="{Binding !HasPresets}"
-                                Width="146"
-                                MinWidth="146"
-                                Height="32"
-                                VerticalAlignment="Center"
-                                BorderBrush="{DynamicResource SpxBorderBrush}"
-                                BorderThickness="1"
-                                Background="{DynamicResource SpxControlBrush}"
-                                CornerRadius="6">
-                                <TextBlock
-                                    Margin="12,0,12,0"
+                                Spacing="8">
+                        <TextBox Classes="search-textbox"
+                                 Text="{Binding SearchText}"
+                                 IsEnabled="{Binding IsOperationAllowed}"
+                                 Watermark="{DynamicResource SearchForServers}"
+                                 Width="230" />
+
+                        <ComboBox x:Name="GameModeComboBox"
+                                  Classes="game-combobox"
+                                  SelectionChanged="GameModeComboBox_SelectionChanged"
+                                  IsEnabled="{Binding IsOperationAllowed}"
+                                  ToolTip.Tip="{DynamicResource GameModeToolTip}"
+                                  ToolTip.ShowDelay="300"
+                                  Width="168" />
+
+                        <Grid Width="168">
+                            <ComboBox x:Name="PresetComboBox"
+                                      Classes="game-combobox"
+                                      ItemsSource="{Binding PresetItems}"
+                                      SelectedItem="{Binding SelectedPreset}"
+                                      SelectionChanged="PresetComboBox_SelectionChanged"
+                                      IsVisible="{Binding HasPresets}"
+                                      IsEnabled="{Binding CanSelectPresets}"
+                                      ToolTip.Tip="{DynamicResource PresetToolTip}"
+                                      ToolTip.ShowDelay="300"
+                                      Width="168">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <Border IsVisible="{Binding !HasPresets}"
+                                    Height="32"
                                     VerticalAlignment="Center"
-                                    FontSize="12"
-                                    Foreground="{DynamicResource SpxTextFaintBrush}"
-                                    TextTrimming="CharacterEllipsis"
-                                    Text="{DynamicResource NoPresets}" />
+                                    Background="{DynamicResource SpxControlDisabledBrush}"
+                                    BorderBrush="{DynamicResource SpxBorderMutedBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6">
+                                <TextBlock Classes="faint"
+                                           Margin="10,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{DynamicResource NoPresets}" />
                             </Border>
                         </Grid>
                     </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button 
-                            x:Name="ClusterUnclusterBtn"
-                            Classes="main-btn"
-                            IsEnabled="{Binding IsOperationAllowed}"
-                            Content="{DynamicResource ClusterServers}"
-                            ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
-                            ToolTip.ShowDelay="20"
-                            Click="ClusterUnclusterBtn_Click"
-                            VerticalAlignment="Center"
-                            Margin="0,0,8,0"/>
-                        <Button
-                            x:Name="PresetsBtn"
-                            Classes="main-btn"
-                            IsEnabled="{Binding IsOperationAllowed}"
-                            Content="{DynamicResource Presets}"
-                            ToolTip.Tip="{DynamicResource PresetsToolTip}"
-                            ToolTip.ShowDelay="20"
-                            Click="PresetsBtn_Click"
-                            VerticalAlignment="Center"
-                            Margin="0,0,8,0"/>
-                        <Button 
-                            x:Name="RefreshBtn"
-                            Classes="main-btn"
-                            Command="{Binding PingServers}" 
-                            CommandParameter="{Binding ServerModels}"
-                            IsEnabled="{Binding IsOperationAllowed}"
-                            Content="{DynamicResource Refresh}"
-                            ToolTip.Tip="{DynamicResource RefreshToolTip}"
-                            ToolTip.ShowDelay="20"
-                            VerticalAlignment="Center"
-                            Margin="0,0,8,0"/>
+
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Spacing="8">
+                        <Button x:Name="ClusterUnclusterBtn"
+                                Classes="main-btn"
+                                IsEnabled="{Binding IsOperationAllowed}"
+                                Content="{DynamicResource ClusterServers}"
+                                ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
+                                ToolTip.ShowDelay="300"
+                                MinWidth="124"
+                                Click="ClusterUnclusterBtn_Click" />
+                        <Button x:Name="PresetsBtn"
+                                Classes="main-btn"
+                                IsEnabled="{Binding IsOperationAllowed}"
+                                Content="{DynamicResource Presets}"
+                                ToolTip.Tip="{DynamicResource PresetsToolTip}"
+                                ToolTip.ShowDelay="300"
+                                Click="PresetsBtn_Click" />
+                        <Button x:Name="RefreshBtn"
+                                Classes="main-btn"
+                                Command="{Binding PingServers}"
+                                CommandParameter="{Binding ServerModels}"
+                                IsEnabled="{Binding IsOperationAllowed}"
+                                Content="{DynamicResource Refresh}"
+                                ToolTip.Tip="{DynamicResource RefreshToolTip}"
+                                ToolTip.ShowDelay="300" />
                     </StackPanel>
                 </Grid>
+            </Border>
 
-                <Grid Grid.Row="1">
-                     <DataGrid
-                         x:Name="ServerList"
-                         ItemsSource="{Binding FilteredServerModels}"
-                         SelectedItem="{Binding SelectedDataGridServerModel}"
-                         SelectionMode="Extended"
-                         IsReadOnly="True"
-                         CanUserReorderColumns="False"
-                         CanUserResizeColumns="False"
-                         CanUserSortColumns="True"
-                         GridLinesVisibility="All"
-                         HorizontalGridLinesBrush="{DynamicResource SpxBorderBrush}"
-                         VerticalGridLinesBrush="{DynamicResource SpxBorderBrush}"
-                         Foreground="{DynamicResource SpxTextBrush}"
-                         Background="Transparent"
-                         DoubleTapped="DataGrid_DoubleTapped">
-                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Flag">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}" 
-                                               Width="50" Height="50" 
-                                               Stretch="Uniform"
-                                               VerticalAlignment="Center" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-							<DataGridTextColumn Width="105" Header="Server ID" Binding="{Binding Name}" />
-							<DataGridTextColumn Width="*" Header="Server Name" Binding="{Binding Description}" />
-							<DataGridTemplateColumn Header="Ping" SortMemberPath="Ping" Width="128" HeaderPointerPressed="DataGridPingColumn_HeaderPointerPressed">
-                                <DataGridTemplateColumn.CellTemplate>
-							        <DataTemplate>
-							            <TextBlock 
-                                            Text="{Binding Ping}"
-                                            Foreground="{Binding Ping, Converter={StaticResource PingColorConverter}}"
-                                            VerticalAlignment="Center"
-                                            Padding="12,0,0,0"/>
-							        </DataTemplate>
-							    </DataGridTemplateColumn.CellTemplate>
-							</DataGridTemplateColumn>
-                             <DataGridTemplateColumn Header="Packet Loss" SortMemberPath="PacketLoss" Width="120" HeaderPointerPressed="DataGridPacketLossColumn_HeaderPointerPressed">
-							    <DataGridTemplateColumn.CellTemplate>
-							        <DataTemplate>
-							            <TextBlock 
-                                            Text="{Binding PacketLoss}"
-                                            Foreground="{Binding PacketLoss, Converter={StaticResource PacketLossColorConverter}}"
-                                            VerticalAlignment="Center"
-                                            Padding="12,0,0,0"/>
-							        </DataTemplate>
-							    </DataGridTemplateColumn.CellTemplate>
-							</DataGridTemplateColumn>
-							<DataGridTextColumn Width="100" Header="Status" Binding="{Binding Status}" />
-						</DataGrid.Columns>
+            <!-- Sort strip, the card grid has no column headers -->
+            <Border Grid.Row="3"
+                    Classes="rule-bottom"
+                    Background="{DynamicResource SpxChromeBrush}"
+                    Padding="14,0">
+                <Grid>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Spacing="4">
+                        <TextBlock Classes="faint"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,6,0"
+                                   Text="{DynamicResource SortLabel}" />
 
-						<DataGrid.Styles>
-                            <Style Selector="DataGridColumnHeader">
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
-                            </Style>
-                        </DataGrid.Styles>
-                    </DataGrid>
+                        <Button x:Name="SortLocationBtn" Classes="chip" Click="SortBtn_Click" Tag="location">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{DynamicResource SortLocation}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SortLocationArrow" FontSize="10" VerticalAlignment="Center" Text="&#8593;" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SortPingBtn" Classes="chip" Click="SortBtn_Click" Tag="ping">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{DynamicResource SortPing}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SortPingArrow" FontSize="10" VerticalAlignment="Center" Text="&#8593;" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SortLossBtn" Classes="chip" Click="SortBtn_Click" Tag="loss">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{DynamicResource SortLoss}" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SortLossArrow" FontSize="10" VerticalAlignment="Center" Text="&#8593;" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Spacing="5">
+                        <TextBlock Classes="mono muted" Text="{Binding BlockedServerCount}" />
+                        <TextBlock Classes="faint" FontSize="11" VerticalAlignment="Center" Text="{DynamicResource StatusBlocked}" />
+                    </StackPanel>
                 </Grid>
+            </Border>
 
-                <Grid Grid.Row="2" Margin="0,0,0,-6">
-                      <StackPanel
-                          Orientation="Horizontal" 
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Left" 
-                          Spacing="6" 
-                          Margin="8,0,0,0">
-                          <Button x:Name="BlockAllBtn"
-                              Classes="main-btn"
-                              IsEnabled="{Binding IsOperationAllowed}"
-                              Command="{Binding BlockAllAsync}"
-                              VerticalAlignment="Center"
-                              MaxWidth="200"
-                              ToolTip.Tip="{DynamicResource BlockAll}"
-                              ToolTip.ShowDelay="20">
-                              <TextBlock FontWeight="Bold">
-                                  <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
-                                  <TextBlock Text="{DynamicResource BlockAll}" Margin="0,0,0,-4"/>
-                              </TextBlock>
-                          </Button>
-                          <Button 
-                              x:Name="BlockSelectedBtn" 
-                              Classes="main-btn" 
-                              IsEnabled="{Binding IsOperationAllowed}"
-                              Command="{Binding BlockSelectedAsync}"
-                              CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
-                              VerticalAlignment="Center"
-                              MaxWidth="200"
-                              ToolTip.Tip="{DynamicResource BlockSelected}"
-                              ToolTip.ShowDelay="20">
-                              <TextBlock FontWeight="Bold">
-                                  <i:Icon Value="fa-x" FontSize="14" Margin="0,0,0,-3" /> 
-                                  <TextBlock Text="{DynamicResource BlockSelected}" Margin="0,0,0,-4"/>
-                              </TextBlock>
-                          </Button>
-                      </StackPanel>
-                      <StackPanel 
-                          Orientation="Horizontal" 
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Right" 
-                          Spacing="6" 
-                          Margin="0,0,8,0">
-                          <Button 
-                              x:Name="UnlockAllBtn" 
-                              Classes="main-btn"
-                              IsEnabled="{Binding IsOperationAllowed}"
-                              Command="{Binding UnblockAllAsync}"
-                              VerticalAlignment="Center"
-                              MinWidth="100"
-                              MaxWidth="200"
-                              ToolTip.Tip="{DynamicResource UnblockAll}"
-                              ToolTip.ShowDelay="20">
-                              <TextBlock FontWeight="Bold">
-                                  <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
-                                  <TextBlock Text="{DynamicResource UnblockAll}" Margin="0,0,0,-4"/>
-                              </TextBlock>
-                          </Button>
-                          <Button 
-                              x:Name="UnblockSelectedBtn" 
-                              Classes="main-btn"
-                              IsEnabled="{Binding IsOperationAllowed}"
-                              Command="{Binding UnblockSelectedAsync}"
-                              CommandParameter="{Binding ElementName=ServerList, Path=SelectedItems}"
-                              VerticalAlignment="Center"
-                              MinWidth="100"
-                              MaxWidth="200"
-                              ToolTip.Tip="{DynamicResource UnblockSelected}"
-                              ToolTip.ShowDelay="20">
-                              <TextBlock FontWeight="Bold">
-                                  <i:Icon Value="fa-check" FontSize="14" Margin="0,0,0,-3" /> 
-                                  <TextBlock Text="{DynamicResource UnblockSelected}" Margin="0,0,0,-4"/>
-                              </TextBlock>
-                          </Button>
-                      </StackPanel>
-                  </Grid>
+            <!-- Server cards, click to block or unblock -->
+            <Grid Grid.Row="4">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <!-- Inset lives on the content, not on the ScrollViewer, so a
+                         hovered card is not clipped at the viewport edge -->
+                    <ItemsControl Margin="14,14,10,14" ItemsSource="{Binding FilteredServerModels}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:ServerModel">
+                                <Border Classes="server-card"
+                                        Classes.blocked="{Binding IsBlocked}"
+                                        Tapped="ServerCard_Tapped">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{DynamicResource PingServerMenuItem}"
+                                                      Click="PingServerMenuItem_Click" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
 
-                <Grid Grid.Row="3">
+                                    <Grid RowDefinitions="Auto,*">
+                                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                                            <Border Grid.Column="0" Classes="flag">
+                                                <Image Source="{Binding Flag, Converter={StaticResource ImageConverter}}"
+                                                       Stretch="UniformToFill" />
+                                            </Border>
+                                            <TextBlock Grid.Column="1"
+                                                       Classes="card-title"
+                                                       Margin="10,0,8,0"
+                                                       Text="{Binding Description}" />
+                                            <Border Grid.Column="2"
+                                                    Classes="status-dot"
+                                                    Classes.up="{Binding Status, Converter={StaticResource StatusTier}, ConverterParameter=up}"
+                                                    Classes.down="{Binding Status, Converter={StaticResource StatusTier}, ConverterParameter=down}" />
+                                        </Grid>
+
+                                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalAlignment="Bottom">
+                                            <TextBlock Grid.Column="0"
+                                                       Classes="mono muted"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Name}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Classes="mono metric"
+                                                           Classes.good="{Binding Ping, Converter={StaticResource PingTier}, ConverterParameter=good}"
+                                                           Classes.warn="{Binding Ping, Converter={StaticResource PingTier}, ConverterParameter=warn}"
+                                                           Classes.bad="{Binding Ping, Converter={StaticResource PingTier}, ConverterParameter=bad}"
+                                                           Classes.pending="{Binding Ping, Converter={StaticResource PingTier}, ConverterParameter=pending}"
+                                                           Text="{Binding Ping}" />
+                                                <TextBlock Classes="mono metric"
+                                                           Classes.good="{Binding PacketLoss, Converter={StaticResource LossTier}, ConverterParameter=good}"
+                                                           Classes.warn="{Binding PacketLoss, Converter={StaticResource LossTier}, ConverterParameter=warn}"
+                                                           Classes.bad="{Binding PacketLoss, Converter={StaticResource LossTier}, ConverterParameter=bad}"
+                                                           Classes.pending="{Binding PacketLoss, Converter={StaticResource LossTier}, ConverterParameter=pending}"
+                                                           Text="{Binding PacketLoss}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock Classes="empty-state"
+                           IsVisible="{Binding FilteredServerModels.Count, Converter={StaticResource IsEmpty}}"
+                           Text="{DynamicResource NoServersMatch}" />
+            </Grid>
+
+            <!-- Bulk actions -->
+            <Border Grid.Row="5"
+                    Classes="rule-top"
+                    Background="{DynamicResource SpxChromeBrush}"
+                    Padding="14,0">
+                <Grid>
+                    <Button x:Name="BlockAllBtn"
+                            Classes="main-btn danger"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            Command="{Binding BlockAllAsync}"
+                            Content="{DynamicResource BlockAll}"
+                            ToolTip.Tip="{DynamicResource BlockAllToolTip}"
+                            ToolTip.ShowDelay="300"
+                            MinWidth="132" />
+
+                    <Button x:Name="UnlockAllBtn"
+                            Classes="main-btn"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsOperationAllowed}"
+                            Command="{Binding UnblockAllAsync}"
+                            Content="{DynamicResource UnblockAll}"
+                            ToolTip.Tip="{DynamicResource UnblockAllToolTip}"
+                            ToolTip.ShowDelay="300"
+                            MinWidth="132" />
+                </Grid>
+            </Border>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="6"
+                    Classes="rule-top"
+                    Background="{DynamicResource SpxChromeBrush}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Margin="14,0,0,0"
+                                Spacing="4"
+                                ToolTip.Tip="Servers shown / servers loaded"
+                                ToolTip.ShowDelay="300">
+                        <TextBlock Classes="mono faint" Text="{Binding FilteredServerModels.Count}" />
+                        <TextBlock Classes="faint" FontSize="11" Text="/" />
+                        <TextBlock Classes="mono faint" Text="{Binding ServerModels.Count}" />
+                    </StackPanel>
+
                     <userControls:FooterButtons />
                 </Grid>
-            </Grid>
-                
+            </Border>
         </Grid>
     </Border>
-
-
 </Window>

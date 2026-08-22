@@ -42,6 +42,9 @@ namespace ServerPickerX.Settings
 
         public virtual Dictionary<string, string> last_selected_preset_names { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+        // Blocked servers per game mode, firewall rules outlive the process
+        public virtual Dictionary<string, List<string>> blocked_server_keys { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
         [JsonIgnore]
         public readonly string jsonFilePath = "./settings.json";
 
@@ -102,6 +105,9 @@ namespace ServerPickerX.Settings
                 last_selected_preset_names = localSettings.last_selected_preset_names != null
                     ? new Dictionary<string, string>(localSettings.last_selected_preset_names, StringComparer.OrdinalIgnoreCase)
                     : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                blocked_server_keys = localSettings.blocked_server_keys != null
+                    ? new Dictionary<string, List<string>>(localSettings.blocked_server_keys, StringComparer.OrdinalIgnoreCase)
+                    : new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             }
             catch (Exception ex)
             {
@@ -232,6 +238,45 @@ namespace ServerPickerX.Settings
             }
 
             last_selected_preset_names.Remove(game_mode);
+
+            await SaveSettingsAsync();
+        }
+
+        public List<string> GetBlockedServerKeysByGameMode()
+        {
+            if (string.IsNullOrWhiteSpace(game_mode))
+            {
+                return [];
+            }
+
+            return blocked_server_keys.TryGetValue(game_mode, out List<string>? serverKeys)
+                ? serverKeys ?? []
+                : [];
+        }
+
+        public async Task SetBlockedServerKeysByGameModeAsync(IEnumerable<string> serverKeys)
+        {
+            if (string.IsNullOrWhiteSpace(game_mode))
+            {
+                return;
+            }
+
+            blocked_server_keys ??= new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+            List<string> normalizedServerKeys = serverKeys
+                .Where(serverKey => !string.IsNullOrWhiteSpace(serverKey))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(serverKey => serverKey, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (normalizedServerKeys.Count == 0)
+            {
+                blocked_server_keys.Remove(game_mode);
+            }
+            else
+            {
+                blocked_server_keys[game_mode] = normalizedServerKeys;
+            }
 
             await SaveSettingsAsync();
         }

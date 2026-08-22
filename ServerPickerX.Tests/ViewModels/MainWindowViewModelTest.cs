@@ -145,7 +145,7 @@ namespace ServerPickerX.Tests.ViewModels
             // Assert
             Assert.NotEmpty(_vm.ServerModels);
             Assert.True(_vm.ServerModels[0].Ping?.Contains("ms"));
-            Assert.Equal("✅", _vm.ServerModels[0].Status);
+            Assert.Equal(ServerModel.StatusUp, _vm.ServerModels[0].Status);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.NotEmpty(_vm.ServerModels);
             var model = _vm.SelectedDataGridServerModel;
             Assert.True(_vm.SelectedDataGridServerModel.Ping?.Contains("ms"));
-            Assert.Equal("✅", _vm.ServerModels[0].Status);
+            Assert.Equal(ServerModel.StatusUp, _vm.ServerModels[0].Status);
         }
 
         [Fact]
@@ -215,7 +215,7 @@ namespace ServerPickerX.Tests.ViewModels
             foreach (var server in _vm.ServerModels)
             {
                 Assert.Empty(server.Ping);
-                Assert.Equal("❌", server.Status);
+                Assert.Equal(ServerModel.StatusDown, server.Status);
             }
         }
 
@@ -272,10 +272,10 @@ namespace ServerPickerX.Tests.ViewModels
             {
                 if (item.index is 0 or 2)
                 {
-                    Assert.Equal("❌", item.value.Status);
+                    Assert.Equal(ServerModel.StatusDown, item.value.Status);
                 } else
                 {
-                    Assert.Equal("✅", item.value.Status);
+                    Assert.Equal(ServerModel.StatusUp, item.value.Status);
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.True(result);
             foreach (var srv in _vm.ServerModels)
             {
-                Assert.Equal("✅", srv.Status);
+                Assert.Equal(ServerModel.StatusUp, srv.Status);
             }
         }
 
@@ -429,7 +429,7 @@ namespace ServerPickerX.Tests.ViewModels
             foreach (var srv in serverModels)
             {
                 Assert.Empty(srv.Ping);
-                Assert.Equal("❌", srv.Status);
+                Assert.Equal(ServerModel.StatusDown, srv.Status);
             }
         }
 
@@ -455,7 +455,7 @@ namespace ServerPickerX.Tests.ViewModels
             Assert.True(result);
             foreach (var srv in serverModels)
             {
-                Assert.Equal("✅", srv.Status);
+                Assert.Equal(ServerModel.StatusUp, srv.Status);
             }
         }
 

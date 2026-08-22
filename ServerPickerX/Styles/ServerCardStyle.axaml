@@ -1,0 +1,76 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20" Background="#09090B">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Border Classes="server-card" />
+                <Border Classes="server-card blocked" />
+            </StackPanel>
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- One card per server, clicking it toggles the firewall rule.
+         Blocked cards scale down and drop their shadow. Scale is a
+         RenderTransform so the grid slot is unaffected and nothing reflows.
+         Hover changes fill and shadow only, scaling it as well left the 1px
+         border landing on a half pixel and dropping out along one edge. -->
+    <Style Selector="Border.server-card">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="Height" Value="76" />
+        <Setter Property="Margin" Value="0,0,10,10" />
+        <Setter Property="Padding" Value="13,11" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Background" Value="{DynamicResource SpxCardBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BoxShadow" Value="0 2 6 0 #40000000" />
+        <Setter Property="RenderTransform" Value="scale(1)" />
+
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.17" Easing="CubicEaseOut" />
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.17" Easing="CubicEaseOut" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.17" Easing="CubicEaseOut" />
+                <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.17" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <Style Selector="Border.server-card:pointerover">
+        <Setter Property="Background" Value="{DynamicResource SpxCardHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxTextFaintBrush}" />
+        <Setter Property="BoxShadow" Value="0 3 10 0 #4D000000" />
+    </Style>
+
+    <!-- Declared after BaseStyle metric tiers so these setters win -->
+    <Style Selector="Border.server-card.blocked">
+        <Setter Property="Background" Value="{DynamicResource SpxCardMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderMutedBrush}" />
+        <Setter Property="BoxShadow" Value="0 0 0 0 #00000000" />
+        <Setter Property="RenderTransform" Value="scale(0.96)" />
+    </Style>
+
+    <Style Selector="Border.server-card.blocked:pointerover">
+        <Setter Property="Background" Value="{DynamicResource SpxCardMutedHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BoxShadow" Value="0 1 4 0 #33000000" />
+    </Style>
+
+    <Style Selector="Border.flag">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.empty-state">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextFaintBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Styles>

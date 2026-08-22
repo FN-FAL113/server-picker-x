@@ -13,12 +13,8 @@
             <Color x:Key="SystemAccentColorDark2">#71717A</Color>
             <Color x:Key="SystemAccentColorDark3">#52525B</Color>
 
-            <Color x:Key="DataGridRowHoveredBackgroundColor">#1C1C20</Color>
-            <Color x:Key="DataGridRowSelectedBackgroundColor">#27272A</Color>
-            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#323236</Color>
-            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#27272A</Color>
-            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#323236</Color>
-
+            <!-- Fluent's own disabled keys, so a control greyed out during a
+                 firewall operation keeps a readable label -->
             <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#A1A1AA" />
             <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#18181B" />
             <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#27272A" />
@@ -30,11 +26,21 @@
             <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#27272A" />
             <SolidColorBrush x:Key="ComboBoxDropDownGlyphForegroundDisabled" Color="#A1A1AA" />
 
+            <Color x:Key="DataGridRowHoveredBackgroundColor">#18181B</Color>
+            <Color x:Key="DataGridRowSelectedBackgroundColor">#27272A</Color>
+            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#32323680</Color>
+            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#27272A</Color>
+            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#323236</Color>
+
             <SolidColorBrush x:Key="SpxWindowBrush" Color="#09090B" />
             <SolidColorBrush x:Key="SpxChromeBrush" Color="#0F0F11" />
-            <SolidColorBrush x:Key="SpxSurfaceBrush" Color="#18181B" />
 
-            <SolidColorBrush x:Key="SpxBorderBrush" Color="#2E2E33" />
+            <SolidColorBrush x:Key="SpxCardBrush" Color="#26262B" />
+            <SolidColorBrush x:Key="SpxCardHoverBrush" Color="#2F2F35" />
+            <SolidColorBrush x:Key="SpxCardMutedBrush" Color="#0B0B0E" />
+            <SolidColorBrush x:Key="SpxCardMutedHoverBrush" Color="#141418" />
+
+            <SolidColorBrush x:Key="SpxBorderBrush" Color="#34343A" />
             <SolidColorBrush x:Key="SpxBorderMutedBrush" Color="#1F1F24" />
             <SolidColorBrush x:Key="SpxRingBrush" Color="#D4D4D8" />
 
@@ -43,11 +49,14 @@
             <SolidColorBrush x:Key="SpxTextFaintBrush" Color="#6B6B76" />
 
             <SolidColorBrush x:Key="SpxControlBrush" Color="#18181B" />
-            <SolidColorBrush x:Key="SpxControlHoverBrush" Color="#27272A" />
+            <SolidColorBrush x:Key="SpxControlHoverBrush" Color="#2A2A2F" />
             <SolidColorBrush x:Key="SpxControlPressedBrush" Color="#323236" />
             <SolidColorBrush x:Key="SpxControlDisabledBrush" Color="#131316" />
 
+            <SolidColorBrush x:Key="SpxGoodBrush" Color="#4FB783" />
+            <SolidColorBrush x:Key="SpxWarnBrush" Color="#D9A441" />
             <SolidColorBrush x:Key="SpxBadBrush" Color="#DB6E66" />
+            <SolidColorBrush x:Key="SpxBadSoftBrush" Color="#26DB6E66" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Light">
@@ -58,12 +67,6 @@
             <Color x:Key="SystemAccentColorDark1">#111113</Color>
             <Color x:Key="SystemAccentColorDark2">#09090B</Color>
             <Color x:Key="SystemAccentColorDark3">#000000</Color>
-
-            <Color x:Key="DataGridRowHoveredBackgroundColor">#EDEDEE</Color>
-            <Color x:Key="DataGridRowSelectedBackgroundColor">#E4E4E7</Color>
-            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#D4D4D8</Color>
-            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#E4E4E7</Color>
-            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#D4D4D8</Color>
 
             <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#71717A" />
             <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#FFFFFF" />
@@ -76,12 +79,22 @@
             <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#E4E4E7" />
             <SolidColorBrush x:Key="ComboBoxDropDownGlyphForegroundDisabled" Color="#71717A" />
 
+            <Color x:Key="DataGridRowHoveredBackgroundColor">#F4F4F5</Color>
+            <Color x:Key="DataGridRowSelectedBackgroundColor">#E4E4E7</Color>
+            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#D4D4D8</Color>
+            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#E4E4E7</Color>
+            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#D4D4D8</Color>
+
             <SolidColorBrush x:Key="SpxWindowBrush" Color="#F4F4F5" />
             <SolidColorBrush x:Key="SpxChromeBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="SpxSurfaceBrush" Color="#FFFFFF" />
+
+            <SolidColorBrush x:Key="SpxCardBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SpxCardHoverBrush" Color="#FAFAFA" />
+            <SolidColorBrush x:Key="SpxCardMutedBrush" Color="#E3E3E7" />
+            <SolidColorBrush x:Key="SpxCardMutedHoverBrush" Color="#DADADF" />
 
             <SolidColorBrush x:Key="SpxBorderBrush" Color="#E4E4E7" />
-            <SolidColorBrush x:Key="SpxBorderMutedBrush" Color="#EDEDEE" />
+            <SolidColorBrush x:Key="SpxBorderMutedBrush" Color="#D0D0D6" />
             <SolidColorBrush x:Key="SpxRingBrush" Color="#18181B" />
 
             <SolidColorBrush x:Key="SpxTextBrush" Color="#09090B" />
@@ -93,8 +106,14 @@
             <SolidColorBrush x:Key="SpxControlPressedBrush" Color="#E4E4E7" />
             <SolidColorBrush x:Key="SpxControlDisabledBrush" Color="#EFEFF1" />
 
+            <SolidColorBrush x:Key="SpxGoodBrush" Color="#2E7D57" />
+            <SolidColorBrush x:Key="SpxWarnBrush" Color="#8F6413" />
             <SolidColorBrush x:Key="SpxBadBrush" Color="#B24B42" />
+            <SolidColorBrush x:Key="SpxBadSoftBrush" Color="#26B24B42" />
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>
+
+    <FontFamily x:Key="SpxUiFont">Segoe UI Variable Text, Segoe UI, Ubuntu, Cantarell, Noto Sans, DejaVu Sans, Liberation Sans, $Default</FontFamily>
+    <FontFamily x:Key="SpxMonoFont">Cascadia Mono, Consolas, Ubuntu Mono, DejaVu Sans Mono, Liberation Mono, $Default</FontFamily>
 </ResourceDictionary>

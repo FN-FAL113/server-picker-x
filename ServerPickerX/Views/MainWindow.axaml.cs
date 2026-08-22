@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using ServerPickerX.Comparers;
+using Avalonia.Interactivity;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
 using ServerPickerX.Services.Localizations;
@@ -14,7 +14,6 @@ using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,8 +36,6 @@ namespace ServerPickerX.Views
             }
         }
 
-        private ListSortDirection pingSortDirection = ListSortDirection.Ascending;
-        private ListSortDirection packetLossSortDirection = ListSortDirection.Ascending;
         private bool _suppressPresetSelectionChanged;
         private PresetModel? _previousPreset;
 
@@ -119,15 +116,90 @@ namespace ServerPickerX.Views
             await HandlePresetChangeAsync(selectedPreset, previousPreset);
         }
 
-        private async void DataGrid_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        // A click anywhere on a server card toggles its firewall rule
+        private async void ServerCard_Tapped(object? sender, Avalonia.Input.TappedEventArgs e)
         {
-            var source = e.Source;
-
-            if (source is Border or TextBlock or Image)
+            if (DataContext is not MainWindowViewModel vm)
             {
-                var vm = DataContext as MainWindowViewModel;
-                vm?.PingSelectedServer();
+                return;
             }
+
+            if (sender is not Border { DataContext: ServerModel serverModel })
+            {
+                return;
+            }
+
+            e.Handled = true;
+
+            await vm.ToggleServerBlockAsync(serverModel);
+        }
+
+        private void PingServerMenuItem_Click(object? sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem { DataContext: ServerModel serverModel })
+            {
+                serverModel.PingServer();
+            }
+        }
+
+        private void SortBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel vm)
+            {
+                return;
+            }
+
+            if (sender is not Button { Tag: string sortTag })
+            {
+                return;
+            }
+
+            ServerSortField sortField = sortTag switch
+            {
+                "ping" => ServerSortField.Ping,
+                "loss" => ServerSortField.PacketLoss,
+                _ => ServerSortField.Location,
+            };
+
+            // Clicking the active chip flips direction and re-applies the sort
+            if (vm.SortField == sortField)
+            {
+                vm.SortDescending = !vm.SortDescending;
+            }
+            else
+            {
+                vm.SortField = sortField;
+                vm.SortDescending = false;
+            }
+
+            RefreshSortChips();
+        }
+
+        private void RefreshSortChips()
+        {
+            if (DataContext is not MainWindowViewModel vm)
+            {
+                return;
+            }
+
+            SetSortChipState(SortLocationBtn, SortLocationArrow, vm, ServerSortField.Location);
+            SetSortChipState(SortPingBtn, SortPingArrow, vm, ServerSortField.Ping);
+            SetSortChipState(SortLossBtn, SortLossArrow, vm, ServerSortField.PacketLoss);
+        }
+
+        private static void SetSortChipState(
+            Button chip,
+            TextBlock arrow,
+            MainWindowViewModel vm,
+            ServerSortField sortField
+            )
+        {
+            bool isActive = vm.SortField == sortField;
+
+            chip.Classes.Set("active", isActive);
+
+            arrow.IsVisible = isActive;
+            arrow.Text = vm.SortDescending ? "\u2193" : "\u2191";
         }
 
         private void TitleBar_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
@@ -196,6 +268,7 @@ namespace ServerPickerX.Views
 
             ConfigurePresetControls(vm);
             RefreshClusterButtonContent();
+            RefreshSortChips();
 
             await _versionService.CheckVersionAsync();
         }
@@ -383,22 +456,5 @@ namespace ServerPickerX.Views
                 );
         }
 
-        private void DataGridPingColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            pingSortDirection = pingSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-            ServerList.Columns[3].CustomSortComparer = new PingComparer(pingSortDirection);
-        }
-
-        private void DataGridPacketLossColumn_HeaderPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-        {
-            packetLossSortDirection = packetLossSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-            ServerList.Columns[4].CustomSortComparer = new PacketLossComparer(packetLossSortDirection);
-        }
     }
 }

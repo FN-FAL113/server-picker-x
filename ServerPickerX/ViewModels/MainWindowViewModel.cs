@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia.Enums;
+using ServerPickerX.Comparers;
 using ServerPickerX.Extensions;
 using ServerPickerX.Models;
 using ServerPickerX.Services.DependencyInjection;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ServerPickerX.ViewModels
@@ -24,14 +26,23 @@ namespace ServerPickerX.ViewModels
     {
         public ObservableCollectionExtended<ServerModel> ServerModels { get; set; } = [];
 
-        // Property resolved through expression body that react to changes from another observable property
-        public ObservableCollectionExtended<ServerModel> FilteredServerModels =>
-             string.IsNullOrWhiteSpace(SearchText)
-                ? ServerModels
-                : new(ServerModels.Where(s =>
-                    s.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-                    s.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
-                ));
+        // Search filter and sort, recomputed when the search text or sort changes
+        public ObservableCollectionExtended<ServerModel> FilteredServerModels
+        {
+            get
+            {
+                IEnumerable<ServerModel> serverModels = ServerModels;
+
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    serverModels = serverModels.Where(serverModel =>
+                        serverModel.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                        serverModel.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                }
+
+                return new ObservableCollectionExtended<ServerModel>(SortServerModels(serverModels));
+            }
+        }
 
         public ObservableCollectionExtended<PresetModel> PresetItems { get; set; } = [];
 
@@ -66,10 +77,25 @@ namespace ServerPickerX.ViewModels
         [NotifyPropertyChangedFor(nameof(CanSelectPresets))]
         public bool hasPresets = false;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FilteredServerModels))]
+        public ServerSortField sortField = ServerSortField.Location;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(FilteredServerModels))]
+        public bool sortDescending = false;
+
         // Dependent/Computed prop for main UI buttons `IsEnabled` state
         public bool IsOperationAllowed => !PendingOperation && ServerModelsInitialized;
 
         public bool CanSelectPresets => IsOperationAllowed && HasPresets;
+
+        public int BlockedServerCount => ServerModels.Count(serverModel => serverModel.IsBlocked);
+
+        // Sort fallbacks so servers that have not answered land last
+        private const int UnknownPing = 99999;
+
+        private const int UnknownPacketLoss = 100;
 
         private readonly ILoggerService _loggerService;
         private readonly IMessageBoxService _messageBoxService;
@@ -151,6 +177,9 @@ namespace ServerPickerX.ViewModels
 
                 await _jsonSetting.SaveSettingsAsync();
 
+                // Both views key servers differently and the rules were just cleared
+                await _jsonSetting.SetBlockedServerKeysByGameModeAsync([]);
+
                 await ClearLastSelectedPresetByGameModeAsync();
             }
 
@@ -161,6 +190,11 @@ namespace ServerPickerX.ViewModels
 
             ServerModels.Clear();
             ServerModels.AddRange(serverModels);
+
+            ApplyStoredBlockedState();
+
+            OnPropertyChanged(nameof(FilteredServerModels));
+            OnPropertyChanged(nameof(BlockedServerCount));
 
             PingServers(serverModels);
         }
@@ -289,6 +323,19 @@ namespace ServerPickerX.ViewModels
             SelectedDataGridServerModel.PingServer();
         }
 
+        // Flips one server between blocked and allowed, called by a card click
+        public async Task<bool> ToggleServerBlockAsync(ServerModel? serverModel)
+        {
+            if (serverModel == null || !IsOperationAllowed)
+            {
+                return false;
+            }
+
+            ObservableCollection<ServerModel> serverModels = new() { serverModel };
+
+            return await PerformOperationAsync(!serverModel.IsBlocked, serverModels);
+        }
+
         [RelayCommand]
         public async Task<bool> BlockAllAsync()
         {
@@ -383,6 +430,15 @@ namespace ServerPickerX.ViewModels
 
                     await _loggerService.LogInfoAsync("Servers unblocked successfully");
                 }
+
+                foreach (ServerModel serverModel in serverModels)
+                {
+                    serverModel.IsBlocked = shouldBlock;
+                }
+
+                await PersistBlockedServerKeysAsync();
+
+                OnPropertyChanged(nameof(BlockedServerCount));
 
                 if (shouldClearLastSelectedPreset)
                 {
@@ -491,6 +547,50 @@ namespace ServerPickerX.ViewModels
                 );
 
             return presetsPruned;
+        }
+
+        private IEnumerable<ServerModel> SortServerModels(IEnumerable<ServerModel> serverModels)
+        {
+            return SortField switch
+            {
+                ServerSortField.Ping => SortDescending
+                    ? serverModels.OrderByDescending(serverModel => ParseMetric(serverModel.Ping, UnknownPing))
+                    : serverModels.OrderBy(serverModel => ParseMetric(serverModel.Ping, UnknownPing)),
+                ServerSortField.PacketLoss => SortDescending
+                    ? serverModels.OrderByDescending(serverModel => ParseMetric(serverModel.PacketLoss, UnknownPacketLoss))
+                    : serverModels.OrderBy(serverModel => ParseMetric(serverModel.PacketLoss, UnknownPacketLoss)),
+                _ => SortDescending
+                    ? serverModels.OrderByDescending(serverModel => serverModel.Description, NaturalStringComparer.OrdinalIgnoreCase)
+                    : serverModels.OrderBy(serverModel => serverModel.Description, NaturalStringComparer.OrdinalIgnoreCase),
+            };
+        }
+
+        private static int ParseMetric(string? rawValue, int fallback)
+        {
+            string digits = Regex.Replace(rawValue ?? string.Empty, @"[^\d]", string.Empty);
+
+            return int.TryParse(digits, out int value) ? value : fallback;
+        }
+
+        private void ApplyStoredBlockedState()
+        {
+            HashSet<string> blockedServerKeys = _jsonSetting
+                .GetBlockedServerKeysByGameMode()
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (ServerModel serverModel in ServerModels)
+            {
+                serverModel.IsBlocked = blockedServerKeys.Contains(GetServerKey(serverModel));
+            }
+        }
+
+        private async Task PersistBlockedServerKeysAsync()
+        {
+            await _jsonSetting.SetBlockedServerKeysByGameModeAsync(
+                ServerModels
+                    .Where(serverModel => serverModel.IsBlocked)
+                    .Select(serverModel => GetServerKey(serverModel))
+                );
         }
 
         public string GetServerKey(ServerModel serverModel, bool isClustered)
