@@ -220,7 +220,7 @@ namespace ServerPickerX.Views
             vm.SortPresets(_presetSortDirection.Value);
         }
 
-        private async void BlockedCheckBox_Click(object? sender, RoutedEventArgs e)
+        private async void AllowedCheckBox_Click(object? sender, RoutedEventArgs e)
         {
             if (DataContext is not PresetManagerWindowViewModel vm)
             {
@@ -228,6 +228,27 @@ namespace ServerPickerX.Views
             }
 
             await vm.PersistSelectedPresetServerKeysAsync();
+            ReapplyServerSortIfNeeded();
+        }
+
+        private async void AllowAllBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            await SetAllPresetServersAllowedAsync(true);
+        }
+
+        private async void AllowNoneBtn_Click(object? sender, RoutedEventArgs e)
+        {
+            await SetAllPresetServersAllowedAsync(false);
+        }
+
+        private async Task SetAllPresetServersAllowedAsync(bool isAllowed)
+        {
+            if (DataContext is not PresetManagerWindowViewModel vm)
+            {
+                return;
+            }
+
+            await vm.SetAllPresetServersAllowedAsync(isAllowed);
             ReapplyServerSortIfNeeded();
         }
 
@@ -254,11 +275,11 @@ namespace ServerPickerX.Views
 
             e.Handled = true;
 
-            bool shouldBlock = selectedItems.Any(serverItem => !serverItem.IsBlocked);
+            bool shouldAllow = selectedItems.Any(serverItem => !serverItem.IsAllowed);
 
             foreach (PresetServerModel serverItem in selectedItems)
             {
-                serverItem.IsBlocked = shouldBlock;
+                serverItem.IsAllowed = shouldAllow;
             }
 
             await vm.PersistSelectedPresetServerKeysAsync();
@@ -269,7 +290,7 @@ namespace ServerPickerX.Views
         {
             string? sortKey = e.Column.SortMemberPath switch
             {
-                "IsBlocked" => "Blocked",
+                "IsAllowed" => "Allowed",
                 "FlagSortKey" => "Flag",
                 "Name" => "ServerId",
                 "Description" => "ServerName",
@@ -281,7 +302,7 @@ namespace ServerPickerX.Views
                 return;
             }
 
-            ListSortDirection defaultDirection = sortKey == "Blocked"
+            ListSortDirection defaultDirection = sortKey == "Allowed"
                 ? ListSortDirection.Descending
                 : ListSortDirection.Ascending;
 
