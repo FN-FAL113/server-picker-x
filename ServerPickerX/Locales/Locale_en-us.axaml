@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">A preset named '{0}' already exists for this game. Overwrite it?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Changing between clustered and unclustered view will clear this preset's blocked entries. Continue?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Preset name cannot be empty.</x:String>
+  <x:String x:Key="ThemeLabel">Theme</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">Select app theme</x:String>
+  <x:String x:Key="ThemeSystem">System</x:String>
+  <x:String x:Key="ThemeLight">Light</x:String>
+  <x:String x:Key="ThemeDark">Dark</x:String>
 </ResourceDictionary>

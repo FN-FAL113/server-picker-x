@@ -1,0 +1,100 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Brushes are defined once per theme variant and consumed with
+         DynamicResource, so switching variant repaints without recreating views. -->
+    <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="SystemAccentColor">#D4D4D8</Color>
+            <Color x:Key="SystemAccentColorLight1">#E4E4E7</Color>
+            <Color x:Key="SystemAccentColorLight2">#F4F4F5</Color>
+            <Color x:Key="SystemAccentColorLight3">#FAFAFA</Color>
+            <Color x:Key="SystemAccentColorDark1">#A1A1AA</Color>
+            <Color x:Key="SystemAccentColorDark2">#71717A</Color>
+            <Color x:Key="SystemAccentColorDark3">#52525B</Color>
+
+            <Color x:Key="DataGridRowHoveredBackgroundColor">#1C1C20</Color>
+            <Color x:Key="DataGridRowSelectedBackgroundColor">#27272A</Color>
+            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#323236</Color>
+            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#27272A</Color>
+            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#323236</Color>
+
+            <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#A1A1AA" />
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#18181B" />
+            <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#27272A" />
+            <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#A1A1AA" />
+            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="#18181B" />
+            <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="#27272A" />
+            <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="#A1A1AA" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="#18181B" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#27272A" />
+            <SolidColorBrush x:Key="ComboBoxDropDownGlyphForegroundDisabled" Color="#A1A1AA" />
+
+            <SolidColorBrush x:Key="SpxWindowBrush" Color="#09090B" />
+            <SolidColorBrush x:Key="SpxChromeBrush" Color="#0F0F11" />
+            <SolidColorBrush x:Key="SpxSurfaceBrush" Color="#18181B" />
+
+            <SolidColorBrush x:Key="SpxBorderBrush" Color="#2E2E33" />
+            <SolidColorBrush x:Key="SpxBorderMutedBrush" Color="#1F1F24" />
+            <SolidColorBrush x:Key="SpxRingBrush" Color="#D4D4D8" />
+
+            <SolidColorBrush x:Key="SpxTextBrush" Color="#FAFAFA" />
+            <SolidColorBrush x:Key="SpxTextMutedBrush" Color="#A1A1AA" />
+            <SolidColorBrush x:Key="SpxTextFaintBrush" Color="#6B6B76" />
+
+            <SolidColorBrush x:Key="SpxControlBrush" Color="#18181B" />
+            <SolidColorBrush x:Key="SpxControlHoverBrush" Color="#27272A" />
+            <SolidColorBrush x:Key="SpxControlPressedBrush" Color="#323236" />
+            <SolidColorBrush x:Key="SpxControlDisabledBrush" Color="#131316" />
+
+            <SolidColorBrush x:Key="SpxBadBrush" Color="#DB6E66" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="SystemAccentColor">#18181B</Color>
+            <Color x:Key="SystemAccentColorLight1">#3F3F46</Color>
+            <Color x:Key="SystemAccentColorLight2">#52525B</Color>
+            <Color x:Key="SystemAccentColorLight3">#71717A</Color>
+            <Color x:Key="SystemAccentColorDark1">#111113</Color>
+            <Color x:Key="SystemAccentColorDark2">#09090B</Color>
+            <Color x:Key="SystemAccentColorDark3">#000000</Color>
+
+            <Color x:Key="DataGridRowHoveredBackgroundColor">#EDEDEE</Color>
+            <Color x:Key="DataGridRowSelectedBackgroundColor">#E4E4E7</Color>
+            <Color x:Key="DataGridRowSelectedHoveredBackgroundColor">#D4D4D8</Color>
+            <Color x:Key="DataGridRowSelectedUnfocusedBackgroundColor">#E4E4E7</Color>
+            <Color x:Key="DataGridRowSelectedHoveredUnfocusedBackgroundColor">#D4D4D8</Color>
+
+            <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#71717A" />
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#71717A" />
+            <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="#71717A" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="ComboBoxDropDownGlyphForegroundDisabled" Color="#71717A" />
+
+            <SolidColorBrush x:Key="SpxWindowBrush" Color="#F4F4F5" />
+            <SolidColorBrush x:Key="SpxChromeBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SpxSurfaceBrush" Color="#FFFFFF" />
+
+            <SolidColorBrush x:Key="SpxBorderBrush" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="SpxBorderMutedBrush" Color="#EDEDEE" />
+            <SolidColorBrush x:Key="SpxRingBrush" Color="#18181B" />
+
+            <SolidColorBrush x:Key="SpxTextBrush" Color="#09090B" />
+            <SolidColorBrush x:Key="SpxTextMutedBrush" Color="#71717A" />
+            <SolidColorBrush x:Key="SpxTextFaintBrush" Color="#8A8A93" />
+
+            <SolidColorBrush x:Key="SpxControlBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SpxControlHoverBrush" Color="#F4F4F5" />
+            <SolidColorBrush x:Key="SpxControlPressedBrush" Color="#E4E4E7" />
+            <SolidColorBrush x:Key="SpxControlDisabledBrush" Color="#EFEFF1" />
+
+            <SolidColorBrush x:Key="SpxBadBrush" Color="#B24B42" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

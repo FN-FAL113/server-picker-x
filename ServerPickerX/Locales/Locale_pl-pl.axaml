@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Preset o nazwie '{0}' już istnieje dla tej gry. Nadpisać?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Przełączenie między widokiem grupowanym i niegrupowanym wyczyści zablokowane wpisy tego presetu. Kontynuować?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Nazwa presetu nie może być pusta.</x:String>
+  <x:String x:Key="ThemeLabel">Motyw</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">Wybierz motyw aplikacji</x:String>
+  <x:String x:Key="ThemeSystem">Systemowy</x:String>
+  <x:String x:Key="ThemeLight">Jasny</x:String>
+  <x:String x:Key="ThemeDark">Ciemny</x:String>
 </ResourceDictionary>

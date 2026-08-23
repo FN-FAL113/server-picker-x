@@ -11,6 +11,8 @@
     <Application.Resources>
 		<ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+				<!-- Locale swapping only removes dictionaries with a LanguageCode key -->
+				<ResourceInclude Source="/Styles/Palette.axaml" />
 				<ResourceInclude Source="/Locales/Locale_en-us.axaml" />
 				<ResourceInclude Source="/Locales/Locale_es-es.axaml" />
 				<ResourceInclude Source="/Locales/Locale_zh-cn.axaml" />
@@ -27,6 +29,7 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="/Styles/BaseStyle.axaml" />
         <StyleInclude Source="/Styles/TitleBarButtonStyle.axaml" />
         <StyleInclude Source="/Styles/MainButtonStyle.axaml" />
         <StyleInclude Source="/Styles/TextBoxStyle.axaml" />

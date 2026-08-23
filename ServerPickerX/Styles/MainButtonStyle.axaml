@@ -1,38 +1,86 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20" Background="Gray">
-            <!-- Add Controls for Previewer Here -->
-            <StackPanel Orientation="Horizontal" Spacing="12">
-				<Button Classes="main-btn" Padding="20">Block All</Button>
-                <Button Classes="main-btn" Padding="20">Block Selected</Button>
-                <Button Classes="main-btn" Padding="20">Unblock All</Button>
-                <Button Classes="main-btn" Padding="20">Unblock Selected</Button>
+        <Border Padding="20" Background="#09090B">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="main-btn" Content="Block All" />
+                <Button Classes="main-btn" Content="Unblock All" />
+                <Button Classes="icon-btn" Content="S" />
             </StackPanel>
         </Border>
     </Design.PreviewWith>
 
-    <!-- Add Styles Here -->
     <Style Selector="Button.main-btn">
-		<Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background">
-            <Setter.Value>
-				<SolidColorBrush Color="White" Opacity="0.25" />
-            </Setter.Value>
-        </Setter> 
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="BorderThickness" Value="6"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
 
-        <Style Selector="^:pointerover /template/ ContentPresenter">
-			<Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background">
-            <Setter.Value>
-				<SolidColorBrush Color="White" Opacity="0.12" />
-            </Setter.Value>
-        </Setter> 
+        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.12" Easing="CubicEaseOut" />
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlHoverBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxTextFaintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlPressedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxTextFaintBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        </Style>
+        <!-- Buttons disable for the length of a firewall operation. Keep the fill
+             and only dim the label so a quick toggle does not read as text vanishing. -->
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderMutedBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        </Style>
+    </Style>
+
+    <Style Selector="Button.icon-btn">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="MinWidth" Value="30" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+
+        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12" Easing="CubicEaseOut" />
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlHoverBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SpxControlPressedBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
         </Style>
     </Style>
 </Styles>

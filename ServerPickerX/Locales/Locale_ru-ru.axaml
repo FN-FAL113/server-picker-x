@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Пресет с именем '{0}' уже существует для этой игры. Перезаписать его?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Переключение между сгруппированным и несгруппированным видом очистит заблокированные записи этого пресета. Продолжить?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Имя пресета не может быть пустым.</x:String>
+  <x:String x:Key="ThemeLabel">Тема</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">Выбрать тему приложения</x:String>
+  <x:String x:Key="ThemeSystem">Системная</x:String>
+  <x:String x:Key="ThemeLight">Светлая</x:String>
+  <x:String x:Key="ThemeDark">Тёмная</x:String>
 </ResourceDictionary>

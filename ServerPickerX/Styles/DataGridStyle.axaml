@@ -1,38 +1,46 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Design.PreviewWith>
-    <Border Padding="20">
-      <!-- Add Controls for Previewer Here -->
-    </Border>
+    <Border Padding="20" Background="#18181B" Height="160" />
   </Design.PreviewWith>
 
     <Style Selector="DataGrid.preset-grid">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CanUserResizeColumns" Value="False" />
         <Setter Property="CanUserReorderColumns" Value="False" />
         <Setter Property="CanUserSortColumns" Value="False" />
-        <Setter Property="GridLinesVisibility" Value="All" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource SpxBorderBrush}" />
         <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="FontSize" Value="13" />
     </Style>
     <Style Selector="DataGrid.preset-grid DataGridColumnHeader">
-        <Setter Property="Background" Value="#1A1D40" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource SpxChromeBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="SeparatorBrush" Value="Transparent" />
     </Style>
     <Style Selector="DataGrid.preset-grid DataGridCell">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector="DataGrid.preset-grid TextBox">
-        <Setter Property="Background" Value="#1A1D40" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="BorderBrush" Value="#00d9ff" />
-        <Setter Property="CaretBrush" Value="White" />
-        <Setter Property="SelectionBrush" Value="#575cd4" />
+        <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxRingBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource SpxControlPressedBrush}" />
+        <Setter Property="CornerRadius" Value="2" />
     </Style>
     <Style Selector="CheckBox.preset-toggle">
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>

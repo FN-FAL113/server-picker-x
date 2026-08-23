@@ -26,8 +26,8 @@
     </Window.Resources>
 
     <Border
-        Background="#373B78"
-        BorderBrush="#575cd4"
+        Background="{DynamicResource SpxWindowBrush}"
+        BorderBrush="{DynamicResource SpxBorderBrush}"
         BorderThickness="1.0">
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
@@ -38,14 +38,14 @@
             </Grid.RowDefinitions>
 
             <!-- Title Bar -->
-            <Grid Grid.Row="0" x:Name="TitleBar" Background="#373B78" PointerPressed="TitleBar_PointerPressed" >
+            <Grid Grid.Row="0" x:Name="TitleBar" Background="{DynamicResource SpxChromeBrush}" PointerPressed="TitleBar_PointerPressed" >
                 <ProgressBar 
                     Margin="0,-28,0,0" 
                     Height="6"
                     Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Width}"
                     IsIndeterminate="True"
                     IsVisible="{Binding ShowProgressBar}"/>
-                <TextBlock VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White" FontWeight="Bold" FontSize="14">
+                <TextBlock Classes="window-title" Margin="10,0,0,0">
                     Server Picker X
                 </TextBlock>
                 <userControls:TitleBarButtons/>
@@ -125,16 +125,15 @@
                                 MinWidth="146"
                                 Height="32"
                                 VerticalAlignment="Center"
-                                BorderBrush="#575cd4"
+                                BorderBrush="{DynamicResource SpxBorderBrush}"
                                 BorderThickness="1"
-                                Background="#804a4e8a"
-                                CornerRadius="2">
+                                Background="{DynamicResource SpxControlBrush}"
+                                CornerRadius="6">
                                 <TextBlock
                                     Margin="12,0,12,0"
                                     VerticalAlignment="Center"
                                     FontSize="12"
-                                    Foreground="White"
-                                    Opacity="0.55"
+                                    Foreground="{DynamicResource SpxTextFaintBrush}"
                                     TextTrimming="CharacterEllipsis"
                                     Text="{DynamicResource NoPresets}" />
                             </Border>
@@ -150,7 +149,6 @@
                             ToolTip.ShowDelay="20"
                             Click="ClusterUnclusterBtn_Click"
                             VerticalAlignment="Center"
-                            Foreground="White"
                             Margin="0,0,8,0"/>
                         <Button
                             x:Name="PresetsBtn"
@@ -161,7 +159,6 @@
                             ToolTip.ShowDelay="20"
                             Click="PresetsBtn_Click"
                             VerticalAlignment="Center"
-                            Foreground="White"
                             Margin="0,0,8,0"/>
                         <Button 
                             x:Name="RefreshBtn"
@@ -173,7 +170,6 @@
                             ToolTip.Tip="{DynamicResource RefreshToolTip}"
                             ToolTip.ShowDelay="20"
                             VerticalAlignment="Center"
-                            Foreground="White"
                             Margin="0,0,8,0"/>
                     </StackPanel>
                 </Grid>
@@ -189,7 +185,9 @@
                          CanUserResizeColumns="False"
                          CanUserSortColumns="True"
                          GridLinesVisibility="All"
-                         Foreground="White"
+                         HorizontalGridLinesBrush="{DynamicResource SpxBorderBrush}"
+                         VerticalGridLinesBrush="{DynamicResource SpxBorderBrush}"
+                         Foreground="{DynamicResource SpxTextBrush}"
                          Background="Transparent"
                          DoubleTapped="DataGrid_DoubleTapped">
                          <DataGrid.Columns>
@@ -234,7 +232,7 @@
                             <Style Selector="DataGridColumnHeader">
                                 <Setter Property="FontWeight" Value="Bold"/>
                                 <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
                             </Style>
                         </DataGrid.Styles>
                     </DataGrid>

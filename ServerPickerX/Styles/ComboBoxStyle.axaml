@@ -1,40 +1,61 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20" Background="Gray">
-            <!-- Add Controls for Previewer Here -->
-            <StackPanel Orientation="Horizontal" Spacing="12">
-				<ComboBox Classes="game-combobox" SelectedIndex="0">
-					<ComboBoxItem>Counter Strike 2</ComboBoxItem>
-					<ComboBoxItem>Deadlock</ComboBoxItem>
-                </ComboBox>
-            </StackPanel>
+        <Border Padding="20" Background="#09090B">
+            <ComboBox Classes="game-combobox" Width="170" SelectedIndex="0">
+                <ComboBoxItem>Counter Strike 2</ComboBoxItem>
+                <ComboBoxItem>Deadlock</ComboBoxItem>
+            </ComboBox>
         </Border>
     </Design.PreviewWith>
 
-    <!-- Add Styles Here -->
     <Style Selector="ComboBox.game-combobox">
         <Style.Resources>
-			<SolidColorBrush x:Key="ComboBoxDropDownGlyphForeground">White</SolidColorBrush>
+            <SolidColorBrush x:Key="ComboBoxDropDownGlyphForeground" Color="#A1A1AA" />
         </Style.Resources>
-        <Setter Property="BorderBrush" Value="#575cd4"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background">
-            <Setter.Value>
-				<SolidColorBrush Color="#4a4e8a" Opacity="0.5" />
-            </Setter.Value>
-        </Setter> 
-        <Setter Property="FontSize" Value="14"/>
-
-        <!-- set style when hovered or focused -->
-        <Style Selector="^:focus /template/ Border#PART_BorderElement">
-	        <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
-            <Setter Property="Background" Value="{TemplateBinding Background}"/>
-        </Style>
+        <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource SpxTextFaintBrush}" />
 
         <Style Selector="^:pointerover /template/ Border#PART_BorderElement">
-            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
-            <Setter Property="Background" Value="{TemplateBinding Background}"/>
+            <Setter Property="Background" Value="{DynamicResource SpxControlHoverBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
         </Style>
+
+        <Style Selector="^:pressed /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource SpxControlPressedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxRingBrush}" />
+        </Style>
+
+        <Style Selector="^:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxRingBrush}" />
+        </Style>
+
+        <Style Selector="^:disabled /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderMutedBrush}" />
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
+        </Style>
+    </Style>
+
+    <Style Selector="ComboBox.game-combobox /template/ Border#PopupBorder">
+        <Setter Property="Background" Value="{DynamicResource SpxSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style Selector="ComboBox.game-combobox ComboBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="CornerRadius" Value="0" />
     </Style>
 </Styles>

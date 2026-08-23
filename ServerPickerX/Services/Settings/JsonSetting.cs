@@ -29,6 +29,9 @@ namespace ServerPickerX.Settings
 
         public virtual string language { set; get; } = "English | en-us";
 
+        // "System" follows the OS setting, "Light" and "Dark" pin it
+        public virtual string theme { set; get; } = "System";
+
         public virtual Dictionary<string, string> server_revisions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         public virtual bool is_clustered { get; set; } = false;
@@ -89,6 +92,7 @@ namespace ServerPickerX.Settings
 
                 game_mode = localSettings.game_mode;
                 language = localSettings.language;
+                theme = string.IsNullOrWhiteSpace(localSettings.theme) ? "System" : localSettings.theme;
                 server_revisions = localSettings.server_revisions != null
                     ? new Dictionary<string, string>(localSettings.server_revisions, StringComparer.OrdinalIgnoreCase)
                     : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -185,6 +189,13 @@ namespace ServerPickerX.Settings
         public async Task SetLanguageAsync(string language)
         {
             this.language = language;
+
+            await this.SaveSettingsAsync();
+        }
+
+        public async Task SetThemeAsync(string theme)
+        {
+            this.theme = theme;
 
             await this.SaveSettingsAsync();
         }

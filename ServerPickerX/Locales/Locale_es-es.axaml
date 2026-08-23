@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ya existe un preset llamado '{0}' para este juego. ¿Sobrescribirlo?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Cambiar entre la vista agrupada y no agrupada borrará las entradas bloqueadas de este preajuste. ¿Continuar?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">El nombre del preset no puede estar vacío.</x:String>
+  <x:String x:Key="ThemeLabel">Tema</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">Seleccionar tema de la aplicación</x:String>
+  <x:String x:Key="ThemeSystem">Sistema</x:String>
+  <x:String x:Key="ThemeLight">Claro</x:String>
+  <x:String x:Key="ThemeDark">Oscuro</x:String>
 </ResourceDictionary>

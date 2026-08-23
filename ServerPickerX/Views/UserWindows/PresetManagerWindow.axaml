@@ -22,8 +22,8 @@
     </Window.Resources>
 
     <Border
-        Background="#373B78"
-        BorderBrush="#575cd4"
+        Background="{DynamicResource SpxWindowBrush}"
+        BorderBrush="{DynamicResource SpxBorderBrush}"
         BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
@@ -32,14 +32,11 @@
             </Grid.RowDefinitions>
 
             <Grid x:Name="TitleBar"
-                  Background="#373B78"
+                  Background="{DynamicResource SpxChromeBrush}"
                   PointerPressed="TitleBar_PointerPressed">
                 <TextBlock
-                    VerticalAlignment="Center"
+                    Classes="window-title"
                     Margin="10,0,0,0"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    FontSize="14"
                     Text="{Binding WindowTitle}" />
                 <userControls:TitleBarButtons />
             </Grid>
@@ -53,10 +50,10 @@
 
                 <Border
                     Grid.Column="0"
-                    BorderBrush="#575cd4"
+                    BorderBrush="{DynamicResource SpxBorderBrush}"
                     BorderThickness="1"
-                    Background="#4a4e8a"
-                    Opacity="0.95">
+                    Background="{DynamicResource SpxSurfaceBrush}"
+                    CornerRadius="8">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -71,8 +68,7 @@
                                 Classes="main-btn"
                                 Content="{DynamicResource AddPreset}"
                                 ToolTip.Tip="{DynamicResource AddPresetToolTip}"
-                                Click="AddBtn_Click"
-                                Foreground="White" />
+                                Click="AddBtn_Click" />
                             <Button
                                 Grid.Column="2"
                                 HorizontalAlignment="Stretch"
@@ -81,8 +77,7 @@
                                 Content="{DynamicResource DeletePreset}"
                                 ToolTip.Tip="{DynamicResource DeletePresetToolTip}"
                                 IsEnabled="{Binding CanDelete}"
-                                Click="DeleteBtn_Click"
-                                Foreground="White" />
+                                Click="DeleteBtn_Click" />
                             <Button
                                 Grid.Column="4"
                                 HorizontalAlignment="Stretch"
@@ -91,8 +86,7 @@
                                 Content="{DynamicResource ApplyPreset}"
                                 ToolTip.Tip="{DynamicResource ApplyPresetToolTip}"
                                 IsEnabled="{Binding CanApply}"
-                                Click="ApplyBtn_Click"
-                                Foreground="White" />
+                                Click="ApplyBtn_Click" />
                         </Grid>
 
                         <DataGrid
@@ -136,9 +130,9 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center"
                                     Spacing="4">
-                                    <Ellipse Width="2" Height="2" Fill="White" />
-                                    <Ellipse Width="2" Height="2" Fill="White" />
-                                    <Ellipse Width="2" Height="2" Fill="White" />
+                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
+                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
+                                    <Ellipse Width="2" Height="2" Fill="{DynamicResource SpxTextFaintBrush}" />
                                 </StackPanel>
                             </Grid>
                         </ControlTemplate>
@@ -147,10 +141,10 @@
 
                 <Border
                     Grid.Column="2"
-                    BorderBrush="#575cd4"
+                    BorderBrush="{DynamicResource SpxBorderBrush}"
                     BorderThickness="1"
-                    Background="#4a4e8a"
-                    Opacity="0.95">
+                    Background="{DynamicResource SpxSurfaceBrush}"
+                    CornerRadius="8">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -159,7 +153,7 @@
 
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBlock
-                                Foreground="White"
+                                Foreground="{DynamicResource SpxTextBrush}"
                                 FontSize="14"
                                 FontWeight="SemiBold"
                                 VerticalAlignment="Center"
@@ -171,8 +165,7 @@
                                 ToolTip.Tip="{DynamicResource ClusterUnclusterToolTip}"
                                 IsEnabled="{Binding CanToggleClusterMode}"
                                 Click="ClusterToggleBtn_Click"
-                                HorizontalAlignment="Right"
-                                Foreground="White" />
+                                HorizontalAlignment="Right" />
                         </Grid>
 
                         <DataGrid

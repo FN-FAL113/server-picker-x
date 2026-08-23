@@ -38,8 +38,8 @@
 
     <Border 
         Classes="wBorder" 
-        Background="#373B78"
-        BorderBrush="#575cd4"
+        Background="{DynamicResource SpxWindowBrush}"
+        BorderBrush="{DynamicResource SpxBorderBrush}"
         BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
@@ -51,14 +51,11 @@
 
             <!-- Title Bar -->
             <Grid x:Name="TitleBar" 
-                  Background="#373B78" 
+                  Background="{DynamicResource SpxChromeBrush}" 
                   PointerPressed="TitleBar_PointerPressed">
                 <TextBlock 
-                    VerticalAlignment="Center" 
-                    Margin="10,0,0,0" 
-                    Foreground="White" 
-                    FontWeight="Bold" 
-                    FontSize="14">
+                    Classes="window-title"
+                    Margin="10,0,0,0">
                     Settings
                 </TextBlock>
                 <userControls:TitleBarButtons/>
@@ -73,13 +70,31 @@
 
                 <!-- Main settings -->
                 <Grid>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
                         <CheckBox 
                             x:Name="VersionCheckerSetting"
-                            Foreground="White"
                             IsChecked="{Binding VersionCheckOnStartup}"
                             Command="{Binding VersionCheckerToggleCommand}"
                             Content="{DynamicResource CheckForNewVersion}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock 
+                                Classes="muted"
+                                VerticalAlignment="Center"
+                                Text="{DynamicResource ThemeLabel}"/>
+                            <ComboBox 
+                                x:Name="ThemeComboBox"
+                                Classes="game-combobox"
+                                Width="120"
+                                Height="32"
+                                SelectedIndex="0"
+                                SelectionChanged="ThemeComboBox_SelectionChanged"
+                                ToolTip.Tip="{DynamicResource ThemeComboBoxToolTip}"
+                                ToolTip.ShowDelay="20">
+                                <ComboBoxItem Content="{DynamicResource ThemeSystem}"/>
+                                <ComboBoxItem Content="{DynamicResource ThemeLight}"/>
+                                <ComboBoxItem Content="{DynamicResource ThemeDark}"/>
+                            </ComboBox>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
 
@@ -128,7 +143,7 @@
                     Canvas.Right="2"
                     ZIndex="-2"
                     Text="Version: " 
-                    Foreground="White"
+                    Foreground="{DynamicResource SpxTextFaintBrush}"
                     FontSize="10"/>
             </Canvas>
         </Grid>

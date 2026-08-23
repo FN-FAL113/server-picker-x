@@ -47,4 +47,9 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">此游戏已存在名为“{0}”的预设。要覆盖吗？</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">在集群视图和非集群视图之间切换将清除此预设中已阻止的条目。是否继续？</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">预设名称不能为空。</x:String>
+  <x:String x:Key="ThemeLabel">主题</x:String>
+  <x:String x:Key="ThemeComboBoxToolTip">选择应用主题</x:String>
+  <x:String x:Key="ThemeSystem">跟随系统</x:String>
+  <x:String x:Key="ThemeLight">浅色</x:String>
+  <x:String x:Key="ThemeDark">深色</x:String>
 </ResourceDictionary>

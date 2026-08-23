@@ -8,6 +8,7 @@ using ServerPickerX.Services.Localizations;
 using ServerPickerX.Services.Loggers;
 using ServerPickerX.Services.MessageBoxes;
 using ServerPickerX.Services.Servers;
+using ServerPickerX.Services.Themes;
 using ServerPickerX.Services.Versions;
 using ServerPickerX.Settings;
 using ServerPickerX.ViewModels;
@@ -171,6 +172,10 @@ namespace ServerPickerX.Views
         public async Task InitializeApp()
         {
             await _jsonSetting.LoadSettingsAsync();
+
+            ThemeService.Apply(_jsonSetting.theme);
+
+            FooterButtons.Instance?.RefreshThemeButton(_jsonSetting.theme);
 
             await SetLanguage();
 

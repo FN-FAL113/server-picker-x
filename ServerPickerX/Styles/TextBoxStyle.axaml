@@ -1,35 +1,44 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20" Background="Gray">
-            <!-- Add Controls for Previewer Here -->
-            <StackPanel Orientation="Horizontal" Spacing="12">
-				<TextBox Classes="search-textbox" Width="128" Padding="20" Text="Test"/>
-            </StackPanel>
+        <Border Padding="20" Background="#09090B">
+            <TextBox Classes="search-textbox" Width="200" Watermark="Search servers" />
         </Border>
     </Design.PreviewWith>
 
-    <!-- Add Styles Here -->
-    
     <Style Selector="TextBox.search-textbox">
-        <Setter Property="BorderBrush" Value="#575cd4"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background">
-            <Setter.Value>
-				<SolidColorBrush Color="#4a4e8a" Opacity="0.5" />
-            </Setter.Value>
-        </Setter> 
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource SpxControlPressedBrush}" />
+        <Setter Property="SelectionForegroundBrush" Value="{DynamicResource SpxTextBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
 
-        <!-- set style when hovered or focused -->
-        <Style Selector="^:focus /template/ Border#PART_BorderElement">
-	        <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
-            <Setter Property="Background" Value="{TemplateBinding Background}"/>
+        <Style Selector="^ /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextFaintBrush}" />
         </Style>
 
         <Style Selector="^:pointerover /template/ Border#PART_BorderElement">
-            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"/> 
-            <Setter Property="Background" Value="{TemplateBinding Background}"/>
+            <Setter Property="Background" Value="{DynamicResource SpxControlHoverBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderBrush}" />
+        </Style>
+
+        <Style Selector="^:focus /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxRingBrush}" />
+        </Style>
+
+        <Style Selector="^:disabled /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource SpxControlBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SpxBorderMutedBrush}" />
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource SpxTextMutedBrush}" />
         </Style>
     </Style>
 </Styles>
