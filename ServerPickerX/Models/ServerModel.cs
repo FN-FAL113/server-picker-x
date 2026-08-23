@@ -97,7 +97,7 @@ namespace ServerPickerX.Models
                     catch (Exception ex) when (ex is OperationCanceledException) { }
                 }
 
-                double lossPercent = (1 - (successCount / probeCount)) * 100;
+                double lossPercent = (1 - ((double)successCount / probeCount)) * 100;
                 Ping = successCount > 0 ? finalBestRtt + "ms" : "";
                 Status = successCount > 0 ? "✅" : "❌";
                 PacketLoss = $"{lossPercent:F0}%";
