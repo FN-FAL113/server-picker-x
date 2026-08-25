@@ -73,13 +73,31 @@
 
                 <!-- Main settings -->
                 <Grid>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12">
                         <CheckBox 
                             x:Name="VersionCheckerSetting"
                             Foreground="White"
                             IsChecked="{Binding VersionCheckOnStartup}"
                             Command="{Binding VersionCheckerToggleCommand}"
                             Content="{DynamicResource CheckForNewVersion}"/>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="{DynamicResource RenderMode}" VerticalAlignment="Center" Foreground="White"/>
+                            <ComboBox 
+                                x:Name="RenderModeComboBox"
+                                Classes="game-combobox"
+                                Width="168" 
+                                Height="32"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                MinWidth="100"
+                                MaxWidth="200"
+                                SelectedIndex="0"
+                                SelectionChanged="RenderModeComboBox_SelectionChanged"
+                                ToolTip.Tip="{DynamicResource RenderModeToolTip}"
+                                ToolTip.ShowDelay="20">
+                             </ComboBox>
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
 

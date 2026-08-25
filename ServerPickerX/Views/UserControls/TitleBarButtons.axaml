@@ -14,14 +14,16 @@
             i:Attached.Icon="mdi-window-minimize" 
             Width="32"
             Height="32"
-            Click="MinimizeBtn_Click" />
+            Click="MinimizeBtn_Click" 
+            Foreground="White"/>
         <Button
             Name="MaximizeBtn"
             Classes="titlebar-btn maximize-btn"
             i:Attached.Icon="mdi-window-maximize" 
             Width="32"
             Height="32"
-            Click="MaximizeBtn_Click" />
+            Click="MaximizeBtn_Click" 
+            Foreground="White"/>
         <Button
             Name="CloseBtn"
             Classes="titlebar-btn close-btn"
@@ -29,6 +31,7 @@
             FontSize="18"
             Width="32"
             Height="32"
-            Click="CloseBtn_Click" />
+            Click="CloseBtn_Click" 
+            Foreground="White"/>
     </StackPanel>
 </UserControl>

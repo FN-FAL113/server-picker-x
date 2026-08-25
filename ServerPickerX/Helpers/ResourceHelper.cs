@@ -1,15 +1,23 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System;
+using System.IO;
 using System.Reflection;
 
 namespace ServerPickerX.Helpers
 {
     public class ResourceHelper
     {
-        public static Bitmap LoadImageFromResource(string path)
+        public static Bitmap? LoadImageFromResource(string path)
         {
-            return new Bitmap(AssetLoader.Open(CreateResourceUriFromPath(path)));
+            try
+            {
+                return new Bitmap(AssetLoader.Open(CreateResourceUriFromPath(path)));
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         // For avalonia resources, embedded resources may have different URI

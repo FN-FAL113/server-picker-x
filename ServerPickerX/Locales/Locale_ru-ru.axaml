@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Пресет с именем '{0}' уже существует для этой игры. Перезаписать его?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Переключение между сгруппированным и несгруппированным видом очистит заблокированные записи этого пресета. Продолжить?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Имя пресета не может быть пустым.</x:String>
+  <x:String x:Key="RenderMode">Режим отрисовки:</x:String>
+  <x:String x:Key="RenderModeToolTip">Измените способ отрисовки приложения на экране, используя другой графический конвейер.</x:String>
+  <x:String x:Key="RenderModeDialogue">Перезапустите приложение, чтобы изменения вступили в силу.</x:String>
 </ResourceDictionary>

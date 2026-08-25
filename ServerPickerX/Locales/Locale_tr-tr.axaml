@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Bu oyun için '{0}' adında bir ön ayar zaten var. Üzerine yazılsın mı?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Kümelenmiş ve kümelenmemiş görünüm arasında geçiş yapmak bu ön ayarın engellenen girdilerini temizleyecek. Devam edilsin mi?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Ön ayar adı boş olamaz.</x:String>
+  <x:String x:Key="RenderMode">Oluşturma Modu:</x:String>
+  <x:String x:Key="RenderModeToolTip">Farklı bir grafik işlem hattı kullanarak uygulamanın ekranda oluşturulma şeklini değiştirin.</x:String>
+  <x:String x:Key="RenderModeDialogue">Değişikliklerin geçerli olması için uygulamayı yeniden başlatın.</x:String>
 </ResourceDictionary>

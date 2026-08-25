@@ -27,6 +27,8 @@ namespace ServerPickerX.Settings
 
         public virtual string game_mode { set; get; } = "Counter Strike 2";
 
+        public virtual string render_mode { set; get; } = "Software (CPU)";
+
         public virtual string language { set; get; } = "English | en-us";
 
         public virtual Dictionary<string, string> server_revisions { get; set; } = new(StringComparer.OrdinalIgnoreCase);
@@ -88,6 +90,7 @@ namespace ServerPickerX.Settings
                 JsonSetting localSettings = await JsonSerializer.DeserializeAsync<JsonSetting>(settingsFile, serializerOptions) ?? this;
 
                 game_mode = localSettings.game_mode;
+                render_mode = localSettings.render_mode;
                 language = localSettings.language;
                 server_revisions = localSettings.server_revisions != null
                     ? new Dictionary<string, string>(localSettings.server_revisions, StringComparer.OrdinalIgnoreCase)
@@ -178,6 +181,13 @@ namespace ServerPickerX.Settings
         public async Task SetGameModeAsync(string gameMode)
         {
             this.game_mode = gameMode;
+
+            await this.SaveSettingsAsync();
+        }
+
+        public async Task SetRenderModeAsync(string renderMode)
+        {
+            this.render_mode = renderMode;
 
             await this.SaveSettingsAsync();
         }

@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">En förinställning med namnet '{0}' finns redan för det här spelet. Skriva över den?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Att växla mellan grupperad och ogrupperad vy kommer att rensa det här förinställets blockerade poster. Fortsätta?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Namnet på förinställningen får inte vara tomt.</x:String>
+  <x:String x:Key="RenderMode">Renderingsläge:</x:String>
+  <x:String x:Key="RenderModeToolTip">Ändra hur appen renderas på skärmen genom att använda en annan grafikpipeline.</x:String>
+  <x:String x:Key="RenderModeDialogue">Starta om programmet för att ändringarna ska träda i kraft.</x:String>
 </ResourceDictionary>
