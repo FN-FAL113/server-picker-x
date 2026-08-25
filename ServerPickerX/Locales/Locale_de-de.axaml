@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ein Preset mit dem Namen '{0}' existiert für dieses Spiel bereits. Überschreiben?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Das Wechseln zwischen gruppierter und entgruppierter Ansicht löscht die blockierten Einträge dieses Presets. Fortfahren?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Der Preset-Name darf nicht leer sein.</x:String>
+  <x:String x:Key="RenderMode">Render-Modus:</x:String>
+  <x:String x:Key="RenderModeToolTip">Ändern Sie die Art und Weise, wie die App auf dem Bildschirm gerendert wird, indem Sie eine andere Grafik-Pipeline verwenden.</x:String>
+  <x:String x:Key="RenderModeDialogue">Starten Sie die Anwendung neu, damit die Änderungen wirksam werden.</x:String>
 </ResourceDictionary>

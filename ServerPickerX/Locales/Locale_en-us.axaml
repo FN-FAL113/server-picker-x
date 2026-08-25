@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">A preset named '{0}' already exists for this game. Overwrite it?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Changing between clustered and unclustered view will clear this preset's blocked entries. Continue?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">Preset name cannot be empty.</x:String>
+  <x:String x:Key="RenderMode">Render Mode:</x:String>
+  <x:String x:Key="RenderModeToolTip">Change how the app is rendered on the screen by using different graphics pipeline.</x:String>
+  <x:String x:Key="RenderModeDialogue">Restart the application for the changes to take effect.</x:String>
 </ResourceDictionary>

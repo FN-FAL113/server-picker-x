@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">此游戏已存在名为“{0}”的预设。要覆盖吗？</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">在集群视图和非集群视图之间切换将清除此预设中已阻止的条目。是否继续？</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">预设名称不能为空。</x:String>
+  <x:String x:Key="RenderMode">渲染模式：</x:String>
+  <x:String x:Key="RenderModeToolTip">通过使用不同的图形管线，改变应用程序在屏幕上的渲染方式。</x:String>
+  <x:String x:Key="RenderModeDialogue">重新启动应用程序以使更改生效。</x:String>
 </ResourceDictionary>

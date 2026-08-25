@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">このゲームには '{0}' という名前のプリセットが既にあります。上書きしますか？</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">クラスタ表示と非クラスタ表示を切り替えると、このプリセットのブロック済み項目は消去されます。続行しますか？</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">プリセット名は空にできません。</x:String>
+  <x:String x:Key="RenderMode">レンダリングモード:</x:String>
+  <x:String x:Key="RenderModeToolTip">異なるグラフィックスパイプラインを使用して、画面上でのアプリの描画方法を変更します。</x:String>
+  <x:String x:Key="RenderModeDialogue">変更を適用するには、アプリケーションを再起動してください。</x:String>
 </ResourceDictionary>

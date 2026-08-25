@@ -47,4 +47,7 @@
   <x:String x:Key="PresetOverwriteConfirmDialogue">Ya existe un preset llamado '{0}' para este juego. ¿Sobrescribirlo?</x:String>
   <x:String x:Key="PresetChangeViewModeConfirmDialogue">Cambiar entre la vista agrupada y no agrupada borrará las entradas bloqueadas de este preajuste. ¿Continuar?</x:String>
   <x:String x:Key="PresetNameRequiredDialogue">El nombre del preset no puede estar vacío.</x:String>
+  <x:String x:Key="RenderMode">Modo de renderizado:</x:String>
+  <x:String x:Key="RenderModeToolTip">Modifica la forma en que se renderiza la aplicación en pantalla mediante el uso de una canalización gráfica diferente.</x:String>
+  <x:String x:Key="RenderModeDialogue">Reinicia la aplicación para que los cambios surtan efecto.</x:String>
 </ResourceDictionary>
