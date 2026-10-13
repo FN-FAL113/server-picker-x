@@ -7,6 +7,7 @@ namespace ServerPickerX.Constants
         public const string English = "English | en-us";
         public const string Spanish = "Spanish | es-es";
         public const string Chinese = "Chinese | zh-cn";
+        public const string ChineseTraditional = "Chinese (Traditional) | zh-tw";
         public const string Japanese = "Japanese | ja-jp";
         public const string Swedish = "Swedish | sv-se";
         public const string Russian = "Russian | ru-ru";
@@ -19,6 +20,7 @@ namespace ServerPickerX.Constants
             English,
             Spanish,
             Chinese,
+            ChineseTraditional,
             Japanese,
             Swedish,
             Russian,
