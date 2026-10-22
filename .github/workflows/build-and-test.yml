@@ -2,24 +2,31 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: windows-latest
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  tauri:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
+      - uses: actions/setup-node@v4
         with:
-          dotnet-version: '10.0.x'
-      - name: Install dependencies
-        run: dotnet restore ServerPickerX.slnx
-      - name: Build
-        run: dotnet build ServerPickerX.slnx --no-restore
-      - name: Test (XUnit)
-        run: dotnet test ServerPickerX.Tests.slnx
+          node-version: "22"
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - name: Linux webview dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev
+      - run: npm ci
+      - run: npm run build
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+      - run: npm run tauri build -- --no-bundle

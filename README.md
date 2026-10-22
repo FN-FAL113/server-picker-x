@@ -1,94 +1,58 @@
 # Server Picker X
-<div align="center">
 
-  <a href="https://api.github.com/repositories/1141835010/releases"><img src="https://img.shields.io/github/downloads/FN-FAL113/server-picker-x/total.svg"/></a>
-  <img src="https://img.shields.io/github/license/FN-FAL113/server-picker-x"/>
-  <img src="https://img.shields.io/github/v/release/FN-FAL113/server-picker-x"/>
-  <img src="https://img.shields.io/github/stars/FN-FAL113/server-picker-x"/>
+Server Picker X is a Windows and Linux desktop app for choosing which game relay locations your computer can reach. It uses **Tauri 2 + Rust** with a React interface.
 
-</div>
+## What it does
 
-Lightweight server picker for CS2 and Deadlock with cross-platform support for **Windows** and **Linux**. A rewrite of my CS2 Server Picker into a modern MVVM pattern and service-based application. Designed to control connections by blocking or unblocking servers according to their location.
+- Loads current Steam Datagram Relay locations for CS2, CS2 Perfect World, Deadlock, Marathon, and THE FINALS.
+- Shows the selected game's artwork in the active game banner, including while offline.
+- Searches individual locations or groups related locations into regions.
+- Measures latency and packet loss automatically after loading relays or changing the grouped view; the recheck button can measure again.
+- Blocks or allows selected relay locations through the system firewall.
+- Saves and applies per-game presets. Existing `settings.json` presets are imported on first launch when run from the old app's working directory.
+- Restores the last selected preset, synchronizes saved presets when Valve changes its relay list, and retains ten legacy translation catalogs for core controls and release checks.
+- Clears only the firewall rules that this Tauri app has created.
 
-## ⬇️ Download
-### [Releases](https://github.com/FN-FAL113/server-picker-x/releases)
+Firewall changes affect **relay IP addresses**, not game files. Steam can still route through other available relays, so a chosen location is not a guarantee of an in-game server. Blocking too many relays can cause matchmaking timeouts.
 
-## 📷 Screenshot
-![ServerPickerX](https://github.com/user-attachments/assets/21a3a513-9dce-461b-a174-becddcb57f4a)
-<details>
-  <summary>Windows Short Demo</summary>
-  
-  ![Windows Short Demo Video](https://github.com/FN-FAL113/server-picker-x/blob/chore/readme-assets/readme_assets/ServerPickerX-Windows.gif)
-</details>
-<details>
-  <summary>Linux Arch Short Demo</summary>
-  
-  ![Linux Arch Short Demo Video](https://github.com/FN-FAL113/server-picker-x/blob/chore/readme-assets/readme_assets/ServerPickerX-Linux-Arch.gif)
-</details>
+## Develop
 
-## ❔ FAQ
-**1. How it works, will I get banned?!**
- - The app does not modify any game or system files, I can assure you are safe from being banned when using the app as long as you **do not download from untrusted sources**. It will add necessary firewall policies to block game server relay ip addresses from being accessed by your network thus skipping them in-game when finding a match.
+Install [Rust](https://rustup.rs/), Node.js 22+, and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform. On Linux, install `iptables` too.
 
-**2. Not being routed to lowest ping server or not working on your location?**
-  - Due to the fact that we can only access and block **_IP relay addresses_** from valve's network points around the world rather than the game's actual server IP addresses directly, which are **_not exposed_** publicly, either your connection got relayed to the nearest available server due to **_how Steam Datagram relay works_** or **_your location might be a factor_**. 
-- Re-routing can also happen anytime, even mid-game. One of the best ways to test it out is to block low-ping servers and leave out high-ping servers that are far from your current region. If your ping is high in-game, then you are being routed properly, and the blocked IP relays are not able to re-route you to a nearby server. I was able to test this out properly way back.
-- Some solutions that might help out but are not guaranteed: turning off any vpn, uninstalling third-party antivirus.
-- ISP-related issues, such as bad routing or high ping, are out of scope and control since the app only adds firewall entries. Please contact your ISP instead.
-
-**3. Why it requires admin/sudo permission on execution?<br>**
-  - This is due to how Windows or Linux requires elevated execution when adding the necessary firewall policies. If the app is running in normal mode, it will not be able to do its operations and will throw errors.
-
-**4. Windows smartscreen detected unrecognized app/publisher<br>**
-  - The app requires a registered publisher which costs a lot of money. Rest assured the app is safe and you can compile it yourself. Again, do not download from untrusted sources.
-
-![image](https://github.com/FN-FAL113/csgo-server-picker/assets/88238718/fe0af8a8-4195-457e-bbbf-3a772e7f646c)
-
-**5. I'm receiving frequent timeouts when a match is being confirmed<br>**
-  - You may have blocked too many servers, for optimal searching and relaying block only the necessary server relays.
-
-## 🐛 Troubleshooting
-| Problem | Cause | Fix |
-|---------|---------------|-----|
-| Firewall rules not applied or app won't open | App not run as admin or not in sudo env | - For windows: Run the app in administrator mode <br/> - For Linux: Add execute permission for the bash script `chmod +x RunServerPickerX.sh` and execute the app `./RunServerPickerX.sh`,  |
-| No servers appear | Internet blocked / API unreachable | Check your network and try again. |
-| Ping shows ❌ for all | Server IPs are blocked or unreachable | Ensure you’re connected to the internet and that no other firewall is interfering. |
-
-If you encounter a bug, open an issue on GitHub and include:
-* Operating System
-* Steps to reproduce
-* Any info/error logs (the app writes them to `server_picker_x_log.txt`)
-> ⚠️ The first time you run the app it will create a settings.json file in the current directory. Do not edit this file manually; use the Settings UI instead.
-
-## 🛠️ Building from Source
-#### Clone the repo
+```bash
+npm ci
+npm run tauri dev
 ```
-git clone https://github.com/FN-FAL113/server-picker-x.git
-cd server-picker-x
+
+The Windows executable requests administrator access at launch. On Linux, run the app with root privileges to change firewall rules. Use a normal user account to build it.
+For a local Linux release build, `bash RunServerPickerX.sh` launches the new Tauri binary with elevated privileges.
+
+## Build
+
+```bash
+npm run build
+cargo test --manifest-path src-tauri/Cargo.toml
+npm run tauri build
 ```
-#### Restore NuGet packages
-`dotnet restore ServerPickerX.slnx`
-#### Build (debug)
-`dotnet build ServerPickerX.slnx -c Debug`
 
-Executable output: in `ServerPickerX/bin/Debug/net10.0/<runtime>/publish/`
-#### Build (release)
-`dotnet publish ServerPickerX.slnx -c Release -r win-x64`  # or linux-x64.
+Tauri output is in `src-tauri/target/release/` and installers in `src-tauri/target/release/bundle/`. Use `npm run tauri build -- --no-bundle` to build only the executable.
 
-Executable output: `ServerPickerX/bin/Release/net10.0/<runtime>/publish/`
-#### Run in debug mode
-`dotnet run --project ServerPickerX/ServerPickerX.csproj`
+## Settings and migration
 
-## 🤝 Contributing
-Feel free to fork the repo, create a feature branch, and submit a pull request.  
-All contributions are welcome – just keep in mind the GPL v3 license.
+The Tauri app stores `settings.json` and `ServerDefinitions.json` in its per-user app config directory. It imports the old `./settings.json` once if present. Existing presets, selected game, language, release-check preference, and relay revisions are preserved. The default definitions are maintained in `src-tauri/resources/ServerDefinitions.json`.
 
-## 🔽 Disclaimer
-- This project or its author are not affiliated, associated, authorized, endorsed by valve, its affiliates or subsidiaries. Images, names and other form of trademark are registered to their respective owners.
-- You are free to compile the project on Visual Studio, the zip/tar file provided here is a clean compilation of the binaries.
-  
-## 💖 Support the Project/Dev
-- I develop stuff for free with dedication and hard work. Sharing this project with fellow gamers or giving it a star is a huge sign of appreciation!</br>
-<a href="https://www.paypal.com/paypalme/fnfal113" target=_blank>
-  <img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate via Paypal" width="40%" />
-</a>
+The previous Avalonia app did not record the firewall rules it created in settings. Existing rules with the old `server_picker_x_` prefix are not removed automatically. Remove them through Windows Firewall management before switching if they are active. The earlier Linux rules had no app-specific marker and also require manual review. The Settings action in this app clears only tracked Tauri rules.
+
+`ServerDefinitions.json` can be edited in the app config directory to configure additional game modes. Each definition supplies a Steam app ID, keyword filter, and optional cluster keywords. Restart after editing it.
+
+## Safety
+
+The app validates relay addresses as IPv4 before passing them as arguments to firewall tools. Windows rules use the `server_picker_x_v2_` prefix. Linux rules use the same identifier in an `iptables` comment on outbound traffic. The Settings panel removes only tracked rules created by this version of the app. It never resets the full firewall.
+
+The interface shows the rules recorded by this app. Linux `iptables` rules can disappear after a reboot; unblock and block a location again to refresh a stale record.
+
+## License
+
+GPL-3.0. This project is not affiliated with Valve.
+
+The promotional banner images in `public/game-art/` come from the Steam store pages for [Counter-Strike 2](https://store.steampowered.com/app/730/CounterStrike_2/), [Deadlock](https://store.steampowered.com/app/1422450/Deadlock/), [Marathon](https://store.steampowered.com/app/3065800/Marathon/), and [THE FINALS](https://store.steampowered.com/app/2073850/THE_FINALS/). Their respective owners retain rights to the artwork; the GPL license for this app does not cover those images.

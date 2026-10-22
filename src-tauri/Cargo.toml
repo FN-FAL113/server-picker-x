@@ -1,0 +1,33 @@
+[package]
+name = "server-picker-x"
+version = "0.2.0"
+description = "Fast game relay filtering for Windows and Linux"
+authors = ["Server Picker X contributors"]
+edition = "2021"
+license = "GPL-3.0-only"
+
+[lib]
+name = "server_picker_x_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "server-picker-x"
+path = "src/main.rs"
+test = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["time", "process", "sync", "rt"] }
+regex = "1"
+sha2 = "0.10"
+hex = "0.4"
+tauri-plugin-opener = "2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
