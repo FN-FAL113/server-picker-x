@@ -29,30 +29,37 @@ namespace ServerPickerX.Services.SystemFirewalls
 
         public async Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
+            // Snapshot on the UI thread, the collection is bound to the UI and may change during the operation
+            ServerModel[] servers = [.. serverModels];
+
             try
             {
-                INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
-                INetFwRules firewallRules = firewallPolicy.Rules;
-
-                foreach (var serverModel in serverModels)
+                // The firewall COM API is synchronous, keep it away from the UI thread
+                await Task.Run(() =>
                 {
-                    string ruleName = GetFirewallRuleName(serverModel);
-                    string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4));
+                    INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
+                    INetFwRules firewallRules = firewallPolicy.Rules;
 
-                    RemoveFirewallRuleByName(firewallRules, ruleName);
+                    foreach (var serverModel in servers)
+                    {
+                        string ruleName = GetFirewallRuleName(serverModel);
+                        string ipAddresses = string.Join(",", serverModel.RelayModels.Select(s => s.IPv4));
 
-                    INetFwRule firewallRule = CreateFirewallRuleApi();
-                    firewallRule.Name = ruleName;
-                    firewallRule.Description = serverModel.Description;
-                    firewallRule.Direction = _firewallRuleDirectionOutbound;
-                    firewallRule.Action = _firewallRuleActionBlock;
-                    firewallRule.Protocol = _firewallRuleProtocolAny;
-                    firewallRule.RemoteAddresses = ipAddresses;
-                    firewallRule.Enabled = true;
-                    firewallRule.Profiles = _firewallRuleProfilesAll;
+                        RemoveFirewallRuleByName(firewallRules, ruleName);
 
-                    firewallRules.Add(firewallRule);
-                }
+                        INetFwRule firewallRule = CreateFirewallRuleApi();
+                        firewallRule.Name = ruleName;
+                        firewallRule.Description = serverModel.Description;
+                        firewallRule.Direction = _firewallRuleDirectionOutbound;
+                        firewallRule.Action = _firewallRuleActionBlock;
+                        firewallRule.Protocol = _firewallRuleProtocolAny;
+                        firewallRule.RemoteAddresses = ipAddresses;
+                        firewallRule.Enabled = true;
+                        firewallRule.Profiles = _firewallRuleProfilesAll;
+
+                        firewallRules.Add(firewallRule);
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -63,16 +70,21 @@ namespace ServerPickerX.Services.SystemFirewalls
 
         public async Task UnblockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
+            ServerModel[] servers = [.. serverModels];
+
             try
             {
-                INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
-                INetFwRules firewallRules = firewallPolicy.Rules;
-
-                foreach (var serverModel in serverModels)
+                await Task.Run(() =>
                 {
-                    string ruleName = GetFirewallRuleName(serverModel);
-                    RemoveFirewallRuleByName(firewallRules, ruleName);
-                }
+                    INetFwPolicy2 firewallPolicy = GetFirewallPolicyApi();
+                    INetFwRules firewallRules = firewallPolicy.Rules;
+
+                    foreach (var serverModel in servers)
+                    {
+                        string ruleName = GetFirewallRuleName(serverModel);
+                        RemoveFirewallRuleByName(firewallRules, ruleName);
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -98,7 +110,7 @@ namespace ServerPickerX.Services.SystemFirewalls
                 process.StartInfo.Arguments = $"/c {Path.Combine(Environment.SystemDirectory, "netsh.exe")} advfirewall reset";
 
                 process.Start();
-                process.WaitForExit();
+                await process.WaitForExitAsync();
 
                 string stdOut = process.StandardOutput.ReadToEnd().Trim();
                 string stdErr = process.StandardError.ReadToEnd().Trim();

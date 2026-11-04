@@ -1,4 +1,5 @@
 using Avalonia;
+using System;
 using System.Collections.Generic;
 
 namespace ServerPickerX.Constants
@@ -27,7 +28,37 @@ namespace ServerPickerX.Constants
             Glx
         ];
 
-        public static Win32RenderingMode ResolveWindowsRenderMode(string renderMode)
+        public static AppBuilder ApplyRenderMode(AppBuilder appBuilder, string? renderMode)
+        {
+            // With<T> registers options under the compile-time type T, so each branch must pass
+            // its concrete options type. Passing them as `object` makes Avalonia silently ignore them.
+            return OperatingSystem.IsWindows()
+                ? appBuilder.With(CreateWindowsOptions(renderMode))
+                : appBuilder.With(CreateLinuxOptions(renderMode));
+        }
+
+        public static Win32PlatformOptions CreateWindowsOptions(string? renderMode)
+        {
+            return new Win32PlatformOptions
+            {
+                // Software is the fallback if the GPU mode is unsupported, else Avalonia throws on startup
+                RenderingMode = [ResolveWindowsRenderMode(renderMode), Win32RenderingMode.Software],
+                // Excludes the default WinUIComposition: its render thread parks while holding
+                // a lock that closing a window needs, which can freeze the app
+                CompositionMode = [Win32CompositionMode.DirectComposition, Win32CompositionMode.RedirectionSurface],
+            };
+        }
+
+        public static X11PlatformOptions CreateLinuxOptions(string? renderMode)
+        {
+            return new X11PlatformOptions
+            {
+                // Software is the fallback if the GPU mode is unsupported, else Avalonia throws on startup
+                RenderingMode = [ResolveLinuxRenderMode(renderMode), X11RenderingMode.Software],
+            };
+        }
+
+        public static Win32RenderingMode ResolveWindowsRenderMode(string? renderMode)
         {
             switch(renderMode)
             {
@@ -42,7 +73,7 @@ namespace ServerPickerX.Constants
             };
         }
 
-        public static X11RenderingMode ResolveLinuxRenderMode(string renderMode)
+        public static X11RenderingMode ResolveLinuxRenderMode(string? renderMode)
         {
             switch (renderMode)
             {

@@ -85,6 +85,9 @@ namespace ServerPickerX.Views
         private async void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             await InitializeApp();
+
+            // Startup only, InitializeApp also runs on every game mode change
+            await _versionService.CheckVersionAsync();
         }
 
         private async void GameModeComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -191,8 +194,6 @@ namespace ServerPickerX.Views
 
             ConfigurePresetControls(vm);
             RefreshClusterButtonContent();
-
-            await _versionService.CheckVersionAsync();
         }
 
         private async Task SetLanguage()
@@ -309,21 +310,32 @@ namespace ServerPickerX.Views
 
             if (!result)
             {
-                // Revert back selection without triggering event handler
-                GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
-                GameModeComboBox.SelectedItem = _jsonSetting.game_mode;
-                GameModeComboBox.SelectionChanged += GameModeComboBox_SelectionChanged;
+                RevertGameModeSelection();
 
                 return;
             }
 
-            // Clear the currently loaded game rules before changing game mode while preserving last selected preset
-            await vm.UnblockAllAsync(shouldClearLastSelectedPreset: false);
+            // Clear the currently loaded game rules before changing game mode while preserving last selected preset.
+            // Stay on the current game if that fails, its rules would otherwise be left active.
+            if (vm.ServerModels.Count > 0 && !await vm.UnblockAllAsync(shouldClearLastSelectedPreset: false))
+            {
+                RevertGameModeSelection();
+
+                return;
+            }
 
             // Update json setting game mode and serialize it
             await _jsonSetting.SetGameModeAsync((string)GameModeComboBox.SelectedItem);
 
             await InitializeApp();
+        }
+
+        // Revert back selection without triggering event handler
+        private void RevertGameModeSelection()
+        {
+            GameModeComboBox.SelectionChanged -= GameModeComboBox_SelectionChanged;
+            GameModeComboBox.SelectedItem = _jsonSetting.game_mode;
+            GameModeComboBox.SelectionChanged += GameModeComboBox_SelectionChanged;
         }
 
         private async Task HandlePresetChangeAsync(
