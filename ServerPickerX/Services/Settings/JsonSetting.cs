@@ -42,7 +42,7 @@ namespace ServerPickerX.Settings
         public virtual Dictionary<string, string> last_selected_preset_names { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
         [JsonIgnore]
-        public readonly string jsonFilePath = "./settings.json";
+        public readonly string jsonFilePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
 
         [JsonIgnore]
         public readonly JsonSerializerOptions serializerOptions = new()

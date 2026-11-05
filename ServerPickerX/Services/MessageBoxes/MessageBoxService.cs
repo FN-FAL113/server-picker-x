@@ -1,4 +1,5 @@
 using MsBox.Avalonia;
+using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using ServerPickerX.Helpers;
@@ -21,6 +22,18 @@ namespace ServerPickerX.Services.MessageBoxes
             _processService = processService;
         }
 
+        private static async Task<string> ShowDialogAndWaitForCloseAsync(IMsBox<string> box)
+        {
+            string result = await box.ShowWindowDialogAsync(MainWindow.Instance!);
+
+            // The dialog result is set before its window is destroyed and callers would resume inline,
+            // on the same call stack as the button click. Yield so the window finishes closing first,
+            // long running work in a caller can otherwise deadlock with the Avalonia render thread.
+            await Task.Yield();
+
+            return result;
+        }
+
         public async Task ShowMessageBoxAsync(string title, string text, Icon icon = Icon.Info)
         {
             try
@@ -41,7 +54,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                await box.ShowWindowDialogAsync(MainWindow.Instance!);
+                await ShowDialogAndWaitForCloseAsync(box);
             }
             catch (Exception ex)
             {
@@ -70,7 +83,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                var result = await box.ShowWindowDialogAsync(MainWindow.Instance!);
+                var result = await ShowDialogAndWaitForCloseAsync(box);
 
                 return result == "Ok";
             }
@@ -102,7 +115,7 @@ namespace ServerPickerX.Services.MessageBoxes
 
                 var box = MessageBoxManager.GetMessageBoxCustom(customMbsParams);
 
-                var result = await box.ShowWindowDialogAsync(MainWindow.Instance!);
+                var result = await ShowDialogAndWaitForCloseAsync(box);
 
                 if (result != "Ok")
                 {

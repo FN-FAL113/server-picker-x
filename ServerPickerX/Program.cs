@@ -27,21 +27,9 @@ namespace ServerPickerX
             .Register<FontAwesomeIconProvider>()
             .Register<MaterialDesignIconProvider>();
 
-            object platformOptions = OperatingSystem.IsWindows() ?
-                new Win32PlatformOptions
-                {
-                    // Prioritize Software
-                    RenderingMode = ResolveWindowsRenderMode()
-                } :
-                new X11PlatformOptions
-                {
-                    // Prioritize Software
-                    RenderingMode = ResolveLinuxRenderMode()
-                };
+            AppBuilder appBuilder = AppBuilder.Configure<App>().UsePlatformDetect();
 
-            return AppBuilder.Configure<App>()
-                .UsePlatformDetect()
-                .With(platformOptions)
+            return RenderModes.ApplyRenderMode(appBuilder, ReadSavedRenderMode())
                 #if DEBUG
                 .WithDeveloperTools()
                 #endif
@@ -49,66 +37,25 @@ namespace ServerPickerX
                 .LogToTrace();
         }
 
-        [RequiresUnreferencedCode("ResolveWindowsRenderMode method: Calls System.Text.Json.JsonSerializer.Deserialize<TValue>(Stream, JsonSerializerOptions)")]
-        private static Win32RenderingMode[] ResolveWindowsRenderMode()
+        [RequiresUnreferencedCode("ReadSavedRenderMode method: Calls System.Text.Json.JsonSerializer.Deserialize<TValue>(Stream, JsonSerializerOptions)")]
+        private static string? ReadSavedRenderMode()
         {
-            Win32RenderingMode[] defaultRenderMode = [Win32RenderingMode.Software];
-
             try
             {
                 string jsonFilePath = (new JsonSetting()).jsonFilePath;
 
-                // create local json settings if not exists with serialized object properties
                 if (!File.Exists(jsonFilePath))
                 {
-                    return defaultRenderMode;
+                    return null;
                 }
 
                 using FileStream settingsFile = File.OpenRead(jsonFilePath);
 
-                JsonSetting? localSettings = JsonSerializer.Deserialize<JsonSetting>(settingsFile);
-
-                if (localSettings is null)
-                {
-                    return defaultRenderMode;
-                }
-
-                return [RenderModes.ResolveWindowsRenderMode(localSettings.render_mode)];
-            } catch
-            {
-                return defaultRenderMode;
-            }
-        }
-
-        [RequiresUnreferencedCode("ResolveLinuxRenderMode method: Calls System.Text.Json.JsonSerializer.Deserialize<TValue>(Stream, JsonSerializerOptions)")]
-        private static X11RenderingMode[] ResolveLinuxRenderMode()
-        {
-            X11RenderingMode[] defaultRenderMode = [X11RenderingMode.Software];
-
-            try
-            {
-                string jsonFilePath = (new JsonSetting()).jsonFilePath;
-
-                // create local json settings if not exists with serialized object properties
-                if (!File.Exists(jsonFilePath))
-                {
-                    return defaultRenderMode;
-                }
-
-                using FileStream settingsFile = File.OpenRead(jsonFilePath);
-
-                JsonSetting? localSettings = JsonSerializer.Deserialize<JsonSetting>(settingsFile);
-
-                if (localSettings is null)
-                {
-                    return defaultRenderMode;
-                }
-
-                return [RenderModes.ResolveLinuxRenderMode(localSettings.render_mode)];
+                return JsonSerializer.Deserialize<JsonSetting>(settingsFile)?.render_mode;
             }
             catch
             {
-                return defaultRenderMode;
+                return null;
             }
         }
     }

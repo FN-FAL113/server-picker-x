@@ -65,7 +65,7 @@ namespace ServerPickerX.Models
                         bestRelay = relay;
                     }
                 }
-                catch (Exception ex) when(ex is OperationCanceledException) { }
+                catch (Exception ex) when (IsPingFailure(ex)) { }
             }
 
             if (bestRelay != null)
@@ -94,7 +94,7 @@ namespace ServerPickerX.Models
                             finalBestRtt = Math.Min(finalBestRtt, res.RoundtripTime);
                         }
                     }
-                    catch (Exception ex) when (ex is OperationCanceledException) { }
+                    catch (Exception ex) when (IsPingFailure(ex)) { }
                 }
 
                 double lossPercent = (1 - ((double)successCount / probeCount)) * 100;
@@ -107,6 +107,13 @@ namespace ServerPickerX.Models
                 PacketLoss = "";
                 Status = "❌";
             }
+        }
+
+        // PingServer is async void, an exception escaping it would terminate the app.
+        // A relay that cannot be pinged only counts as a failed probe.
+        private static bool IsPingFailure(Exception ex)
+        {
+            return ex is OperationCanceledException or PingException or FormatException or ArgumentException;
         }
     }
 }
