@@ -39,11 +39,18 @@ namespace ServerPickerX.Tests.Services.SystemFirewalls
 
         private const string _fakeIptables = """
             #!/bin/sh
-            # Only understands "iptables -A|-I|-C|-D INPUT -s <ip> -j DROP" and "iptables -F",
-            # the rules file lists the chain from top to bottom
+            # Only understands "iptables -A|-I|-C|-D INPUT -s <ip> -j DROP" and "iptables -S INPUT".
+            # The rules file lists the INPUT chain from top to bottom, a bare address stands for "-s <ip>/32 -j DROP"
+            # and any other line is an unrelated rule kept in "iptables -S" format
             touch "$RULES_FILE"
-            if [ "$*" = -F ]; then
-                : > "$RULES_FILE"
+            if [ "$*" = "-S INPUT" ]; then
+                echo "-P INPUT DROP"
+                while IFS= read -r rule; do
+                    case "$rule" in
+                        *" "*) echo "$rule" ;;
+                        *) echo "-A INPUT -s $rule/32 -j DROP" ;;
+                    esac
+                done < "$RULES_FILE"
                 exit 0
             fi
             [ $# -eq 6 ] && [ "$2 $3 $5 $6" = "INPUT -s -j DROP" ] || { echo "unexpected rule: $*" >&2; exit 2; }
@@ -224,10 +231,17 @@ namespace ServerPickerX.Tests.Services.SystemFirewalls
         }
 
         [LinuxFact]
-        public async Task Test_ResetFirewallAsync_FlushesRules_WhenConfirmed()
+        public async Task Test_ResetFirewallAsync_RemovesOnlyAppRules_WhenConfirmed()
         {
             // Arrange
-            File.WriteAllLines(_rulesFile, ["10.0.0.1"]);
+            // A ufw jump and a user's own rule must survive, the app's rules (including a duplicate) must not
+            File.WriteAllLines(_rulesFile, [
+                "-A INPUT -j ufw-before-input",
+                "10.0.0.1",
+                "-A INPUT -s 10.0.0.2/32 -p tcp -m tcp --dport 22 -j DROP",
+                "10.0.0.1",
+                "192.168.0.5"
+                ]);
             _messageBoxService
                 .Setup(i => i.ShowMessageBoxConfirmationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Icon>()))
                 .ReturnsAsync(true);
@@ -236,7 +250,10 @@ namespace ServerPickerX.Tests.Services.SystemFirewalls
             await _service.ResetFirewallAsync();
 
             // Assert
-            Assert.Empty(ReadLines(_rulesFile));
+            Assert.Equal([
+                "-A INPUT -j ufw-before-input",
+                "-A INPUT -s 10.0.0.2/32 -p tcp -m tcp --dport 22 -j DROP"
+                ], ReadLines(_rulesFile));
             _messageBoxService.Verify(i => i.ShowMessageBoxAsync(It.IsAny<string>(), It.IsAny<string>(), Icon.Success), Times.Once);
         }
 

@@ -43,7 +43,15 @@ namespace ServerPickerX.Services.SystemFirewalls
             done
             """;
 
-        private const string _resetScript = "iptables -F";
+        // Only removes rules with the exact shape this app creates, including ones left by older versions.
+        // Flushing would also wipe rules from ufw, Docker or the user, and with ufw's DROP input policy
+        // an empty INPUT chain drops all incoming traffic
+        private const string _resetScript = """
+            rules=$(iptables -S INPUT) || exit
+            for ip in $(printf '%s\n' "$rules" | sed -n 's|^-A INPUT -s \([0-9.]*\)/32 -j DROP$|\1|p'); do
+                iptables -D INPUT -s "$ip" -j DROP || exit
+            done
+            """;
 
         public Task BlockServersAsync(ObservableCollection<ServerModel> serverModels)
         {
